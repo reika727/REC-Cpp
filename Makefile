@@ -1,4 +1,4 @@
-mycc: mycc.c
+mycc: mycc.cpp
 
 test: mycc
 	./test.sh
