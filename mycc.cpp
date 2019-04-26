@@ -1,5 +1,4 @@
 #include<bits/stdc++.h>
-
 enum{
     TK_NUM=0x100,
     TK_EOF,
@@ -16,7 +15,6 @@ class invalid_tokens:public std::exception{
 	{
 	    return s.c_str();
 	}
-
 };
 class unexpected_token:public std::exception{
     private:
@@ -30,7 +28,6 @@ class unexpected_token:public std::exception{
 	{
 	    return s.c_str();
 	}
-
 };
 class tokens{
     private:
@@ -70,6 +67,29 @@ class tokens{
 	    return tarray[i].val;
 	}
 };
+class assembly_source{
+    private:
+	int indent;
+    public:
+	assembly_source()
+	{
+	    indent=0;
+	    std::cout<<".global main"<<std::endl;
+	}
+	void write(const std::string&str)
+	{
+	    std::cout<<std::string(indent,' ')<<str<<std::endl;
+	    if(str.back()==':')++indent;
+	}
+	void write(const std::string&inst,const std::string&src,const std::string&dst)
+	{
+	    write(inst+' '+src+", "+dst);
+	}
+	void write(const std::string&inst,int num,const std::string&reg)
+	{
+	    write(inst,'$'+std::to_string(num),'%'+reg);
+	}
+};
 int digit(int n)
 {
     return n==0?1:static_cast<int>(floor(log10(n)+1));
@@ -77,19 +97,12 @@ int digit(int n)
 int main(int argc,char**argv)
 {
     try{
-	if(argc!=2){
-	    throw std::runtime_error("引数の個数が正しくありません");
-	}
+	if(argc!=2)throw std::runtime_error("引数の個数が正しくありません");
 	tokens tk(argv[1]);
-
-	std::cout<<".global main"<<std::endl;
-	std::cout<<"main:"<<std::endl;
-
-	if(tk.type(0)!=TK_NUM){
-	    throw unexpected_token(argv[1]);
-	}
-	std::cout<<" mov $"<<tk.val(0)<<", %rax"<<std::endl;
-
+	if(tk.type(0)!=TK_NUM)throw unexpected_token(argv[1]);
+	assembly_source as;
+	as.write("main:");
+	as.write("mov",tk.val(0),"eax");
 	int stridx=digit(tk.val(0));
 	for(int i=0;tk.type(i)!=TK_EOF;++i){
 	    if(tk.type(i)=='+'||tk.type(i)=='-'){
@@ -98,16 +111,15 @@ int main(int argc,char**argv)
 		if(tk.type(++i)!=TK_NUM){
 		    throw unexpected_token(argv[1]+stridx);
 		}
-		std::cout<<" "<<inst<<" $"<<tk.val(i)<<", %rax"<<std::endl;
+		as.write(inst,tk.val(i),"eax");
 		stridx+=digit(tk.val(i));
 	    }
 	}
-
-	std::cout<<" ret"<<std::endl;
-	return 0;
+	as.write("retq");
+	return EXIT_SUCCESS;
     }
     catch(const std::exception&e){
 	std::cout<<e.what()<<std::endl;
-	return 1;
+	return EXIT_FAILURE;
     }
 }
