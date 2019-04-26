@@ -82,14 +82,13 @@ int main(int argc,char**argv)
 	}
 	tokens tk(argv[1]);
 
-	std::cout<<".intel_syntax noprefix"<<std::endl;
 	std::cout<<".global main"<<std::endl;
 	std::cout<<"main:"<<std::endl;
 
 	if(tk.type(0)!=TK_NUM){
 	    throw unexpected_token(argv[1]);
 	}
-	std::cout<<" mov rax, "<<tk.val(0)<<std::endl;
+	std::cout<<" mov $"<<tk.val(0)<<", %rax"<<std::endl;
 
 	int stridx=digit(tk.val(0));
 	for(int i=0;tk.type(i)!=TK_EOF;++i){
@@ -99,7 +98,7 @@ int main(int argc,char**argv)
 		if(tk.type(++i)!=TK_NUM){
 		    throw unexpected_token(argv[1]+stridx);
 		}
-		std::cout<<" "<<inst<<" rax, "<<tk.val(i)<<std::endl;
+		std::cout<<" "<<inst<<" $"<<tk.val(i)<<", %rax"<<std::endl;
 		stridx+=digit(tk.val(i));
 	    }
 	}
