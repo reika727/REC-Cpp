@@ -1,5 +1,6 @@
 #include<iostream>
 #include<string>
+#include<vector>
 #include<exception>
 #include<cmath>
 namespace mycc{
@@ -13,58 +14,58 @@ namespace mycc{
     };
     class tokenizer{
 	private:
-	    static const int max_token=256;
 	    struct token{
 		int type;
 		int value;
-	    }tokens[max_token];
+		token(int type):type(type){}
+		token(int type,int value):type(type),value(value){}
+	    };
+	    std::vector<token>tokens;
 	public:
 	    tokenizer(const std::string&s)
 	    {
-		int idx=0;
 		for(int i=0;i<s.length();++i){
 		    if(isspace(s[i])){
 			continue;
 		    }else if(s[i]=='+'||s[i]=='-'||s[i]=='*'||s[i]=='/'||s[i]=='('||s[i]==')'){
-			tokens[idx++].type=s[i];
+			tokens.emplace_back(s[i]);
 		    }else if(s[i]=='='){
 			if(i!=s.length()-1&&s[i+1]=='='){
-			    tokens[idx++].type=TK_EQ;
+			    tokens.emplace_back(TK_EQ);
 			    ++i;
 			}else{
 			    throw std::runtime_error("認識できないトークンが含まれます");
 			}
 		    }else if(s[i]=='!'){
 			if(i!=s.length()-1&&s[i+1]=='='){
-			    tokens[idx++].type=TK_NE;
+			    tokens.emplace_back(TK_NE);
 			    ++i;
 			}else{
 			    throw std::runtime_error("認識できないトークンが含まれます");
 			}
 		    }else if(s[i]=='<'){
 			if(i!=s.length()-1&&s[i+1]=='='){
-			    tokens[idx++].type=TK_LE;
+			    tokens.emplace_back(TK_LE);
 			    ++i;
 			}else{
-			    tokens[idx++].type='<';
+			    tokens.emplace_back('<');
 			}
 		    }else if(s[i]=='>'){
 			if(i!=s.length()-1&&s[i+1]=='='){
-			    tokens[idx++].type=TK_GE;
+			    tokens.emplace_back(TK_GE);
 			    ++i;
 			}else{
-			    tokens[idx++].type='>';
+			    tokens.emplace_back('>');
 			}
 		    }else if(isdigit(s[i])){
 			size_t sz;
-			tokens[idx].type=TK_NUM;
-			tokens[idx++].value=std::stoi(s.substr(i),&sz);
+			tokens.emplace_back(TK_NUM,std::stoi(s.substr(i),&sz));
 			i+=sz-1;
 		    }else{
 			throw std::runtime_error("無効な文字が含まれます");
 		    }
 		}
-		tokens[idx].type=TK_EOF;
+		tokens.emplace_back(TK_EOF);
 	    }
 	    const token&operator()(int idx)const
 	    {
