@@ -1,4 +1,10 @@
-mycc: mycc.cpp
+CFLAGS=-Wall
+SRCS=$(wildcard *.cpp)
+OBJS=$(SRCS:.cpp=.o)
+
+mycc: $(OBJS)
+	g++ -o mycc $(OBJS) $(CFLAGS)
+$(OBJS): mycc.hpp
 
 test: mycc
 	./test.sh
