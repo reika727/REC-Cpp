@@ -1,4 +1,5 @@
 mycc
+mycc.out
 *.o
 *~
 tmp*

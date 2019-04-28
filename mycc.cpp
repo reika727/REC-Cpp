@@ -5,6 +5,10 @@
 namespace mycc{
     enum{
 	TK_NUM=0x100,
+	TK_EQ,
+	TK_NE,
+	TK_LE,
+	TK_GE,
 	TK_EOF,
     };
     class tokenizer{
@@ -23,6 +27,34 @@ namespace mycc{
 			continue;
 		    }else if(s[i]=='+'||s[i]=='-'||s[i]=='*'||s[i]=='/'||s[i]=='('||s[i]==')'){
 			tokens[idx++].type=s[i];
+		    }else if(s[i]=='='){
+			if(i!=s.length()-1&&s[i+1]=='='){
+			    tokens[idx++].type=TK_EQ;
+			    ++i;
+			}else{
+			    throw std::runtime_error("認識できないトークンが含まれます");
+			}
+		    }else if(s[i]=='!'){
+			if(i!=s.length()-1&&s[i+1]=='='){
+			    tokens[idx++].type=TK_NE;
+			    ++i;
+			}else{
+			    throw std::runtime_error("認識できないトークンが含まれます");
+			}
+		    }else if(s[i]=='<'){
+			if(i!=s.length()-1&&s[i+1]=='='){
+			    tokens[idx++].type=TK_LE;
+			    ++i;
+			}else{
+			    tokens[idx++].type='<';
+			}
+		    }else if(s[i]=='>'){
+			if(i!=s.length()-1&&s[i+1]=='='){
+			    tokens[idx++].type=TK_GE;
+			    ++i;
+			}else{
+			    tokens[idx++].type='>';
+			}
 		    }else if(isdigit(s[i])){
 			size_t sz;
 			tokens[idx].type=TK_NUM;
@@ -61,6 +93,36 @@ namespace mycc{
 		    return false;
 		}
 	    }
+	    node*equality()
+	    {
+		node*ret=relational();
+		while(true){
+		    if(consume(TK_EQ)){
+			ret=new node(ret,TK_EQ,relational());
+		    }else if(consume(TK_NE)){
+			ret=new node(ret,TK_NE,relational());
+		    }else{
+			return ret;
+		    }
+		}
+	    }
+	    node*relational()
+	    {
+		node*ret=add();
+		while(true){
+		    if(consume('<')){
+			ret=new node(ret,'<',add());
+		    }else if(consume('>')){
+			ret=new node(ret,'>',add());
+		    }else if(consume(TK_LE)){
+			ret=new node(ret,TK_LE,add());
+		    }else if(consume(TK_GE)){
+			ret=new node(ret,TK_GE,add());
+		    }else{
+			return ret;
+		    }
+		}
+	    }
 	    node*add()
 	    {
 		node*ret=mul();
@@ -76,22 +138,33 @@ namespace mycc{
 	    }
 	    node*mul()
 	    {
-		node*ret=term();
+		node*ret=unary();
 		while(true){
 		    if(consume('*')){
-			ret=new node(ret,'*',term());
+			ret=new node(ret,'*',unary());
 		    }else if(consume('/')){
-			ret=new node(ret,'/',term());
+			ret=new node(ret,'/',unary());
 		    }else{
 			return ret;
 		    }
 		}
 	    }
+	    node*unary()
+	    {
+		if(consume('+')){
+		    return term();
+		}else if(consume('-')){
+		    return new node(new node(0),'-',term());
+		}
+		return term();
+	    }
 	    node*term()
 	    {
 		if(consume('(')){
 		    node*ret=add();
-		    if(!consume(')'))throw std::runtime_error("括弧の対応が正しくありません");
+		    if(!consume(')')){
+			throw std::runtime_error("括弧の対応が正しくありません");
+		    }
 		    return ret;
 		}else if(tk(pos_now).type==TK_NUM){
 		    return new node(tk(pos_now++).value);
@@ -100,7 +173,7 @@ namespace mycc{
 		}
 	    }
 	public:
-	    abstract_syntax_tree(tokenizer&_tk):tk(_tk),pos_now(0),rt(add()){}
+	    abstract_syntax_tree(tokenizer&_tk):tk(_tk),pos_now(0),rt(equality()){}
 	    const node*const root()
 	    {
 		return rt;
@@ -160,6 +233,36 @@ namespace mycc{
 			write("mov",0,"rdx");
 			write("div","rdi");
 			break;
+		    case TK_EQ:
+			write("cmp","rdi","rax");
+			write("sete","al");
+			write("movzb","al","rax");
+			break;
+		    case TK_NE:
+			write("cmp","rdi","rax");
+			write("setne","al");
+			write("movzb","al","rax");
+			break;
+		    case '<':
+			write("cmp","rdi","rax");
+			write("setl","al");
+			write("movzb","al","rax");
+			break;
+		    case '>':
+			write("cmp","rdi","rax");
+			write("setg","al");
+			write("movzb","al","rax");
+			break;
+		    case TK_LE:
+			write("cmp","rdi","rax");
+			write("setle","al");
+			write("movzb","al","rax");
+			break;
+		    case TK_GE:
+			write("cmp","rdi","rax");
+			write("setge","al");
+			write("movzb","al","rax");
+			break;
 		}
 		write("push","rax");
 	    }
@@ -167,7 +270,6 @@ namespace mycc{
 }
 int main(int argc,char**argv)
 {
-    auto digit=[](int n){return n==0?1:static_cast<int>(floor(log10(n)+1));};
     try{
 	if(argc!=2)throw std::runtime_error("引数の個数が正しくありません");
 	mycc::tokenizer tk(argv[1]);
