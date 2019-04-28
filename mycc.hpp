@@ -11,11 +11,13 @@ namespace mycc{
 	TK_NE,
 	TK_LE,
 	TK_GE,
+	TK_RETURN,
 	TK_IDENT,
 	TK_EOF,
     };
     enum{
 	ND_NUM=0x100,
+	ND_RETURN,
 	ND_IDENT,
     };
     class tokenizer{

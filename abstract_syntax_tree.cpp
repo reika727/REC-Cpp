@@ -24,7 +24,12 @@ bool abstract_syntax_tree::consume(int type)
 }
 node*abstract_syntax_tree::statement()
 {
-    node*ret=assign();
+    node*ret;
+    if(consume(TK_RETURN)){
+	ret=new node(nullptr,ND_RETURN,assign());
+    }else{
+	ret=assign();
+    }
     if(!consume(';')){
 	throw std::runtime_error("不正な区切り文字です");
     }

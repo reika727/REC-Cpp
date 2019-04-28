@@ -31,4 +31,5 @@ try 'a=b=2;' 2
 try 'a=2;b=3;b;' 3
 try 'a=2;b=3;c=(a+a+a)/b*2;d=(c+a)*2;a=d*2;' 24
 try 'a=2;b=4-a;' 2
+try 'a=2;b=3;return (a+b)*3-2;return a;' 13
 echo OK

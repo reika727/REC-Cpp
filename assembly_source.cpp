@@ -68,6 +68,12 @@ void assembly_source::generate(const abstract_syntax_tree::node*node)
     if(node->type==ND_NUM){
 	write("push",node->value);
 	return;
+    }else if(node->type==ND_RETURN){
+	generate(node->rhs);
+	write("pop","rax");
+	write("mov","rbp","rsp");
+	write("pop","rbp");
+	write("retq");
     }else if(node->type==ND_IDENT){
 	generate_lval(node);
 	write("pop","rax");

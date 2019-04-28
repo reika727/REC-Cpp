@@ -48,6 +48,11 @@ tokenizer::tokenizer(const std::string&s)
 	    }else{
 		tokens.emplace_back('>');
 	    }
+	}else if(s.substr(i,6)=="return"){
+	    if(i+5!=s.length()-1&&isspace(s[i+6])){
+		tokens.emplace_back(TK_RETURN);
+		i+=5;
+	    }
 	}else if(isdigit(s[i])){
 	    size_t sz;
 	    tokens.emplace_back(TK_NUM,std::stoi(s.substr(i),&sz));
