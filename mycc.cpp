@@ -6,7 +6,6 @@ int main(int argc,char**argv)
 	mycc::tokenizer tk(argv[1]);
 	mycc::assembly_source as;
 	as.enter("main");
-	as.write("sub",26*8,"rsp");
 	mycc::abstract_syntax_tree ast(tk);
 	for(auto s:ast.statements()){
 	    as.generate(s);

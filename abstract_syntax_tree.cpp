@@ -5,11 +5,11 @@ node::node(node*left,int type,node*right):type(type),lhs(left),rhs(right)
 {
 
 }
-node::node(int value):type(ND_NUM),value(value)
+node::node(int value):type(ND_NUM),value(value),lhs(nullptr),rhs(nullptr)
 {
 
 }
-node::node(char name):type(ND_IDENT),name(name)
+node::node(const std::string&name):type(ND_IDENT),name(name),lhs(nullptr),rhs(nullptr)
 {
 
 }
@@ -132,7 +132,7 @@ abstract_syntax_tree::abstract_syntax_tree(tokenizer&_tk):tk(_tk),pos_now(0)
 {
     while(tk(pos_now).type!=TK_EOF)stats.push_back(statement());
 }
-const std::vector<node*>& abstract_syntax_tree::statements()const
+const std::vector<node*>& abstract_syntax_tree::statements()
 {
     return stats;
 }

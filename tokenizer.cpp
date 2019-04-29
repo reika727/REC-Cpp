@@ -9,7 +9,7 @@ token::token(int type,int value):type(type),value(value)
 {
 
 }
-token::token(int type,char name):type(type),name(name)
+token::token(int type,const std::string&name):type(type),name(name)
 {
 
 }
@@ -58,7 +58,10 @@ tokenizer::tokenizer(const std::string&s)
 	    tokens.emplace_back(TK_NUM,std::stoi(s.substr(i),&sz));
 	    i+=sz-1;
 	}else if(islower(s[i])){
-	    tokens.emplace_back(TK_IDENT,s[i]);
+	    auto beg=s.begin()+i;
+	    auto len=find_if_not(beg,s.end(),[](char c){return isalpha(c);})-beg;
+	    tokens.emplace_back(TK_IDENT,s.substr(i,len));
+	    i+=len-1;
 	}else{
 	    throw std::runtime_error("無効な文字が含まれます");
 	}

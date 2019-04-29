@@ -1,8 +1,7 @@
 #include"mycc.hpp"
 using namespace mycc;
-assembly_source::assembly_source()
+assembly_source::assembly_source():indent(0)
 {
-    indent=0;
     std::cout<<".global main"<<std::endl;
 }
 void assembly_source::write(const std::string&str)
@@ -19,7 +18,7 @@ void assembly_source::write(const std::string&inst,int arg,const std::string&reg
 }
 void assembly_source::write(const std::string&inst,const std::string&reg)
 {
-    write(inst+" "+p(reg));
+    write(inst+' '+p(reg));
 }
 void assembly_source::write(const std::string&inst,int arg)
 {
@@ -52,24 +51,33 @@ std::string assembly_source::p(const std::string&str)
 {
     return (str[0]=='('?"":"%")+str;
 }
+void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
+{
+    if(node==nullptr)return;
+    if(node->type==ND_IDENT&&!offset.count(node->name)){
+	write("sub",8,"rsp");
+	offset[node->name]=var_size+=8;
+    }
+    enumerate_var(node->lhs);
+    enumerate_var(node->rhs);
+}
 void assembly_source::generate_lval(const abstract_syntax_tree::node*node)
 {
     if(node->type!=ND_IDENT){
 	throw std::runtime_error("右辺値への代入はできません");
     }else{
-	int offset=('z'-node->name+1)*8;
 	write("mov","rbp","rax");
-	write("sub",offset,"rax");
+	write("sub",offset[node->name],"rax");
 	write("push","rax");
     }
 }
-void assembly_source::generate(const abstract_syntax_tree::node*node)
+void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 {
     if(node->type==ND_NUM){
 	write("push",node->value);
 	return;
     }else if(node->type==ND_RETURN){
-	generate(node->rhs);
+	generate_recur(node->rhs);
 	write("pop","rax");
 	write("mov","rbp","rsp");
 	write("pop","rbp");
@@ -82,15 +90,15 @@ void assembly_source::generate(const abstract_syntax_tree::node*node)
 	return;
     }else if(node->type=='='){
 	generate_lval(node->lhs);
-	generate(node->rhs);
+	generate_recur(node->rhs);
 	write("pop","rdi");
 	write("pop","rax");
 	write("mov","rdi",address("rax"));
 	write("push","rdi");
 	return;
     }else{
-	generate(node->lhs);
-	generate(node->rhs);
+	generate_recur(node->lhs);
+	generate_recur(node->rhs);
 	write("pop","rdi");
 	write("pop","rax");
 	switch(node->type){
@@ -141,12 +149,18 @@ void assembly_source::generate(const abstract_syntax_tree::node*node)
 	write("push","rax");
     }
 }
+void assembly_source::generate(const abstract_syntax_tree::node*node)
+{
+    enumerate_var(node);
+    generate_recur(node);
+}
 void assembly_source::enter(const std::string&func)
 {
     write(func+':');
     ++indent;
     write("push","rbp");
     write("mov","rsp","rbp");
+    var_size=0;
 }
 void assembly_source::leave()
 {
@@ -154,4 +168,5 @@ void assembly_source::leave()
     write("pop","rbp");
     write("retq");
     --indent;
+    offset.clear();
 }

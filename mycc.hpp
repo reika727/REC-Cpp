@@ -1,12 +1,15 @@
 #include<iostream>
 #include<string>
 #include<vector>
+#include<map>
 #include<sstream>
+#include<algorithm>
 #include<exception>
 #include<cmath>
 namespace mycc{
     enum{
 	TK_NUM=0x100,
+	ND_NUM=0x100,
 	TK_EQ,
 	TK_NE,
 	TK_LE,
@@ -14,9 +17,6 @@ namespace mycc{
 	TK_RETURN,
 	TK_IDENT,
 	TK_EOF,
-    };
-    enum{
-	ND_NUM=0x100,
 	ND_RETURN,
 	ND_IDENT,
     };
@@ -25,10 +25,10 @@ namespace mycc{
 	    struct token{
 		int type;
 		int value;
-		char name;
+		std::string name;
 		token(int type);
 		token(int type,int value);
-		token(int type,char name);
+		token(int type,const std::string&name);
 	    };
 	private:
 	    std::vector<token>tokens;
@@ -42,10 +42,10 @@ namespace mycc{
 		int type;
 		node*lhs,*rhs;
 		int value;
-		char name;
+		std::string name;
 		node(node*left,int type,node*right);
 		node(int value);
-		node(char name);
+		node(const std::string&name);
 	    };
 	private:
 	    const tokenizer&tk;
@@ -62,17 +62,21 @@ namespace mycc{
 	    node*term();
 	public:
 	    abstract_syntax_tree(tokenizer&_tk);
-	    const std::vector<node*>&statements()const;
+	    const std::vector<node*>&statements();
     };
     class assembly_source{
 	private:
 	    int indent;
+	    int var_size;
+	    std::map<std::string,int>offset;
 	    std::string address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
 	    std::string address(int dis,const std::string&base,int scl);
 	    std::string address(const std::string&base,const std::string&ofs,int scl=1);
 	    std::string address(const std::string&base,int scl=1);
 	    std::string p(const std::string&str);
+	    void enumerate_var(const abstract_syntax_tree::node*node);
 	    void generate_lval(const abstract_syntax_tree::node*node);
+	    void generate_recur(const abstract_syntax_tree::node*node);
 	public:
 	    assembly_source();
 	    void write(const std::string&str);
