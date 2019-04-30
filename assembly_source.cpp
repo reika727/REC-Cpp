@@ -1,8 +1,8 @@
 #include"mycc.hpp"
 using namespace mycc;
-assembly_source::assembly_source():indent(0)
+assembly_source::assembly_source(const std::string&filename):ofs(filename),indent(0)
 {
-    std::cout<<".global main"<<std::endl;
+    write(".global main");
 }
 std::string assembly_source::p(const std::string&str)
 {
@@ -10,7 +10,7 @@ std::string assembly_source::p(const std::string&str)
 }
 void assembly_source::write(const std::string&str)
 {
-    std::cout<<std::string(indent,' ')<<str<<std::endl;
+    ofs<<std::string(indent,' ')<<str<<std::endl;
 }
 void assembly_source::write(const std::string&inst,const std::string&reg1,const std::string&reg2)
 {

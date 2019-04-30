@@ -1,8 +1,9 @@
 #include<iostream>
+#include<sstream>
+#include<fstream>
 #include<string>
 #include<vector>
 #include<map>
-#include<sstream>
 #include<algorithm>
 #include<exception>
 #include<cmath>
@@ -73,6 +74,7 @@ namespace mycc{
     };
     class assembly_source{
 	private:
+	    std::ofstream ofs;
 	    int indent;
 	    int var_size;
 	    std::map<std::string,int>offset;
@@ -85,7 +87,7 @@ namespace mycc{
 	    void generate_lval(const abstract_syntax_tree::node*node);
 	    void generate_recur(const abstract_syntax_tree::node*node);
 	public:
-	    assembly_source();
+	    assembly_source(const std::string&filename);
 	    void write(const std::string&str);
 	    void write(const std::string&inst,const std::string&reg1,const std::string&reg2);
 	    void write(const std::string&inst,int arg,const std::string&reg);

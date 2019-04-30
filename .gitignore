@@ -3,3 +3,4 @@ mycc.out
 *.o
 *~
 tmp*
+*.swp
