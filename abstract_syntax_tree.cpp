@@ -4,6 +4,10 @@ using node=abstract_syntax_tree::node;
 node::node(node*left,int type,node*right):type(type),lhs(left),rhs(right){}
 node::node(int value):type(NUMERIC),value(value),lhs(nullptr),rhs(nullptr){}
 node::node(const std::string&name):type(IDENT),name(name),lhs(nullptr),rhs(nullptr){}
+abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):tk(_tk),pos_now(0)
+{
+    while(tk(pos_now).type!=ENDT)stats.push_back(statement());
+}
 bool abstract_syntax_tree::consume(int type)
 {
     if(tk(pos_now).type==type){
@@ -79,10 +83,6 @@ node*abstract_syntax_tree::term()
     }else if(tk(pos_now).type==NUMERIC)return new node(tk(pos_now++).value);
      else if(tk(pos_now).type==IDENT)  return new node(tk(pos_now++).name);
      else                              throw std::runtime_error("構文解析ができませんでした");
-}
-abstract_syntax_tree::abstract_syntax_tree(tokenizer&_tk):tk(_tk),pos_now(0)
-{
-    while(tk(pos_now).type!=ENDT)stats.push_back(statement());
 }
 const std::vector<node*>& abstract_syntax_tree::statements()
 {

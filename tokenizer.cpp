@@ -52,7 +52,7 @@ tokenizer::tokenizer(const std::string&s)
 	    size_t sz;
 	    tokens.emplace_back(NUMERIC,std::stoi(s.substr(i),&sz));
 	    i+=sz-1;
-	}else if(islower(s[i])){
+	}else if(isalpha(s[i])||s[i]=='_'){
 	    auto beg=s.begin()+i;
 	    auto len=find_if_not(beg,s.end(),[](char c){return isalpha(c)||isdigit(c)||c=='_';})-beg;
 	    tokens.emplace_back(IDENT,s.substr(i,len));

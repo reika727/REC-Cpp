@@ -69,7 +69,7 @@ namespace mycc{
 	    node*unary();
 	    node*term();
 	public:
-	    abstract_syntax_tree(tokenizer&_tk);
+	    abstract_syntax_tree(const tokenizer&_tk);
 	    const std::vector<node*>&statements();
     };
     class assembly_source{
