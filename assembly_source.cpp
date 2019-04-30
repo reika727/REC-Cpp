@@ -4,6 +4,10 @@ assembly_source::assembly_source():indent(0)
 {
     std::cout<<".global main"<<std::endl;
 }
+std::string assembly_source::p(const std::string&str)
+{
+    return (str[0]=='('?"":"%")+str;
+}
 void assembly_source::write(const std::string&str)
 {
     std::cout<<std::string(indent,' ')<<str<<std::endl;
@@ -47,14 +51,10 @@ std::string assembly_source::address(const std::string&base,int scl)
 {
     return address(0,base,"",scl);
 }
-std::string assembly_source::p(const std::string&str)
-{
-    return (str[0]=='('?"":"%")+str;
-}
 void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
 {
     if(node==nullptr)return;
-    if(node->type==ND_IDENT&&!offset.count(node->name)){
+    if(node->type==IDENT&&!offset.count(node->name)){
 	write("sub",8,"rsp");
 	offset[node->name]=var_size+=8;
     }
@@ -63,7 +63,7 @@ void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
 }
 void assembly_source::generate_lval(const abstract_syntax_tree::node*node)
 {
-    if(node->type!=ND_IDENT){
+    if(node->type!=IDENT){
 	throw std::runtime_error("右辺値への代入はできません");
     }else{
 	write("mov","rbp","rax");
@@ -73,22 +73,22 @@ void assembly_source::generate_lval(const abstract_syntax_tree::node*node)
 }
 void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 {
-    if(node->type==ND_NUM){
+    if(node->type==NUMERIC){
 	write("push",node->value);
 	return;
-    }else if(node->type==ND_RETURN){
+    }else if(node->type==RETURN){
 	generate_recur(node->rhs);
 	write("pop","rax");
 	write("mov","rbp","rsp");
 	write("pop","rbp");
 	write("retq");
-    }else if(node->type==ND_IDENT){
+    }else if(node->type==IDENT){
 	generate_lval(node);
 	write("pop","rax");
 	write("mov",address("rax"),"rax");
 	write("push","rax");
 	return;
-    }else if(node->type=='='){
+    }else if(node->type==ASSIGN){
 	generate_lval(node->lhs);
 	generate_recur(node->rhs);
 	write("pop","rdi");
@@ -102,45 +102,45 @@ void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 	write("pop","rdi");
 	write("pop","rax");
 	switch(node->type){
-	    case '+':
+	    case PLUS:
 		write("add","rdi","rax");
 		break;
-	    case '-':
+	    case MINUS:
 		write("sub","rdi","rax");
 		break;
-	    case '*':
+	    case MULTI:
 		write("mul","rdi");
 		break;
-	    case '/':
+	    case DIVIDE:
 		write("mov",0,"rdx");
 		write("div","rdi");
 		break;
-	    case TK_EQ:
+	    case EQUAL:
 		write("cmp","rdi","rax");
 		write("sete","al");
 		write("movzb","al","rax");
 		break;
-	    case TK_NE:
+	    case NEQUAL:
 		write("cmp","rdi","rax");
 		write("setne","al");
 		write("movzb","al","rax");
 		break;
-	    case '<':
+	    case LESS:
 		write("cmp","rdi","rax");
 		write("setl","al");
 		write("movzb","al","rax");
 		break;
-	    case '>':
+	    case GREAT:
 		write("cmp","rdi","rax");
 		write("setg","al");
 		write("movzb","al","rax");
 		break;
-	    case TK_LE:
+	    case LEEQ:
 		write("cmp","rdi","rax");
 		write("setle","al");
 		write("movzb","al","rax");
 		break;
-	    case TK_GE:
+	    case GREQ:
 		write("cmp","rdi","rax");
 		write("setge","al");
 		write("movzb","al","rax");

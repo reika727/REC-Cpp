@@ -8,17 +8,24 @@
 #include<cmath>
 namespace mycc{
     enum{
-	TK_NUM=0x100,
-	ND_NUM=0x100,
-	TK_EQ,
-	TK_NE,
-	TK_LE,
-	TK_GE,
-	TK_RETURN,
-	TK_IDENT,
-	TK_EOF,
-	ND_RETURN,
-	ND_IDENT,
+	PLUS,
+	MINUS,
+	MULTI,
+	DIVIDE,
+	LESS,
+	GREAT,
+	ASSIGN,
+	SEPARATE,
+	OPARENT,
+	CPARENT,
+	EQUAL,
+	NEQUAL,
+	LEEQ,
+	GREQ,
+	RETURN,
+	NUMERIC,
+	IDENT,
+	ENDT,
     };
     class tokenizer{
 	public:
@@ -69,11 +76,11 @@ namespace mycc{
 	    int indent;
 	    int var_size;
 	    std::map<std::string,int>offset;
+	    std::string p(const std::string&str);
 	    std::string address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
 	    std::string address(int dis,const std::string&base,int scl);
 	    std::string address(const std::string&base,const std::string&ofs,int scl=1);
 	    std::string address(const std::string&base,int scl=1);
-	    std::string p(const std::string&str);
 	    void enumerate_var(const abstract_syntax_tree::node*node);
 	    void generate_lval(const abstract_syntax_tree::node*node);
 	    void generate_recur(const abstract_syntax_tree::node*node);
