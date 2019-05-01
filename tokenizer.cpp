@@ -11,12 +11,42 @@ tokenizer::tokenizer(const std::string&s)
 	else if(s[i]=='(')tokens.emplace_back(TK::OPARENT);
 	else if(s[i]==')')tokens.emplace_back(TK::CPARENT);
 	else if(s[i]==';')tokens.emplace_back(TK::SCOLON);
-	else if(s[i]=='+')tokens.emplace_back(TK::PLUS);
-	else if(s[i]=='-')tokens.emplace_back(TK::MINUS);
-	else if(s[i]=='*')tokens.emplace_back(TK::ASTER);
-	else if(s[i]=='/')tokens.emplace_back(TK::SLASH);
-	else if(s[i]=='%')tokens.emplace_back(TK::PERCENT);
-	else if(s[i]=='='){
+	else if(s[i]=='+'){
+	    if(i!=s.length()-1&&s[i+1]=='='){
+		tokens.emplace_back(TK::PLEQ);
+		++i;
+	    }else{
+		tokens.emplace_back(TK::PLUS);
+	    }
+	}else if(s[i]=='-'){
+	    if(i!=s.length()-1&&s[i+1]=='='){
+		tokens.emplace_back(TK::MIEQ);
+		++i;
+	    }else{
+		tokens.emplace_back(TK::MINUS);
+	    }
+	}else if(s[i]=='*'){
+	    if(i!=s.length()-1&&s[i+1]=='='){
+		tokens.emplace_back(TK::ASEQ);
+		++i;
+	    }else{
+		tokens.emplace_back(TK::ASTER);
+	    }
+	}else if(s[i]=='/'){
+	    if(i!=s.length()-1&&s[i+1]=='='){
+		tokens.emplace_back(TK::SLEQ);
+		++i;
+	    }else{
+		tokens.emplace_back(TK::SLASH);
+	    }
+	}else if(s[i]=='%'){
+	    if(i!=s.length()-1&&s[i+1]=='='){
+		tokens.emplace_back(TK::PEEQ);
+		++i;
+	    }else{
+		tokens.emplace_back(TK::PERCENT);
+	    }
+	}else if(s[i]=='='){
 	    if(i!=s.length()-1&&s[i+1]=='='){
 		tokens.emplace_back(TK::EQEQ);
 		++i;

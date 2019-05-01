@@ -26,8 +26,13 @@ node*abstract_syntax_tree::assign()
 {
     node*ret=equality();
     while(true){
-	if(consume(TK::EQUAL))ret=new node(ret,ND::ASSIGN,assign());
-	else                  return ret;
+ 	     if(consume(TK::EQUAL))ret=new node(ret,ND::ASSIGN,assign());
+	else if(consume(TK::PLEQ)) ret=new node(ret,ND::PLASGN,assign());
+	else if(consume(TK::MIEQ)) ret=new node(ret,ND::MIASGN,assign());
+	else if(consume(TK::ASEQ)) ret=new node(ret,ND::MUASGN,assign());
+	else if(consume(TK::SLEQ)) ret=new node(ret,ND::DIASGN,assign());
+	else if(consume(TK::PEEQ)) ret=new node(ret,ND::RMASGN,assign());
+	else                       return ret;
     }
 }
 node*abstract_syntax_tree::equality()

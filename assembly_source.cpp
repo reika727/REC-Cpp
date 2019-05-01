@@ -75,10 +75,18 @@ void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 {
     if(node->type==ND::NUMERIC){
 	write("push",node->value);
-	return;
+    }else if(node->type==ND::IDENT){
+	generate_lval(node);
+	write("pop","rax");
+	write("push",address("rax"));
+    }else if(node->type==ND::RETURN){
+	generate_recur(node->rhs);
+	write("pop","rax");
+	write("mov","rbp","rsp");
+	write("pop","rbp");
+	write("retq");
     }else if(node->type==ND::UPLUS){
 	generate_recur(node->rhs);
-	return;
     }else if(node->type==ND::UMINUS){
 	generate_recur(node->rhs);
 	write("pop","rax");
@@ -86,27 +94,46 @@ void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 	write("mov",2,"rsi");write("mul","rsi");
 	write("sub","rax","rdi");
 	write("push","rdi");
-	return;
-    }else if(node->type==ND::RETURN){
-	generate_recur(node->rhs);
-	write("pop","rax");
-	write("mov","rbp","rsp");
-	write("pop","rbp");
-	write("retq");
-    }else if(node->type==ND::IDENT){
-	generate_lval(node);
-	write("pop","rax");
-	write("mov",address("rax"),"rax");
-	write("push","rax");
-	return;
-    }else if(node->type==ND::ASSIGN){
+    }else if(ND::ASSIGN<=node->type&&node->type<=ND::RMASGN){
 	generate_lval(node->lhs);
 	generate_recur(node->rhs);
 	write("pop","rdi");
 	write("pop","rax");
-	write("mov","rdi",address("rax"));
-	write("push","rdi");
-	return;
+	switch(node->type){
+	    case ND::ASSIGN:
+		write("mov","rdi",address("rax"));
+		break;
+	    case ND::PLASGN:
+		write("add","rdi",address("rax"));
+		break;
+	    case ND::MIASGN:
+		write("sub","rdi",address("rax"));
+		break;
+	    case ND::MUASGN:
+		write("mov","rax","rsi");
+		write("mov",address("rax"),"rax");
+		write("mul","rdi");
+		write("mov","rax",address("rsi"));
+		write("mov","rsi","rax");
+		break;
+	    case ND::DIASGN:
+		write("mov","rax","rsi");
+		write("mov",address("rax"),"rax");
+		write("mov",0,"rdx");
+		write("div","rdi");
+		write("mov","rax",address("rsi"));
+		write("mov","rsi","rax");
+		break;
+	    case ND::RMASGN:
+		write("mov","rax","rsi");
+		write("mov",address("rax"),"rax");
+		write("mov",0,"rdx");
+		write("div","rdi");
+		write("mov","rdx",address("rsi"));
+		write("mov","rsi","rax");
+		break;
+	}
+	write("push",address("rax"));
     }else{
 	generate_recur(node->lhs);
 	generate_recur(node->rhs);

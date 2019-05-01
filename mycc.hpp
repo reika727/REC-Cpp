@@ -17,8 +17,9 @@ namespace mycc{
 	EQUAL,   // =
 	PLEQ,    // +=
 	MIEQ,    // -=
-	MUEQ,    // *=
-	DIEQ,    // /=
+	ASEQ,    // *=
+	SLEQ,    // /=
+	PEEQ,    // %=
 	EQEQ,    // ==
 	EXEQ,    // !=
 	LESS,    // <
@@ -47,12 +48,13 @@ namespace mycc{
 	MIASGN,   // 減算代入
 	MUASGN,   // 乗算代入
 	DIASGN,   // 除算代入
+	RMASGN,   // 剰余代入
 	/*比較演算子*/
 	EQUAL,    // 等価
 	NEQUAL,   // 非等価
 	LESS,     // 小なり
-	LEEQ,     // 小なりイコール
 	GREAT,    // 大なり
+	LEEQ,     // 小なりイコール
 	GREQ,     // 大なりイコール
 	/*キーワード*/
 	RETURN,   // return
