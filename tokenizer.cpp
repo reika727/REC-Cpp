@@ -94,7 +94,7 @@ tokenizer::tokenizer(const std::string&s)
     }
     tokens.emplace_back(TK::ENDT);
 }
-const token&tokenizer::operator()(int idx)const
+const token&tokenizer::operator[](int idx)const
 {
     return tokens[idx];
 }

@@ -8,7 +8,7 @@ int main(int argc,char**argv)
 	mycc::assembly_source as("tmp.s");
 	as.enter("main");
 	for(auto s:ast.statements()){
-	    as.generate(s);
+	    as.eval(s);
 	    as.write("pop","rax");
 	}
 	as.leave();

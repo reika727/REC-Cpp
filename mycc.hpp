@@ -76,7 +76,7 @@ namespace mycc{
 	    std::vector<token>tokens;
 	public:
 	    tokenizer(const std::string&s);
-	    const token&operator()(int idx)const;
+	    const token&operator[](int idx)const;
     };
     class abstract_syntax_tree{
 	public:
@@ -113,13 +113,13 @@ namespace mycc{
 	    int var_size;
 	    std::map<std::string,int>offset;
 	    std::string p(const std::string&str);
-	    std::string address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
-	    std::string address(int dis,const std::string&base,int scl);
-	    std::string address(const std::string&base,const std::string&ofs,int scl=1);
-	    std::string address(const std::string&base,int scl=1);
+	    std::string derefer(int dis,const std::string&base,const std::string&ofs="",int scl=1);
+	    std::string derefer(int dis,const std::string&base,int scl);
+	    std::string derefer(const std::string&base,const std::string&ofs,int scl=1);
+	    std::string derefer(const std::string&base,int scl=1);
 	    void enumerate_var(const abstract_syntax_tree::node*node);
-	    void generate_lval(const abstract_syntax_tree::node*node);
-	    void generate_recur(const abstract_syntax_tree::node*node);
+	    void refer_var(const abstract_syntax_tree::node*node);
+	    void RDP(const abstract_syntax_tree::node*node);
 	public:
 	    assembly_source(const std::string&filename);
 	    void write(const std::string&str);
@@ -127,7 +127,7 @@ namespace mycc{
 	    void write(const std::string&inst,int arg,const std::string&reg);
 	    void write(const std::string&inst,const std::string&reg);
 	    void write(const std::string&inst,int arg);
-	    void generate(const abstract_syntax_tree::node*node);
+	    void eval(const abstract_syntax_tree::node*node);
 	    void enter(const std::string&func);
 	    void leave();
     };

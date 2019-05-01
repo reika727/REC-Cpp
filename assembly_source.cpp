@@ -28,7 +28,7 @@ void assembly_source::write(const std::string&inst,int arg)
 {
     write(inst+" $"+std::to_string(arg));
 } 
-std::string assembly_source::address(int dis,const std::string&base,const std::string&ofs,int scl)
+std::string assembly_source::derefer(int dis,const std::string&base,const std::string&ofs,int scl)
 {
     std::stringstream ss;
     if(dis!=0)ss<<dis;
@@ -39,17 +39,17 @@ std::string assembly_source::address(int dis,const std::string&base,const std::s
     ss<<')';
     return ss.str();
 }
-std::string assembly_source::address(int dis,const std::string&base,int scl)
+std::string assembly_source::derefer(int dis,const std::string&base,int scl)
 {
-    return address(dis,base,"",scl);
+    return derefer(dis,base,"",scl);
 }
-std::string assembly_source::address(const std::string&base,const std::string&ofs,int scl)
+std::string assembly_source::derefer(const std::string&base,const std::string&ofs,int scl)
 {
-    return address(0,base,ofs,scl);
+    return derefer(0,base,ofs,scl);
 }
-std::string assembly_source::address(const std::string&base,int scl)
+std::string assembly_source::derefer(const std::string&base,int scl)
 {
-    return address(0,base,"",scl);
+    return derefer(0,base,"",scl);
 }
 void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
 {
@@ -61,7 +61,7 @@ void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
     enumerate_var(node->lhs);
     enumerate_var(node->rhs);
 }
-void assembly_source::generate_lval(const abstract_syntax_tree::node*node)
+void assembly_source::refer_var(const abstract_syntax_tree::node*node)
 {
     if(node->type!=ND::IDENT){
 	throw std::runtime_error("右辺値への代入はできません");
@@ -71,72 +71,72 @@ void assembly_source::generate_lval(const abstract_syntax_tree::node*node)
 	write("push","rax");
     }
 }
-void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
+void assembly_source::RDP(const abstract_syntax_tree::node*node)
 {
     if(node->type==ND::NUMERIC){
 	write("push",node->value);
     }else if(node->type==ND::IDENT){
-	generate_lval(node);
+	refer_var(node);
 	write("pop","rax");
-	write("push",address("rax"));
+	write("push",derefer("rax"));
     }else if(node->type==ND::RETURN){
-	generate_recur(node->rhs);
+	RDP(node->rhs);
 	write("pop","rax");
 	write("mov","rbp","rsp");
 	write("pop","rbp");
 	write("retq");
     }else if(node->type==ND::UPLUS){
-	generate_recur(node->rhs);
+	RDP(node->rhs);
     }else if(node->type==ND::UMINUS){
-	generate_recur(node->rhs);
+	RDP(node->rhs);
 	write("pop","rax");
 	write("mov","rax","rdi");
 	write("mov",2,"rsi");write("mul","rsi");
 	write("sub","rax","rdi");
 	write("push","rdi");
     }else if(ND::ASSIGN<=node->type&&node->type<=ND::RMASGN){
-	generate_lval(node->lhs);
-	generate_recur(node->rhs);
+	refer_var(node->lhs);
+	RDP(node->rhs);
 	write("pop","rdi");
 	write("pop","rax");
 	switch(node->type){
 	    case ND::ASSIGN:
-		write("mov","rdi",address("rax"));
+		write("mov","rdi",derefer("rax"));
 		break;
 	    case ND::PLASGN:
-		write("add","rdi",address("rax"));
+		write("add","rdi",derefer("rax"));
 		break;
 	    case ND::MIASGN:
-		write("sub","rdi",address("rax"));
+		write("sub","rdi",derefer("rax"));
 		break;
 	    case ND::MUASGN:
 		write("mov","rax","rsi");
-		write("mov",address("rax"),"rax");
+		write("mov",derefer("rax"),"rax");
 		write("mul","rdi");
-		write("mov","rax",address("rsi"));
+		write("mov","rax",derefer("rsi"));
 		write("mov","rsi","rax");
 		break;
 	    case ND::DIASGN:
 		write("mov","rax","rsi");
-		write("mov",address("rax"),"rax");
+		write("mov",derefer("rax"),"rax");
 		write("mov",0,"rdx");
 		write("div","rdi");
-		write("mov","rax",address("rsi"));
+		write("mov","rax",derefer("rsi"));
 		write("mov","rsi","rax");
 		break;
 	    case ND::RMASGN:
 		write("mov","rax","rsi");
-		write("mov",address("rax"),"rax");
+		write("mov",derefer("rax"),"rax");
 		write("mov",0,"rdx");
 		write("div","rdi");
-		write("mov","rdx",address("rsi"));
+		write("mov","rdx",derefer("rsi"));
 		write("mov","rsi","rax");
 		break;
 	}
-	write("push",address("rax"));
+	write("push",derefer("rax"));
     }else{
-	generate_recur(node->lhs);
-	generate_recur(node->rhs);
+	RDP(node->lhs);
+	RDP(node->rhs);
 	write("pop","rdi");
 	write("pop","rax");
 	switch(node->type){
@@ -192,10 +192,10 @@ void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 	write("push","rax");
     }
 }
-void assembly_source::generate(const abstract_syntax_tree::node*node)
+void assembly_source::eval(const abstract_syntax_tree::node*node)
 {
     enumerate_var(node);
-    generate_recur(node);
+    RDP(node);
 }
 void assembly_source::enter(const std::string&func)
 {
