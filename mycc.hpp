@@ -14,6 +14,8 @@ namespace mycc{
 	ASTER,   // *
 	SLASH,   // /
 	PERCENT, // %
+	PLPL,    // ++
+	MIMI,    // --
 	EQUAL,   // =
 	PLEQ,    // +=
 	MIEQ,    // -=
@@ -43,6 +45,8 @@ namespace mycc{
 	MULTI,    // 乗算
 	DIVIDE,   // 除算
 	REMAIN,   // 剰余
+	PREINC,   // 前置インクリメント
+	PREDEC,   // 前置デクリメント
 	ASSIGN,   // 単純代入
 	PLASGN,   // 加算代入
 	MIASGN,   // 減算代入
@@ -59,7 +63,7 @@ namespace mycc{
 	/*キーワード*/
 	RETURN,   // return
 	/*その他*/
-	NUMERIC,  // 即値
+	NUMERIC,  // 数値リテラル
 	IDENT,    // 識別子
     };
     class tokenizer{

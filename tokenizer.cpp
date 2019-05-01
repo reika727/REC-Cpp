@@ -12,16 +12,18 @@ tokenizer::tokenizer(const std::string&s)
 	else if(s[i]==')')tokens.emplace_back(TK::CPARENT);
 	else if(s[i]==';')tokens.emplace_back(TK::SCOLON);
 	else if(s[i]=='+'){
-	    if(i!=s.length()-1&&s[i+1]=='='){
-		tokens.emplace_back(TK::PLEQ);
-		++i;
+	    if(i!=s.length()-1&&s[i+1]=='+'){
+		tokens.emplace_back(TK::PLPL);++i;
+	    }else if(i!=s.length()-1&&s[i+1]=='='){
+		tokens.emplace_back(TK::PLEQ);++i;
 	    }else{
 		tokens.emplace_back(TK::PLUS);
 	    }
 	}else if(s[i]=='-'){
-	    if(i!=s.length()-1&&s[i+1]=='='){
-		tokens.emplace_back(TK::MIEQ);
-		++i;
+	    if(i!=s.length()-1&&s[i+1]=='-'){
+		tokens.emplace_back(TK::MIMI);++i;
+	    }else if(i!=s.length()-1&&s[i+1]=='='){
+		tokens.emplace_back(TK::MIEQ);++i;
 	    }else{
 		tokens.emplace_back(TK::MINUS);
 	    }

@@ -94,6 +94,18 @@ void assembly_source::RDP(abstract_syntax_tree::node*const node)
 	write("mov",2,"rsi");write("mul","rsi");
 	write("sub","rax","rdi");
 	write("push","rdi");
+    }else if(node->type==ND::PREINC||node->type==ND::PREDEC){
+	refer_var(node->rhs);
+	write("pop","rax");
+	switch(node->type){
+	    case ND::PREINC:
+		write("add",1,derefer("rax"));
+		break;
+	    case ND::PREDEC:
+		write("sub",1,derefer("rax"));
+		break;
+	}
+	write("push",derefer("rax"));
     }else if(ND::ASSIGN<=node->type&&node->type<=ND::RMASGN){
 	refer_var(node->lhs);
 	RDP(node->rhs);

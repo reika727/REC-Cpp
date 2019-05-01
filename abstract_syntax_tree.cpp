@@ -22,7 +22,7 @@ node*abstract_syntax_tree::statement()
     if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
     return ret;
 }
-node*abstract_syntax_tree::assign()
+node*abstract_syntax_tree::assign() // =, +=, -=, *=, /= right to left
 {
     node*ret=equality();
     while(true){
@@ -35,7 +35,7 @@ node*abstract_syntax_tree::assign()
 	else                       return ret;
     }
 }
-node*abstract_syntax_tree::equality()
+node*abstract_syntax_tree::equality() // ==, != left to right
 {
     node*ret=relational();
     while(true){
@@ -44,7 +44,7 @@ node*abstract_syntax_tree::equality()
 	else                      return ret;
     }
 }
-node*abstract_syntax_tree::relational()
+node*abstract_syntax_tree::relational() // <, >, <=, >= left to right
 {
     node*ret=add();
     while(true){
@@ -55,7 +55,7 @@ node*abstract_syntax_tree::relational()
 	else                       return ret;
     }
 }
-node*abstract_syntax_tree::add()
+node*abstract_syntax_tree::add() // +, - left to right
 {
     node*ret=mul();
     while(true){
@@ -64,20 +64,22 @@ node*abstract_syntax_tree::add()
 	else                       return ret;
     }
 }
-node*abstract_syntax_tree::mul()
+node*abstract_syntax_tree::mul() // *, /, % left to right
 {
     node*ret=unary();
     while(true){
 	     if(consume(TK::ASTER))  ret=new node(ret,ND::MULTI,unary());
 	else if(consume(TK::SLASH))  ret=new node(ret,ND::DIVIDE,unary());
 	else if(consume(TK::PERCENT))ret=new node(ret,ND::REMAIN,unary());
-	else                    return ret;
+	else                         return ret;
     }
 }
-node*abstract_syntax_tree::unary()
+node*abstract_syntax_tree::unary() // +, -, ++, -- right to left
 {
-         if(consume(TK::PLUS)) return new node(nullptr,ND::UPLUS,term());
-    else if(consume(TK::MINUS))return new node(nullptr,ND::UMINUS,term());
+         if(consume(TK::PLUS)) return new node(nullptr,ND::UPLUS,unary());
+    else if(consume(TK::MINUS))return new node(nullptr,ND::UMINUS,unary());
+    else if(consume(TK::PLPL)) return new node(nullptr,ND::PREINC,unary());
+    else if(consume(TK::MIMI)) return new node(nullptr,ND::PREDEC,unary());
     else                       return term();
 }
 node*abstract_syntax_tree::term()
