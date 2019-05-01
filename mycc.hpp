@@ -85,7 +85,7 @@ namespace mycc{
 		node*lhs,*rhs;
 		int value;
 		std::string name;
-		node(node*left,ND type,node*right);
+		node(node*const left,ND type,node*const right);
 		node(int value);
 		node(const std::string&name);
 	    };
@@ -117,9 +117,9 @@ namespace mycc{
 	    std::string derefer(int dis,const std::string&base,int scl);
 	    std::string derefer(const std::string&base,const std::string&ofs,int scl=1);
 	    std::string derefer(const std::string&base,int scl=1);
-	    void enumerate_var(const abstract_syntax_tree::node*node);
-	    void refer_var(const abstract_syntax_tree::node*node);
-	    void RDP(const abstract_syntax_tree::node*node);
+	    void enumerate_var(abstract_syntax_tree::node*const node);
+	    void refer_var(abstract_syntax_tree::node*const node);
+	    void RDP(abstract_syntax_tree::node*const node);
 	public:
 	    assembly_source(const std::string&filename);
 	    void write(const std::string&str);
@@ -127,7 +127,7 @@ namespace mycc{
 	    void write(const std::string&inst,int arg,const std::string&reg);
 	    void write(const std::string&inst,const std::string&reg);
 	    void write(const std::string&inst,int arg);
-	    void eval(const abstract_syntax_tree::node*node);
+	    void eval(abstract_syntax_tree::node*const node);
 	    void enter(const std::string&func);
 	    void leave();
     };

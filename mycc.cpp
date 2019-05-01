@@ -7,7 +7,7 @@ int main(int argc,char**argv)
 	mycc::abstract_syntax_tree ast(tk);
 	mycc::assembly_source as("tmp.s");
 	as.enter("main");
-	for(auto s:ast.statements()){
+	for(mycc::abstract_syntax_tree::node*const s:ast.statements()){
 	    as.eval(s);
 	    as.write("pop","rax");
 	}

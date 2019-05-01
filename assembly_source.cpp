@@ -51,7 +51,7 @@ std::string assembly_source::derefer(const std::string&base,int scl)
 {
     return derefer(0,base,"",scl);
 }
-void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
+void assembly_source::enumerate_var(abstract_syntax_tree::node*const node)
 {
     if(node==nullptr)return;
     if(node->type==ND::IDENT&&!offset.count(node->name)){
@@ -61,7 +61,7 @@ void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
     enumerate_var(node->lhs);
     enumerate_var(node->rhs);
 }
-void assembly_source::refer_var(const abstract_syntax_tree::node*node)
+void assembly_source::refer_var(abstract_syntax_tree::node*const node)
 {
     if(node->type!=ND::IDENT){
 	throw std::runtime_error("右辺値への代入はできません");
@@ -71,7 +71,7 @@ void assembly_source::refer_var(const abstract_syntax_tree::node*node)
 	write("push","rax");
     }
 }
-void assembly_source::RDP(const abstract_syntax_tree::node*node)
+void assembly_source::RDP(abstract_syntax_tree::node*const node)
 {
     if(node->type==ND::NUMERIC){
 	write("push",node->value);
@@ -192,7 +192,7 @@ void assembly_source::RDP(const abstract_syntax_tree::node*node)
 	write("push","rax");
     }
 }
-void assembly_source::eval(const abstract_syntax_tree::node*node)
+void assembly_source::eval(abstract_syntax_tree::node*const node)
 {
     enumerate_var(node);
     RDP(node);

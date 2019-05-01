@@ -1,7 +1,7 @@
 #include"mycc.hpp"
 using namespace mycc;
 using node=abstract_syntax_tree::node;
-node::node(node*left,ND type,node*right):type(type),lhs(left),rhs(right){}
+node::node(node*const left,ND type,node*const right):type(type),lhs(left),rhs(right){}
 node::node(int value):type(ND::NUMERIC),value(value),lhs(nullptr),rhs(nullptr){}
 node::node(const std::string&name):type(ND::IDENT),name(name),lhs(nullptr),rhs(nullptr){}
 abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):tk(_tk),pos_now(0)
