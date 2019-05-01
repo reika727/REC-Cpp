@@ -126,6 +126,11 @@ void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 		write("mov",0,"rdx");
 		write("div","rdi");
 		break;
+	    case ND::REMAIN:
+		write("mov",0,"rdx");
+		write("div","rdi");
+		write("mov","rdx","rax");
+		break;
 	    case ND::EQUAL:
 		write("cmp","rdi","rax");
 		write("sete","al");

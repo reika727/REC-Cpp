@@ -63,8 +63,9 @@ node*abstract_syntax_tree::mul()
 {
     node*ret=unary();
     while(true){
-	     if(consume(TK::ASTER))ret=new node(ret,ND::MULTI,unary());
-	else if(consume(TK::SLASH))ret=new node(ret,ND::DIVIDE,unary());
+	     if(consume(TK::ASTER))  ret=new node(ret,ND::MULTI,unary());
+	else if(consume(TK::SLASH))  ret=new node(ret,ND::DIVIDE,unary());
+	else if(consume(TK::PERCENT))ret=new node(ret,ND::REMAIN,unary());
 	else                    return ret;
     }
 }

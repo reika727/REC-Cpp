@@ -15,6 +15,7 @@ tokenizer::tokenizer(const std::string&s)
 	else if(s[i]=='-')tokens.emplace_back(TK::MINUS);
 	else if(s[i]=='*')tokens.emplace_back(TK::ASTER);
 	else if(s[i]=='/')tokens.emplace_back(TK::SLASH);
+	else if(s[i]=='%')tokens.emplace_back(TK::PERCENT);
 	else if(s[i]=='='){
 	    if(i!=s.length()-1&&s[i+1]=='='){
 		tokens.emplace_back(TK::EQEQ);

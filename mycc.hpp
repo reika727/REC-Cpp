@@ -13,6 +13,7 @@ namespace mycc{
 	MINUS,   // -
 	ASTER,   // *
 	SLASH,   // /
+	PERCENT, // %
 	EQUAL,   // =
 	PLEQ,    // +=
 	MIEQ,    // -=
@@ -40,6 +41,7 @@ namespace mycc{
 	MINUS,    // 減算
 	MULTI,    // 乗算
 	DIVIDE,   // 除算
+	REMAIN,   // 剰余
 	ASSIGN,   // 単純代入
 	PLASGN,   // 加算代入
 	MIASGN,   // 減算代入
@@ -55,8 +57,6 @@ namespace mycc{
 	/*キーワード*/
 	RETURN,   // return
 	/*その他*/
-	OPARENT,  // 開き括弧
-	CPARENT,  // 閉じ括弧
 	NUMERIC,  // 即値
 	IDENT,    // 識別子
     };
