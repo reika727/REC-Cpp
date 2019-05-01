@@ -54,7 +54,7 @@ std::string assembly_source::address(const std::string&base,int scl)
 void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
 {
     if(node==nullptr)return;
-    if(node->type==IDENT&&!offset.count(node->name)){
+    if(node->type==ND::IDENT&&!offset.count(node->name)){
 	write("sub",8,"rsp");
 	offset[node->name]=var_size+=8;
     }
@@ -63,7 +63,7 @@ void assembly_source::enumerate_var(const abstract_syntax_tree::node*node)
 }
 void assembly_source::generate_lval(const abstract_syntax_tree::node*node)
 {
-    if(node->type!=IDENT){
+    if(node->type!=ND::IDENT){
 	throw std::runtime_error("右辺値への代入はできません");
     }else{
 	write("mov","rbp","rax");
@@ -73,22 +73,33 @@ void assembly_source::generate_lval(const abstract_syntax_tree::node*node)
 }
 void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 {
-    if(node->type==NUMERIC){
+    if(node->type==ND::NUMERIC){
 	write("push",node->value);
 	return;
-    }else if(node->type==RETURN){
+    }else if(node->type==ND::UPLUS){
+	generate_recur(node->rhs);
+	return;
+    }else if(node->type==ND::UMINUS){
+	generate_recur(node->rhs);
+	write("pop","rax");
+	write("mov","rax","rdi");
+	write("mov",2,"rsi");write("mul","rsi");
+	write("sub","rax","rdi");
+	write("push","rdi");
+	return;
+    }else if(node->type==ND::RETURN){
 	generate_recur(node->rhs);
 	write("pop","rax");
 	write("mov","rbp","rsp");
 	write("pop","rbp");
 	write("retq");
-    }else if(node->type==IDENT){
+    }else if(node->type==ND::IDENT){
 	generate_lval(node);
 	write("pop","rax");
 	write("mov",address("rax"),"rax");
 	write("push","rax");
 	return;
-    }else if(node->type==ASSIGN){
+    }else if(node->type==ND::ASSIGN){
 	generate_lval(node->lhs);
 	generate_recur(node->rhs);
 	write("pop","rdi");
@@ -102,45 +113,45 @@ void assembly_source::generate_recur(const abstract_syntax_tree::node*node)
 	write("pop","rdi");
 	write("pop","rax");
 	switch(node->type){
-	    case PLUS:
+	    case ND::PLUS:
 		write("add","rdi","rax");
 		break;
-	    case MINUS:
+	    case ND::MINUS:
 		write("sub","rdi","rax");
 		break;
-	    case MULTI:
+	    case ND::MULTI:
 		write("mul","rdi");
 		break;
-	    case DIVIDE:
+	    case ND::DIVIDE:
 		write("mov",0,"rdx");
 		write("div","rdi");
 		break;
-	    case EQUAL:
+	    case ND::EQUAL:
 		write("cmp","rdi","rax");
 		write("sete","al");
 		write("movzb","al","rax");
 		break;
-	    case NEQUAL:
+	    case ND::NEQUAL:
 		write("cmp","rdi","rax");
 		write("setne","al");
 		write("movzb","al","rax");
 		break;
-	    case LESS:
+	    case ND::LESS:
 		write("cmp","rdi","rax");
 		write("setl","al");
 		write("movzb","al","rax");
 		break;
-	    case GREAT:
+	    case ND::GREAT:
 		write("cmp","rdi","rax");
 		write("setg","al");
 		write("movzb","al","rax");
 		break;
-	    case LEEQ:
+	    case ND::LEEQ:
 		write("cmp","rdi","rax");
 		write("setle","al");
 		write("movzb","al","rax");
 		break;
-	    case GREQ:
+	    case ND::GREQ:
 		write("cmp","rdi","rax");
 		write("setge","al");
 		write("movzb","al","rax");

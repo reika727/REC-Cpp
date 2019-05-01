@@ -8,10 +8,36 @@
 #include<exception>
 #include<cmath>
 namespace mycc{
-    enum{
+    enum class TK{
+	PLUS,    // +
+	MINUS,   // -
+	ASTER,   // *
+	SLASH,   // /
+	EQUAL,   // =
+	PLEQ,    // +=
+	MIEQ,    // -=
+	MUEQ,    // *=
+	DIEQ,    // /=
+	EQEQ,    // ==
+	EXEQ,    // !=
+	LESS,    // <
+	LEEQ,    // <=
+	GREAT,   // >
+	GREQ,    // >=
+	RETURN,  // return
+	SCOLON,  // ;
+	OPARENT, // (
+	CPARENT, // )
+	NUMERIC, // 数値
+	IDENT,   // 識別子
+	ENDT,    // トークン列終端
+    };
+    enum class ND{
 	/*算術演算子*/
-	PLUS,     // 単項プラス, 加算
-	MINUS,    // 単項マイナス, 減算
+	UPLUS,    // 単項プラス
+	UMINUS,   // 単項マイナス
+	PLUS,     // 加算
+	MINUS,    // 減算
 	MULTI,    // 乗算
 	DIVIDE,   // 除算
 	ASSIGN,   // 単純代入
@@ -29,22 +55,20 @@ namespace mycc{
 	/*キーワード*/
 	RETURN,   // return
 	/*その他*/
-	SEPARATE, // 文末記号
 	OPARENT,  // 開き括弧
 	CPARENT,  // 閉じ括弧
 	NUMERIC,  // 即値
 	IDENT,    // 識別子
-	ENDT,     // トークン列終端
     };
     class tokenizer{
 	public:
 	    struct token{
-		int type;
+		TK type;
 		int value;
 		std::string name;
-		token(int type);
-		token(int type,int value);
-		token(int type,const std::string&name);
+		token(TK type);
+		token(TK type,int value);
+		token(TK type,const std::string&name);
 	    };
 	private:
 	    std::vector<token>tokens;
@@ -55,11 +79,11 @@ namespace mycc{
     class abstract_syntax_tree{
 	public:
 	    struct node{
-		int type;
+		ND type;
 		node*lhs,*rhs;
 		int value;
 		std::string name;
-		node(node*left,int type,node*right);
+		node(node*left,ND type,node*right);
 		node(int value);
 		node(const std::string&name);
 	    };
@@ -67,7 +91,7 @@ namespace mycc{
 	    const tokenizer&tk;
 	    int pos_now;
 	    std::vector<node*>stats;
-	    bool consume(int type);
+	    bool consume(TK type);
 	    node*statement();
 	    node*assign();
 	    node*equality();
