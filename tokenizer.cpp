@@ -8,13 +8,13 @@ tokenizer::tokenizer(const std::string&s)
 {
     for(int i=0;i<s.length();++i){
 	if(isspace(s[i]))continue;
+	else if(s[i]=='(')tokens.emplace_back(OPARENT);
+	else if(s[i]==')')tokens.emplace_back(CPARENT);
+	else if(s[i]==';')tokens.emplace_back(SEPARATE);
 	else if(s[i]=='+')tokens.emplace_back(PLUS);
 	else if(s[i]=='-')tokens.emplace_back(MINUS);
 	else if(s[i]=='*')tokens.emplace_back(MULTI);
 	else if(s[i]=='/')tokens.emplace_back(DIVIDE);
-	else if(s[i]=='(')tokens.emplace_back(OPARENT);
-	else if(s[i]==')')tokens.emplace_back(CPARENT);
-	else if(s[i]==';')tokens.emplace_back(SEPARATE);
 	else if(s[i]=='='){
 	    if(i!=s.length()-1&&s[i+1]=='='){
 		tokens.emplace_back(EQUAL);

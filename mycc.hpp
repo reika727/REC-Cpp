@@ -9,24 +9,32 @@
 #include<cmath>
 namespace mycc{
     enum{
-	PLUS,
-	MINUS,
-	MULTI,
-	DIVIDE,
-	LESS,
-	GREAT,
-	ASSIGN,
-	SEPARATE,
-	OPARENT,
-	CPARENT,
-	EQUAL,
-	NEQUAL,
-	LEEQ,
-	GREQ,
-	RETURN,
-	NUMERIC,
-	IDENT,
-	ENDT,
+	/*算術演算子*/
+	PLUS,     // 単項プラス, 加算
+	MINUS,    // 単項マイナス, 減算
+	MULTI,    // 乗算
+	DIVIDE,   // 除算
+	ASSIGN,   // 単純代入
+	PLASGN,   // 加算代入
+	MIASGN,   // 減算代入
+	MUASGN,   // 乗算代入
+	DIASGN,   // 除算代入
+	/*比較演算子*/
+	EQUAL,    // 等価
+	NEQUAL,   // 非等価
+	LESS,     // 小なり
+	LEEQ,     // 小なりイコール
+	GREAT,    // 大なり
+	GREQ,     // 大なりイコール
+	/*キーワード*/
+	RETURN,   // return
+	/*その他*/
+	SEPARATE, // 文末記号
+	OPARENT,  // 開き括弧
+	CPARENT,  // 閉じ括弧
+	NUMERIC,  // 即値
+	IDENT,    // 識別子
+	ENDT,     // トークン列終端
     };
     class tokenizer{
 	public:
