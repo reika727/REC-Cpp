@@ -14,6 +14,8 @@ tokenizer::tokenizer(const std::string&s)
 	if(isspace(s[i]))continue;
 	else if(s[i]=='(')tokens.emplace_back(new symbol(TK::OPARENT));
 	else if(s[i]==')')tokens.emplace_back(new symbol(TK::CPARENT));
+	else if(s[i]=='{')tokens.emplace_back(new symbol(TK::OBRACE));
+	else if(s[i]=='}')tokens.emplace_back(new symbol(TK::CBRACE));
 	else if(s[i]==';')tokens.emplace_back(new symbol(TK::SCOLON));
 	else if(s[i]=='+'){
 	    if(i!=s.length()-1&&s[i+1]=='+'){
@@ -80,6 +82,9 @@ tokenizer::tokenizer(const std::string&s)
 	    }else{
 		tokens.emplace_back(new symbol(TK::GREAT));
 	    }
+	}else if(s.substr(i,2)=="if"&&i+2<s.length()&&(s[i+2]=='('||isspace(s[i+2]))){
+	    tokens.emplace_back(new symbol(TK::IF));
+	    ++i;
 	}else if(isdigit(s[i])){
 	    size_t sz;
 	    tokens.emplace_back(new numeric(std::stoi(s.substr(i),&sz)));

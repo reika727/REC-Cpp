@@ -31,6 +31,9 @@ namespace mycc{
 	SCOLON,  // ;
 	OPARENT, // (
 	CPARENT, // )
+	OBRACE,  // {
+	CBRACE,  // }
+	IF,      // if
     };
     enum class ND{
 	/*算術演算子*/
@@ -104,12 +107,26 @@ namespace mycc{
 		node*larg,*rarg;
 		biopr(node*const left,ND type,node*const right);
 	    };
+	    struct _if_:public node{
+		node*cond,*st;
+		_if_(node*const cond,node*const st);
+	    };
+	    struct statement:public node{
+		virtual ~statement();
+	    };
+	    struct single:public statement{
+		node*stat;
+		single(node*stat);
+	    };
+	    struct compound:public statement{
+		std::vector<statement*>stats;
+	    };
 	private:
+	    compound*prog;
 	    const tokenizer&tk;
 	    int pos_now;
-	    std::vector<node*>stats;
 	    bool consume(TK type);
-	    node*statement();
+	    statement*stat();
 	    node*assign();
 	    node*equality();
 	    node*relational();
@@ -119,7 +136,7 @@ namespace mycc{
 	    node*term();
 	public:
 	    abstract_syntax_tree(const tokenizer&_tk);
-	    const std::vector<node*>&statements();
+	    compound*const statements();
     };
     class assembly_source{
 	private:
@@ -142,7 +159,7 @@ namespace mycc{
 	    void write(const std::string&inst,int arg,const std::string&reg);
 	    void write(const std::string&inst,const std::string&reg);
 	    void write(const std::string&inst,int arg);
-	    void eval(abstract_syntax_tree::node*const node);
+	    void eval(abstract_syntax_tree::statement*const st);
 	    void enter(const std::string&func);
 	    void leave();
     };

@@ -53,15 +53,12 @@ std::string assembly_source::derefer(const std::string&base,int scl)
 }
 void assembly_source::enumerate_var(abstract_syntax_tree::node*const node)
 {
-    if(typeid(*node)==typeid(abstract_syntax_tree::biopr)){
-	auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);
+    if(auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);bop!=nullptr){
 	enumerate_var(bop->larg);
 	enumerate_var(bop->rarg);
-    }else if(typeid(*node)==typeid(abstract_syntax_tree::unopr)){
-	auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);
+    }else if(auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);uop!=nullptr){
 	enumerate_var(uop->arg);
-    }else if(typeid(*node)==typeid(abstract_syntax_tree::ident)){
-	auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);
+    }else if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);idp!=nullptr){
 	if(!offset.count(idp->name)){
 	    write("sub",8,"rsp");
 	    offset[idp->name]=var_size+=8;
@@ -70,27 +67,23 @@ void assembly_source::enumerate_var(abstract_syntax_tree::node*const node)
 }
 void assembly_source::refer_var(abstract_syntax_tree::node*const node)
 {
-    if(typeid(*node)!=typeid(abstract_syntax_tree::ident)){
-	throw std::runtime_error("右辺値への代入はできません");
-    }else{
-	auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);
+    if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);idp!=nullptr){
 	write("mov","rbp","rax");
 	write("sub",offset[idp->name],"rax");
 	write("push","rax");
+    }else{
+	throw std::runtime_error("右辺値への代入はできません");
     }
 }
 void assembly_source::RDP(abstract_syntax_tree::node*const node)
 {
-    if(typeid(*node)==typeid(abstract_syntax_tree::numeric)){
-	auto nup=dynamic_cast<abstract_syntax_tree::numeric*>(node);
+    if(auto nup=dynamic_cast<abstract_syntax_tree::numeric*>(node);nup!=nullptr){
 	write("push",nup->value);
-    }else if(typeid(*node)==typeid(abstract_syntax_tree::ident)){
-	auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);
+    }else if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);idp!=nullptr){
 	refer_var(idp);
 	write("pop","rax");
 	write("push",derefer("rax"));
-    }else if(typeid(*node)==typeid(abstract_syntax_tree::unopr)){
-	auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);
+    }else if(auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);uop!=nullptr){
 	if(uop->type==ND::UPLUS){
 	    RDP(uop->arg);
 	}else if(uop->type==ND::UMINUS){
@@ -113,8 +106,7 @@ void assembly_source::RDP(abstract_syntax_tree::node*const node)
 	    }
 	    write("push",derefer("rax"));
 	}
-    }else if(typeid(*node)==typeid(abstract_syntax_tree::biopr)){
-	auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);
+    }else if(auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);bop!=nullptr){
 	if(ND::ASSIGN<=bop->type&&bop->type<=ND::RMASGN){
 	    refer_var(bop->larg);
 	    RDP(bop->rarg);
@@ -214,10 +206,15 @@ void assembly_source::RDP(abstract_syntax_tree::node*const node)
 	}
     }
 }
-void assembly_source::eval(abstract_syntax_tree::node*const node)
+void assembly_source::eval(abstract_syntax_tree::statement*const st)
 {
-    enumerate_var(node);
-    RDP(node);
+    if(auto sg=dynamic_cast<abstract_syntax_tree::single*>(st);sg!=nullptr){
+	enumerate_var(sg->stat);
+	RDP(sg->stat);
+	write("pop","rax");
+    }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*>(st);com!=nullptr){
+	for(auto c:com->stats)eval(c);
+    }
 }
 void assembly_source::enter(const std::string&func)
 {

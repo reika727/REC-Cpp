@@ -1,32 +1,49 @@
 #include"mycc.hpp"
 using mycc::abstract_syntax_tree;
-using node   =abstract_syntax_tree::node;
-using unopr  =abstract_syntax_tree::unopr;
-using biopr  =abstract_syntax_tree::biopr;
-using numeric=abstract_syntax_tree::numeric;
-using ident  =abstract_syntax_tree::ident;
-node   ::~node  ()                                                                          {}
-unopr  ::unopr  (ND type,node*const arg)                  :type(type),arg(arg)              {}
-biopr  ::biopr  (node*const left,ND type,node*const right):larg(left),type(type),rarg(right){}
-numeric::numeric(int value)                               :value(value)                     {}
-ident  ::ident  (const std::string&name)                  :name(name)                       {}
-abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):tk(_tk),pos_now(0)
+using node     =abstract_syntax_tree::node;
+using unopr    =abstract_syntax_tree::unopr;
+using biopr    =abstract_syntax_tree::biopr;
+using numeric  =abstract_syntax_tree::numeric;
+using ident    =abstract_syntax_tree::ident;
+using statement=abstract_syntax_tree::statement;
+using single   =abstract_syntax_tree::single;
+using compound =abstract_syntax_tree::compound;
+using _if_     =abstract_syntax_tree::_if_;
+node     ::~node     ()                                                                          {}
+unopr    ::unopr     (ND type,node*const arg)                  :type(type),arg(arg)              {}
+biopr    ::biopr     (node*const left,ND type,node*const right):larg(left),type(type),rarg(right){}
+numeric  ::numeric   (int value)                               :value(value)                     {}
+ident    ::ident     (const std::string&name)                  :name(name)                       {}
+statement::~statement()                                                                          {}
+single   ::single    (node*const stat)                         :stat(stat)                       {}
+_if_     ::_if_      (node*const cond,node*const st)           :cond(cond),st(st)                {}
+abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
 {
-    while(pos_now!=tk.size())stats.push_back(statement());
+    while(pos_now!=tk.size()){
+	prog->stats.push_back(stat());
+    }
 }
 bool abstract_syntax_tree::consume(TK type)
 {
-    auto symp=dynamic_cast<tokenizer::symbol*>(tk[pos_now]);
-    if(symp!=nullptr&&symp->type==type){
-	++pos_now;
-	return true;
+    if(pos_now<tk.size()){
+	if(auto symp=dynamic_cast<tokenizer::symbol*>(tk[pos_now]);symp!=nullptr&&symp->type==type){
+	    ++pos_now;
+	    return true;
+	}
     }
     return false;
 }
-node*abstract_syntax_tree::statement()
+statement*abstract_syntax_tree::stat()
 {
-    node*ret=assign();
-    if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
+    statement*ret;
+    if(consume(TK::OBRACE)){
+	ret=new compound();
+	auto cop=dynamic_cast<compound*>(ret);
+	while(!consume(TK::CBRACE))cop->stats.push_back(stat());
+    }else{
+	ret=new single(assign());
+	if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
+    }
     return ret;
 }
 node*abstract_syntax_tree::assign() // =, +=, -=, *=, /= right to left
@@ -95,17 +112,21 @@ node*abstract_syntax_tree::term()
 	node*ret=equality();
 	if(!consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
 	return ret;
-    }else if(typeid(*tk[pos_now])==typeid(tokenizer::numeric)){
-	auto nup=dynamic_cast<tokenizer::numeric*>(tk[pos_now++]);
-	return new numeric(nup->value);
-    }else if(typeid(*tk[pos_now])==typeid(tokenizer::ident)){
-	auto idp=dynamic_cast<tokenizer::ident*>(tk[pos_now++]);
-	return new ident(idp->name);
+    }else if(pos_now<tk.size()){
+	if(auto nup=dynamic_cast<tokenizer::numeric*>(tk[pos_now]);nup!=nullptr){
+	    ++pos_now;
+	    return new numeric(nup->value);
+	}else if(auto idp=dynamic_cast<tokenizer::ident*>(tk[pos_now]);idp!=nullptr){
+	    ++pos_now;
+	    return new ident(idp->name);
+	}else{
+	    throw std::runtime_error("構文解析ができませんでした");
+	}
     }else{
-	throw  std::runtime_error("構文解析ができませんでした");
+	throw std::runtime_error("構文解析ができませんでした");
     }
 }
-const std::vector<node*>& abstract_syntax_tree::statements()
+compound*const abstract_syntax_tree::statements()
 {
-    return stats;
+    return prog;
 }
