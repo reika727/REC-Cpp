@@ -1,5 +1,5 @@
 #include"mycc.hpp"
-using namespace mycc;
+using mycc::assembly_source;
 assembly_source::assembly_source(const std::string&filename):ofs(filename),indent(0)
 {
     write(".global main");
@@ -53,155 +53,165 @@ std::string assembly_source::derefer(const std::string&base,int scl)
 }
 void assembly_source::enumerate_var(abstract_syntax_tree::node*const node)
 {
-    if(node==nullptr)return;
-    if(node->type==ND::IDENT&&!offset.count(node->name)){
-	write("sub",8,"rsp");
-	offset[node->name]=var_size+=8;
+    if(typeid(*node)==typeid(abstract_syntax_tree::biopr)){
+	auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);
+	enumerate_var(bop->larg);
+	enumerate_var(bop->rarg);
+    }else if(typeid(*node)==typeid(abstract_syntax_tree::unopr)){
+	auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);
+	enumerate_var(uop->arg);
+    }else if(typeid(*node)==typeid(abstract_syntax_tree::ident)){
+	auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);
+	if(!offset.count(idp->name)){
+	    write("sub",8,"rsp");
+	    offset[idp->name]=var_size+=8;
+	}
     }
-    enumerate_var(node->lhs);
-    enumerate_var(node->rhs);
 }
 void assembly_source::refer_var(abstract_syntax_tree::node*const node)
 {
-    if(node->type!=ND::IDENT){
+    if(typeid(*node)!=typeid(abstract_syntax_tree::ident)){
 	throw std::runtime_error("右辺値への代入はできません");
     }else{
+	auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);
 	write("mov","rbp","rax");
-	write("sub",offset[node->name],"rax");
+	write("sub",offset[idp->name],"rax");
 	write("push","rax");
     }
 }
 void assembly_source::RDP(abstract_syntax_tree::node*const node)
 {
-    if(node->type==ND::NUMERIC){
-	write("push",node->value);
-    }else if(node->type==ND::IDENT){
-	refer_var(node);
+    if(typeid(*node)==typeid(abstract_syntax_tree::numeric)){
+	auto nup=dynamic_cast<abstract_syntax_tree::numeric*>(node);
+	write("push",nup->value);
+    }else if(typeid(*node)==typeid(abstract_syntax_tree::ident)){
+	auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);
+	refer_var(idp);
 	write("pop","rax");
 	write("push",derefer("rax"));
-    }else if(node->type==ND::RETURN){
-	RDP(node->rhs);
-	write("pop","rax");
-	write("mov","rbp","rsp");
-	write("pop","rbp");
-	write("retq");
-    }else if(node->type==ND::UPLUS){
-	RDP(node->rhs);
-    }else if(node->type==ND::UMINUS){
-	RDP(node->rhs);
-	write("pop","rax");
-	write("mov","rax","rdi");
-	write("mov",2,"rsi");write("mul","rsi");
-	write("sub","rax","rdi");
-	write("push","rdi");
-    }else if(node->type==ND::PREINC||node->type==ND::PREDEC){
-	refer_var(node->rhs);
-	write("pop","rax");
-	switch(node->type){
-	    case ND::PREINC:
-		write("add",1,derefer("rax"));
-		break;
-	    case ND::PREDEC:
-		write("sub",1,derefer("rax"));
-		break;
+    }else if(typeid(*node)==typeid(abstract_syntax_tree::unopr)){
+	auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);
+	if(uop->type==ND::UPLUS){
+	    RDP(uop->arg);
+	}else if(uop->type==ND::UMINUS){
+	    RDP(uop->arg);
+	    write("pop","rax");
+	    write("mov","rax","rdi");
+	    write("mov",2,"rsi");write("mul","rsi");
+	    write("sub","rax","rdi");
+	    write("push","rdi");
+	}else if(uop->type==ND::PREINC||uop->type==ND::PREDEC){
+	    refer_var(uop->arg);
+	    write("pop","rax");
+	    switch(uop->type){
+		case ND::PREINC:
+		    write("add",1,derefer("rax"));
+		    break;
+		case ND::PREDEC:
+		    write("sub",1,derefer("rax"));
+		    break;
+	    }
+	    write("push",derefer("rax"));
 	}
-	write("push",derefer("rax"));
-    }else if(ND::ASSIGN<=node->type&&node->type<=ND::RMASGN){
-	refer_var(node->lhs);
-	RDP(node->rhs);
-	write("pop","rdi");
-	write("pop","rax");
-	switch(node->type){
-	    case ND::ASSIGN:
-		write("mov","rdi",derefer("rax"));
-		break;
-	    case ND::PLASGN:
-		write("add","rdi",derefer("rax"));
-		break;
-	    case ND::MIASGN:
-		write("sub","rdi",derefer("rax"));
-		break;
-	    case ND::MUASGN:
-		write("mov","rax","rsi");
-		write("mov",derefer("rax"),"rax");
-		write("mul","rdi");
-		write("mov","rax",derefer("rsi"));
-		write("mov","rsi","rax");
-		break;
-	    case ND::DIASGN:
-		write("mov","rax","rsi");
-		write("mov",derefer("rax"),"rax");
-		write("mov",0,"rdx");
-		write("div","rdi");
-		write("mov","rax",derefer("rsi"));
-		write("mov","rsi","rax");
-		break;
-	    case ND::RMASGN:
-		write("mov","rax","rsi");
-		write("mov",derefer("rax"),"rax");
-		write("mov",0,"rdx");
-		write("div","rdi");
-		write("mov","rdx",derefer("rsi"));
-		write("mov","rsi","rax");
-		break;
+    }else if(typeid(*node)==typeid(abstract_syntax_tree::biopr)){
+	auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);
+	if(ND::ASSIGN<=bop->type&&bop->type<=ND::RMASGN){
+	    refer_var(bop->larg);
+	    RDP(bop->rarg);
+	    write("pop","rdi");
+	    write("pop","rax");
+	    switch(bop->type){
+		case ND::ASSIGN:
+		    write("mov","rdi",derefer("rax"));
+		    break;
+		case ND::PLASGN:
+		    write("add","rdi",derefer("rax"));
+		    break;
+		case ND::MIASGN:
+		    write("sub","rdi",derefer("rax"));
+		    break;
+		case ND::MUASGN:
+		    write("mov","rax","rsi");
+		    write("mov",derefer("rax"),"rax");
+		    write("mul","rdi");
+		    write("mov","rax",derefer("rsi"));
+		    write("mov","rsi","rax");
+		    break;
+		case ND::DIASGN:
+		    write("mov","rax","rsi");
+		    write("mov",derefer("rax"),"rax");
+		    write("mov",0,"rdx");
+		    write("div","rdi");
+		    write("mov","rax",derefer("rsi"));
+		    write("mov","rsi","rax");
+		    break;
+		case ND::RMASGN:
+		    write("mov","rax","rsi");
+		    write("mov",derefer("rax"),"rax");
+		    write("mov",0,"rdx");
+		    write("div","rdi");
+		    write("mov","rdx",derefer("rsi"));
+		    write("mov","rsi","rax");
+		    break;
+	    }
+	    write("push",derefer("rax"));
+	}else{
+	    RDP(bop->larg);
+	    RDP(bop->rarg);
+	    write("pop","rdi");
+	    write("pop","rax");
+	    switch(bop->type){
+		case ND::PLUS:
+		    write("add","rdi","rax");
+		    break;
+		case ND::MINUS:
+		    write("sub","rdi","rax");
+		    break;
+		case ND::MULTI:
+		    write("mul","rdi");
+		    break;
+		case ND::DIVIDE:
+		    write("mov",0,"rdx");
+		    write("div","rdi");
+		    break;
+		case ND::REMAIN:
+		    write("mov",0,"rdx");
+		    write("div","rdi");
+		    write("mov","rdx","rax");
+		    break;
+		case ND::EQUAL:
+		    write("cmp","rdi","rax");
+		    write("sete","al");
+		    write("movzb","al","rax");
+		    break;
+		case ND::NEQUAL:
+		    write("cmp","rdi","rax");
+		    write("setne","al");
+		    write("movzb","al","rax");
+		    break;
+		case ND::LESS:
+		    write("cmp","rdi","rax");
+		    write("setl","al");
+		    write("movzb","al","rax");
+		    break;
+		case ND::GREAT:
+		    write("cmp","rdi","rax");
+		    write("setg","al");
+		    write("movzb","al","rax");
+		    break;
+		case ND::LEEQ:
+		    write("cmp","rdi","rax");
+		    write("setle","al");
+		    write("movzb","al","rax");
+		    break;
+		case ND::GREQ:
+		    write("cmp","rdi","rax");
+		    write("setge","al");
+		    write("movzb","al","rax");
+		    break;
+	    }
+	    write("push","rax");
 	}
-	write("push",derefer("rax"));
-    }else{
-	RDP(node->lhs);
-	RDP(node->rhs);
-	write("pop","rdi");
-	write("pop","rax");
-	switch(node->type){
-	    case ND::PLUS:
-		write("add","rdi","rax");
-		break;
-	    case ND::MINUS:
-		write("sub","rdi","rax");
-		break;
-	    case ND::MULTI:
-		write("mul","rdi");
-		break;
-	    case ND::DIVIDE:
-		write("mov",0,"rdx");
-		write("div","rdi");
-		break;
-	    case ND::REMAIN:
-		write("mov",0,"rdx");
-		write("div","rdi");
-		write("mov","rdx","rax");
-		break;
-	    case ND::EQUAL:
-		write("cmp","rdi","rax");
-		write("sete","al");
-		write("movzb","al","rax");
-		break;
-	    case ND::NEQUAL:
-		write("cmp","rdi","rax");
-		write("setne","al");
-		write("movzb","al","rax");
-		break;
-	    case ND::LESS:
-		write("cmp","rdi","rax");
-		write("setl","al");
-		write("movzb","al","rax");
-		break;
-	    case ND::GREAT:
-		write("cmp","rdi","rax");
-		write("setg","al");
-		write("movzb","al","rax");
-		break;
-	    case ND::LEEQ:
-		write("cmp","rdi","rax");
-		write("setle","al");
-		write("movzb","al","rax");
-		break;
-	    case ND::GREQ:
-		write("cmp","rdi","rax");
-		write("setge","al");
-		write("movzb","al","rax");
-		break;
-	}
-	write("push","rax");
     }
 }
 void assembly_source::eval(abstract_syntax_tree::node*const node)

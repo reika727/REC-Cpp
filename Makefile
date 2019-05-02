@@ -9,4 +9,4 @@ $(OBJS): mycc.hpp
 test: mycc
 	./test.sh
 clean:
-	rm -f mycc mycc.out *.o *~ tmp* *.swp
+	rm -f mycc mycc.out *.o *~ tmp* .*.swp

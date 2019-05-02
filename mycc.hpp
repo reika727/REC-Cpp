@@ -25,16 +25,12 @@ namespace mycc{
 	EQEQ,    // ==
 	EXEQ,    // !=
 	LESS,    // <
-	LEEQ,    // <=
 	GREAT,   // >
+	LEEQ,    // <=
 	GREQ,    // >=
-	RETURN,  // return
 	SCOLON,  // ;
 	OPARENT, // (
 	CPARENT, // )
-	NUMERIC, // 数値
-	IDENT,   // 識別子
-	ENDT,    // トークン列終端
     };
     enum class ND{
 	/*算術演算子*/
@@ -60,38 +56,53 @@ namespace mycc{
 	GREAT,    // 大なり
 	LEEQ,     // 小なりイコール
 	GREQ,     // 大なりイコール
-	/*キーワード*/
-	RETURN,   // return
-	/*その他*/
-	NUMERIC,  // 数値リテラル
-	IDENT,    // 識別子
     };
     class tokenizer{
 	public:
 	    struct token{
-		TK type;
+		virtual ~token();
+	    };
+	    struct numeric:public token{
 		int value;
+		numeric(int value);
+	    };
+	    struct ident:public token{
 		std::string name;
-		token(TK type);
-		token(TK type,int value);
-		token(TK type,const std::string&name);
+		ident(const std::string&name);
+	    };
+	    struct symbol:public token{
+		TK type;
+		symbol(TK type);
 	    };
 	private:
-	    std::vector<token>tokens;
+	    std::vector<token*>tokens;
 	public:
 	    tokenizer(const std::string&s);
-	    const token&operator[](int idx)const;
+	    token*const operator[](int idx)const;
+	    size_t size()const;
     };
     class abstract_syntax_tree{
 	public:
 	    struct node{
-		ND type;
-		node*lhs,*rhs;
+		virtual ~node();
+	    };
+	    struct numeric:public node{
 		int value;
+		numeric(int value);
+	    };
+	    struct ident:public node{
 		std::string name;
-		node(node*const left,ND type,node*const right);
-		node(int value);
-		node(const std::string&name);
+		ident(const std::string&name);
+	    };
+	    struct unopr:public node{
+		ND type;
+		node*arg;
+		unopr(ND type,node*const arg);
+	    };
+	    struct biopr:public node{
+		ND type;
+		node*larg,*rarg;
+		biopr(node*const left,ND type,node*const right);
 	    };
 	private:
 	    const tokenizer&tk;

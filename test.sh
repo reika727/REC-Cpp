@@ -2,9 +2,8 @@
 try() {
     input="$1"
     echo "input : $input"
-    echo -n 'result: '
-    ./mycc "$input"
-    if [ $? = 0 ]; then
+    echo -e -n 'result: \e[31m';./mycc "$input";res="$?";echo -e -n '\e[m'
+    if [ $res = 0 ]; then
 	expected="$2"
 	gcc -o tmp tmp.s
 	./tmp
@@ -12,17 +11,17 @@ try() {
 	if [ "$actual" = "$expected" ]; then
 	    echo "got $actual"
 	else
-	    echo "expected $expected, but got $actual"
+	    echo -e "\e[31mexpected $expected, but got $actual\e[m"
 	fi
     fi
     echo
 }
-#try 'a!;'
-#try 'a?v;'
-#try 'a'
-#try 'a=+(1+2)*3);'
-#try 'a+2=3;'
-#try '12adada=13;'
+try 'a!;'
+try 'a?v;'
+try 'a'
+try 'a=+(1+2)*3);'
+try 'a+2=3;'
+try '12adada=13;'
 try '((1+2)*3);' 9
 try '+((1+2)*3);' 9
 try '+(2);' 2
@@ -39,7 +38,7 @@ try 'a=1;bc=1;a==bc;' 1
 try '_A=2;b=2;_A!=b;' 0
 try 'a=0;_bc=2;a>_bc;' 0
 try 'a=23;Bc=33;a<Bc;' 1
-try 'bc_sas232332e____as=21;return bc_sas232332e____as*2+3;' 45
+try 'bc_sas232332e____as=21;bc_sas232332e____as*2+3;' 45
 try '_A=5;_Bc=5;_A*2>=_Bc*2;' 1
 try 'A__=2;b_c=99;A__*300<=b_c;' 0
 try 'a=2;a+=3;' 5
