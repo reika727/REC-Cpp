@@ -85,6 +85,9 @@ tokenizer::tokenizer(const std::string&s)
 	}else if(s.substr(i,2)=="if"&&i+2<s.length()&&(s[i+2]=='('||isspace(s[i+2]))){
 	    tokens.emplace_back(new symbol(TK::IF));
 	    ++i;
+	}else if(s.substr(i,4)=="else"&&i+4<s.length()&&(s[i+4]=='('||isspace(s[i+4]))){
+	    tokens.emplace_back(new symbol(TK::ELSE));
+	    i+=3;
 	}else if(isdigit(s[i])){
 	    size_t sz;
 	    tokens.emplace_back(new numeric(std::stoi(s.substr(i),&sz)));

@@ -9,6 +9,7 @@ using statement=abstract_syntax_tree::statement;
 using single   =abstract_syntax_tree::single;
 using compound =abstract_syntax_tree::compound;
 using _if_     =abstract_syntax_tree::_if_;
+using _else_   =abstract_syntax_tree::_else_;
 node     ::~node     ()                                                                          {}
 unopr    ::unopr     (ND type,node*const arg)                  :type(type),arg(arg)              {}
 biopr    ::biopr     (node*const left,ND type,node*const right):larg(left),type(type),rarg(right){}
@@ -16,11 +17,19 @@ numeric  ::numeric   (int value)                               :value(value)    
 ident    ::ident     (const std::string&name)                  :name(name)                       {}
 statement::~statement()                                                                          {}
 single   ::single    (node*const stat)                         :stat(stat)                       {}
+compound ::compound  ()                                                                          {stats.push_back(nullptr);}
 _if_     ::_if_      (single*const cond,statement*const st)    :cond(cond),st(st)                {}
+_else_   ::_else_    (statement*const st)                      :st(st)                           {}
+void compound::push_back(statement*const st)
+{
+    stats.pop_back();
+    stats.push_back(st);
+    stats.push_back(nullptr);
+}
 abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
 {
     while(pos_now!=tk.size()){
-	prog->stats.push_back(stat());
+	prog->push_back(stat());
     }
 }
 bool abstract_syntax_tree::consume(TK type)
@@ -42,10 +51,13 @@ statement*abstract_syntax_tree::stat()
 	if(!consume(TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	statement*st=stat();
 	ret=new _if_(cond,st);
+    }else if(consume(TK::ELSE)){
+	statement*st=stat();
+	ret=new _else_(st);
     }else if(consume(TK::OBRACE)){
 	ret=new compound();
 	auto cop=dynamic_cast<compound*>(ret);
-	while(!consume(TK::CBRACE))cop->stats.push_back(stat());
+	while(!consume(TK::CBRACE))cop->push_back(stat());
     }else{
 	ret=new single(assign());
 	if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
@@ -132,7 +144,7 @@ node*abstract_syntax_tree::term()
 	throw std::runtime_error("構文解析ができませんでした");
     }
 }
-compound*const abstract_syntax_tree::statements()
+const std::vector<statement*>&abstract_syntax_tree::statements()
 {
-    return prog;
+    return prog->stats;
 }

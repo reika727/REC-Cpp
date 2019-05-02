@@ -8,6 +8,10 @@ std::string assembly_source::p(const std::string&str)
 {
     return (str[0]=='('||str[0]=='.'?"":"%")+str;
 }
+std::string assembly_source::label(const std::string&base)
+{
+    return base+std::to_string(serial++);
+}
 void assembly_source::write(const std::string&str)
 {
     ofs<<std::string(indent,' ')<<str<<std::endl;
@@ -209,18 +213,43 @@ void assembly_source::RDP(abstract_syntax_tree::node*const node)
 void assembly_source::eval(abstract_syntax_tree::statement*const st)
 {
     if(auto sg=dynamic_cast<abstract_syntax_tree::single*>(st);sg!=nullptr){
-	enumerate_var(sg->stat);
-	RDP(sg->stat);
-	write("pop","rax");
+	eval(sg);
     }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*>(st);com!=nullptr){
-	for(auto c:com->stats)eval(c);
-    }else if(auto cif=dynamic_cast<abstract_syntax_tree::_if_*>(st);cif!=nullptr){
-	eval(cif->cond);
-	write("cmp",0,"rax");
-	std::string label=".Lend"+std::to_string(serial++);
-	write("je",label);
-	eval(cif->st);
-	write(label+':');
+	eval(com->stats);
+    }
+}
+void assembly_source::eval(abstract_syntax_tree::single*const sg)
+{
+    enumerate_var(sg->stat);
+    RDP(sg->stat);
+    write("pop","rax");
+}
+void assembly_source::eval(const std::vector<abstract_syntax_tree::statement*>&sv)
+{
+    for(int i=0;i<sv.size();++i){
+	if(auto cif=dynamic_cast<abstract_syntax_tree::_if_*>(sv[i]);cif!=nullptr){
+	    if(auto cel=dynamic_cast<abstract_syntax_tree::_else_*>(sv[i+1]);cel!=nullptr){
+		eval(cif->cond);
+		write("cmp",0,"rax");
+		std::string lab1=label(".Lelse");
+		write("je",lab1);
+		eval(cif->st);
+		std::string lab2=label(".Lend");
+		write("jmp",lab2);
+		write(lab1+':');
+		eval(cel->st);
+		write(lab2+':');
+	    }else{
+		eval(cif->cond);
+		write("cmp",0,"rax");
+		std::string lab=label(".Lend");
+		write("je",lab);
+		eval(cif->st);
+		write(lab+':');
+	    }
+	}else{
+	    eval(sv[i]);
+	}
     }
 }
 void assembly_source::enter(const std::string&func)
