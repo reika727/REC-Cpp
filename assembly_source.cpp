@@ -1,12 +1,12 @@
 #include"mycc.hpp"
 using mycc::assembly_source;
-assembly_source::assembly_source(const std::string&filename):ofs(filename),indent(0)
+assembly_source::assembly_source(const std::string&filename):ofs(filename),indent(0),serial(0)
 {
     write(".global main");
 }
 std::string assembly_source::p(const std::string&str)
 {
-    return (str[0]=='('?"":"%")+str;
+    return (str[0]=='('||str[0]=='.'?"":"%")+str;
 }
 void assembly_source::write(const std::string&str)
 {
@@ -214,6 +214,13 @@ void assembly_source::eval(abstract_syntax_tree::statement*const st)
 	write("pop","rax");
     }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*>(st);com!=nullptr){
 	for(auto c:com->stats)eval(c);
+    }else if(auto cif=dynamic_cast<abstract_syntax_tree::_if_*>(st);cif!=nullptr){
+	eval(cif->cond);
+	write("cmp",0,"rax");
+	std::string label=".Lend"+std::to_string(serial++);
+	write("je",label);
+	eval(cif->st);
+	write(label+':');
     }
 }
 void assembly_source::enter(const std::string&func)

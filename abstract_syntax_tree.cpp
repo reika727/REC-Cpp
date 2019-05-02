@@ -16,7 +16,7 @@ numeric  ::numeric   (int value)                               :value(value)    
 ident    ::ident     (const std::string&name)                  :name(name)                       {}
 statement::~statement()                                                                          {}
 single   ::single    (node*const stat)                         :stat(stat)                       {}
-_if_     ::_if_      (node*const cond,node*const st)           :cond(cond),st(st)                {}
+_if_     ::_if_      (single*const cond,statement*const st)    :cond(cond),st(st)                {}
 abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
 {
     while(pos_now!=tk.size()){
@@ -36,7 +36,13 @@ bool abstract_syntax_tree::consume(TK type)
 statement*abstract_syntax_tree::stat()
 {
     statement*ret;
-    if(consume(TK::OBRACE)){
+    if(consume(TK::IF)){
+	if(!consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
+	single*cond=new single(assign());
+	if(!consume(TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
+	statement*st=stat();
+	ret=new _if_(cond,st);
+    }else if(consume(TK::OBRACE)){
 	ret=new compound();
 	auto cop=dynamic_cast<compound*>(ret);
 	while(!consume(TK::CBRACE))cop->stats.push_back(stat());

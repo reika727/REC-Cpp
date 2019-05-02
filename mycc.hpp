@@ -107,10 +107,6 @@ namespace mycc{
 		node*larg,*rarg;
 		biopr(node*const left,ND type,node*const right);
 	    };
-	    struct _if_:public node{
-		node*cond,*st;
-		_if_(node*const cond,node*const st);
-	    };
 	    struct statement:public node{
 		virtual ~statement();
 	    };
@@ -120,6 +116,11 @@ namespace mycc{
 	    };
 	    struct compound:public statement{
 		std::vector<statement*>stats;
+	    };
+	    struct _if_:public statement{
+		single*cond;
+		statement*st;
+		_if_(single*const cond,statement*const st);
 	    };
 	private:
 	    compound*prog;
@@ -144,6 +145,7 @@ namespace mycc{
 	    int indent;
 	    int var_size;
 	    std::map<std::string,int>offset;
+	    unsigned int serial;
 	    std::string p(const std::string&str);
 	    std::string derefer(int dis,const std::string&base,const std::string&ofs="",int scl=1);
 	    std::string derefer(int dis,const std::string&base,int scl);
