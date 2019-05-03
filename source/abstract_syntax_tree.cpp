@@ -34,6 +34,12 @@ statement*abstract_syntax_tree::stat()
     }else if(consume(TK::ELSE)){
 	statement*st=stat();
 	ret=new _else_(st);
+    }else if(consume(TK::WHILE)){
+	if(!consume(TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
+	single*cond=new single(assign());
+	if(!consume(TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
+	statement*st=stat();
+	ret=new _while_(cond,st);
     }else if(consume(TK::OBRACE)){
 	ret=new compound();
 	auto cop=dynamic_cast<compound*>(ret);

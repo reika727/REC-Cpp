@@ -28,6 +28,7 @@ namespace tokenization{
 	CBRACE,  // }
 	IF,      // if
 	ELSE,    // else
+	WHILE,   // while
     };
     struct token{
 	virtual ~token();

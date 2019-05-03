@@ -79,3 +79,12 @@ _else_::~_else_()
 {
     delete st;
 }
+_while_::_while_(single*const cond,statement*const st):cond(cond),st(st)
+{
+
+}
+_while_::~_while_()
+{
+    delete cond;
+    delete st;
+}

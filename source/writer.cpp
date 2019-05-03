@@ -12,7 +12,7 @@ std::string writer::p(const std::string&str)
 }
 std::string writer::label(const std::string&base)
 {
-    return base+std::to_string(serial++);
+    return '.'+base+std::to_string(serial++);
 }
 void writer::write(const std::string&str)
 {
@@ -231,24 +231,34 @@ void writer::eval(const std::vector<parsing::statement*>&sv)
     for(int i=0;i<sv.size();++i){
 	if(auto cif=dynamic_cast<parsing::_if_*>(sv[i]);cif!=nullptr){
 	    if(auto cel=dynamic_cast<parsing::_else_*>(sv[i+1]);cel!=nullptr){
+		std::string lab1=label("Lelse");
+		std::string lab2=label("Lend");
 		eval(cif->cond);
 		write("cmp",0,"rax");
-		std::string lab1=label(".Lelse");
 		write("je",lab1);
 		eval(cif->st);
-		std::string lab2=label(".Lend");
 		write("jmp",lab2);
 		write(lab1+':');
 		eval(cel->st);
 		write(lab2+':');
 	    }else{
+		std::string lab=label("Lend");
 		eval(cif->cond);
 		write("cmp",0,"rax");
-		std::string lab=label(".Lend");
 		write("je",lab);
 		eval(cif->st);
 		write(lab+':');
 	    }
+	}else if(auto cwh=dynamic_cast<parsing::_while_*>(sv[i]);cwh!=nullptr){
+	    std::string beg=label("Lbegin");
+	    std::string end=label("Lend");
+	    write(beg+':');
+	    eval(cwh->cond);
+	    write("cmp",0,"rax");
+	    write("je",end);
+	    eval(cwh->st);
+	    write("jmp",beg);
+	    write(end+':');
 	}else{
 	    eval(sv[i]);
 	}

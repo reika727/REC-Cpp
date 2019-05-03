@@ -77,4 +77,10 @@ namespace parsing{
 	_else_(statement*const st);
 	~_else_()override;
     };
+    struct _while_:public statement{
+	single*cond;
+	statement*st;
+	_while_(single*const cond,statement*const st);
+	~_while_()override;
+    };
 }

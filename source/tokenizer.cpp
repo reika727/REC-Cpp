@@ -82,6 +82,9 @@ tokenizer::tokenizer(const std::string&s)
 	}else if(s.substr(i,4)=="else"&&i+4<s.length()&&(s[i+4]=='('||isspace(s[i+4]))){
 	    tokens.emplace_back(new symbol(TK::ELSE));
 	    i+=3;
+	}else if(s.substr(i,5)=="while"&&i+5<s.length()&&(s[i+5]=='('||isspace(s[i+5]))){
+	    tokens.emplace_back(new symbol(TK::WHILE));
+	    i+=4;
 	}else if(isdigit(s[i])){
 	    size_t sz;
 	    tokens.emplace_back(new numeric(std::stoi(s.substr(i),&sz)));
