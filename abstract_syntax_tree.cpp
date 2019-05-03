@@ -11,19 +11,26 @@ using compound =abstract_syntax_tree::compound;
 using _if_     =abstract_syntax_tree::_if_;
 using _else_   =abstract_syntax_tree::_else_;
 node     ::~node     ()                                                                          {}
-unopr    ::unopr     (ND type,node*const arg)                  :type(type),arg(arg)              {}
-biopr    ::biopr     (node*const left,ND type,node*const right):larg(left),type(type),rarg(right){}
 numeric  ::numeric   (int value)                               :value(value)                     {}
+numeric  ::~numeric  ()                                                                          {}
 ident    ::ident     (const std::string&name)                  :name(name)                       {}
+ident    ::~ident    ()                                                                          {}
+unopr    ::unopr     (ND type,node*const arg)                  :type(type),arg(arg)              {}
+unopr    ::~unopr    ()                                                                          {delete arg;}
+biopr    ::biopr     (node*const left,ND type,node*const right):larg(left),type(type),rarg(right){}
+biopr    ::~biopr    ()                                                                          {delete larg;delete rarg;}
 statement::~statement()                                                                          {}
 single   ::single    (node*const stat)                         :stat(stat)                       {}
+single   ::~single   ()                                                                          {delete stat;}
 compound ::compound  ()                                                                          {stats.push_back(nullptr);}
+compound ::~compound ()                                                                          {for(auto s:stats)delete s;}
 _if_     ::_if_      (single*const cond,statement*const st)    :cond(cond),st(st)                {}
+_if_     ::~_if_     ()                                                                          {delete cond;delete st;}
 _else_   ::_else_    (statement*const st)                      :st(st)                           {}
+_else_   ::~_else_   ()                                                                          {delete st;}
 void compound::push_back(statement*const st)
 {
-    stats.pop_back();
-    stats.push_back(st);
+    stats.back()=st;
     stats.push_back(nullptr);
 }
 abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
@@ -31,6 +38,10 @@ abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):prog(new compoun
     while(pos_now!=tk.size()){
 	prog->push_back(stat());
     }
+}
+abstract_syntax_tree::~abstract_syntax_tree()
+{
+    delete prog;
 }
 bool abstract_syntax_tree::consume(TK type)
 {

@@ -82,6 +82,7 @@ namespace mycc{
 	    std::vector<token*>tokens;
 	public:
 	    tokenizer(const std::string&s);
+	    ~tokenizer();
 	    token*const operator[](int idx)const;
 	    size_t size()const;
     };
@@ -93,20 +94,24 @@ namespace mycc{
 	    struct numeric:public node{
 		int value;
 		numeric(int value);
+		~numeric()override;
 	    };
 	    struct ident:public node{
 		std::string name;
 		ident(const std::string&name);
+		~ident()override;
 	    };
 	    struct unopr:public node{
 		ND type;
 		node*arg;
 		unopr(ND type,node*const arg);
+		~unopr()override;
 	    };
 	    struct biopr:public node{
 		ND type;
 		node*larg,*rarg;
 		biopr(node*const left,ND type,node*const right);
+		~biopr()override;
 	    };
 	    struct statement:public node{
 		virtual ~statement();
@@ -114,20 +119,24 @@ namespace mycc{
 	    struct single:public statement{
 		node*stat;
 		single(node*stat);
+		~single()override;
 	    };
 	    struct compound:public statement{
 		std::vector<statement*>stats;
 		compound();
+		~compound()override;
 		void push_back(statement*const st);
 	    };
 	    struct _if_:public statement{
 		single*cond;
 		statement*st;
 		_if_(single*const cond,statement*const st);
+		~_if_()override;
 	    };
 	    struct _else_:public statement{
 		statement*st;
 		_else_(statement*const st);
+		~_else_()override;
 	    };
 	private:
 	    compound*prog;
@@ -144,6 +153,7 @@ namespace mycc{
 	    node*term();
 	public:
 	    abstract_syntax_tree(const tokenizer&_tk);
+	    ~abstract_syntax_tree();
 	    const std::vector<statement*>&statements();
     };
     class assembly_source{

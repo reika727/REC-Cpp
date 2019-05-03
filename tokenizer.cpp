@@ -102,6 +102,10 @@ tokenizer::tokenizer(const std::string&s)
 	}
     }
 }
+tokenizer::~tokenizer()
+{
+    for(auto t:tokens)delete t;
+}
 tokenizer::token*const tokenizer::operator[](int idx)const
 {
     return tokens[idx];
