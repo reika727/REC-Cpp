@@ -222,32 +222,34 @@ void writer::eval(parsing::statement*const st)
 }
 void writer::eval(parsing::single*const sg)
 {
-    enumerate_var(sg->stat);
-    RDP(sg->stat);
-    write("pop","rax");
+    if(!sg->is_nop()){
+	enumerate_var(sg->stat);
+	RDP(sg->stat);
+	write("pop","rax");
+    }
 }
 void writer::eval(const std::vector<parsing::statement*>&sv)
 {
     for(int i=0;i<sv.size();++i){
 	if(auto cif=dynamic_cast<parsing::_if_*>(sv[i]);cif!=nullptr){
 	    if(auto cel=dynamic_cast<parsing::_else_*>(sv[i+1]);cel!=nullptr){
-		std::string lab1=label("Lelse");
-		std::string lab2=label("Lend");
+		std::string el=label("Lelse");
+		std::string end=label("Lend");
 		eval(cif->cond);
 		write("cmp",0,"rax");
-		write("je",lab1);
+		write("je",el);
 		eval(cif->st);
-		write("jmp",lab2);
-		write(lab1+':');
+		write("jmp",end);
+		write(el+':');
 		eval(cel->st);
-		write(lab2+':');
+		write(end+':');
 	    }else{
-		std::string lab=label("Lend");
+		std::string end=label("Lend");
 		eval(cif->cond);
 		write("cmp",0,"rax");
-		write("je",lab);
+		write("je",end);
 		eval(cif->st);
-		write(lab+':');
+		write(end+':');
 	    }
 	}else if(auto cwh=dynamic_cast<parsing::_while_*>(sv[i]);cwh!=nullptr){
 	    std::string beg=label("Lbegin");
@@ -257,6 +259,19 @@ void writer::eval(const std::vector<parsing::statement*>&sv)
 	    write("cmp",0,"rax");
 	    write("je",end);
 	    eval(cwh->st);
+	    write("jmp",beg);
+	    write(end+':');
+	}else if(auto cfo=dynamic_cast<parsing::_for_*>(sv[i]);cfo!=nullptr){
+	    std::string beg=label("Lbegin");
+	    std::string end=label("Lend");
+	    eval(cfo->init);
+	    write(beg+':');
+	    write("mov",1,"rax");
+	    eval(cfo->cond);
+	    write("cmp",0,"rax");
+	    write("je",end);
+	    eval(cfo->st);
+	    eval(cfo->reinit);
 	    write("jmp",beg);
 	    write(end+':');
 	}else{

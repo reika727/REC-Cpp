@@ -40,6 +40,16 @@ statement*abstract_syntax_tree::stat()
 	if(!consume(TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
 	statement*st=stat();
 	ret=new _while_(cond,st);
+    }else if(consume(TK::FOR)){
+	if(!consume(TK::OPARENT))throw std::runtime_error("forの後ろに括弧がありません");
+	single*init=new single(assign());
+	if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
+	single*cond=new single(assign());
+	if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
+	single*reinit=new single(assign());
+	if(!consume(TK::CPARENT))throw std::runtime_error("forの後ろに括弧がありません");
+	statement*st=stat();
+	ret=new _for_(init,cond,reinit,st);
     }else if(consume(TK::OBRACE)){
 	ret=new compound();
 	auto cop=dynamic_cast<compound*>(ret);
@@ -116,18 +126,18 @@ node*abstract_syntax_tree::term()
 	node*ret=equality();
 	if(!consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
 	return ret;
-    }else if(pos_now<tk.size()){
+    }else{
 	if(auto nup=dynamic_cast<tokenization::numeric*>(tk[pos_now]);nup!=nullptr){
 	    ++pos_now;
 	    return new numeric(nup->value);
 	}else if(auto idp=dynamic_cast<tokenization::ident*>(tk[pos_now]);idp!=nullptr){
 	    ++pos_now;
 	    return new ident(idp->name);
+	}else if(auto syp=dynamic_cast<tokenization::symbol*>(tk[pos_now]);syp!=nullptr&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
+	    return new single(nullptr);
 	}else{
 	    throw std::runtime_error("構文解析ができませんでした");
 	}
-    }else{
-	throw std::runtime_error("構文解析ができませんでした");
     }
 }
 const std::vector<statement*>&abstract_syntax_tree::statements()

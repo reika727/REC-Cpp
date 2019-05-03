@@ -29,6 +29,7 @@ namespace tokenization{
 	IF,      // if
 	ELSE,    // else
 	WHILE,   // while
+	FOR,     // for
     };
     struct token{
 	virtual ~token();

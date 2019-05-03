@@ -41,13 +41,21 @@ statement::~statement()
 {
 
 }
-single::single(node*const stat):stat(stat)
+single::single(node*const _stat)
 {
-
+    if(auto sp=dynamic_cast<single*>(_stat);sp!=nullptr&&sp->stat==nullptr){
+	stat=nullptr;
+    }else{
+	stat=_stat;
+    }
 }
 single::~single()
 {
     delete stat;
+}
+bool single::is_nop()
+{
+    return stat==nullptr;
 }
 compound::compound()
 {
@@ -86,5 +94,16 @@ _while_::_while_(single*const cond,statement*const st):cond(cond),st(st)
 _while_::~_while_()
 {
     delete cond;
+    delete st;
+}
+_for_::_for_(single*const init,single*const cond,single*const reinit,statement*const st):init(init),cond(cond),reinit(reinit),st(st)
+{
+
+}
+_for_::~_for_()
+{
+    delete init;
+    delete cond;
+    delete reinit;
     delete st;
 }

@@ -59,6 +59,7 @@ namespace parsing{
 	node*stat;
 	single(node*stat);
 	~single()override;
+	bool is_nop();
     };
     struct compound:public statement{
 	std::vector<statement*>stats;
@@ -82,5 +83,11 @@ namespace parsing{
 	statement*st;
 	_while_(single*const cond,statement*const st);
 	~_while_()override;
+    };
+    struct _for_:public statement{
+	single*init,*cond,*reinit;
+	statement*st;
+	_for_(single*const init,single*const cond,single*const reinit,statement*const st);
+	~_for_()override;
     };
 }
