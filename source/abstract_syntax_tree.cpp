@@ -1,39 +1,8 @@
-#include"mycc.hpp"
-using mycc::abstract_syntax_tree;
-using node     =abstract_syntax_tree::node;
-using unopr    =abstract_syntax_tree::unopr;
-using biopr    =abstract_syntax_tree::biopr;
-using numeric  =abstract_syntax_tree::numeric;
-using ident    =abstract_syntax_tree::ident;
-using statement=abstract_syntax_tree::statement;
-using single   =abstract_syntax_tree::single;
-using compound =abstract_syntax_tree::compound;
-using _if_     =abstract_syntax_tree::_if_;
-using _else_   =abstract_syntax_tree::_else_;
-node     ::~node     ()                                                                          {}
-numeric  ::numeric   (int value)                               :value(value)                     {}
-numeric  ::~numeric  ()                                                                          {}
-ident    ::ident     (const std::string&name)                  :name(name)                       {}
-ident    ::~ident    ()                                                                          {}
-unopr    ::unopr     (ND type,node*const arg)                  :type(type),arg(arg)              {}
-unopr    ::~unopr    ()                                                                          {delete arg;}
-biopr    ::biopr     (node*const left,ND type,node*const right):larg(left),type(type),rarg(right){}
-biopr    ::~biopr    ()                                                                          {delete larg;delete rarg;}
-statement::~statement()                                                                          {}
-single   ::single    (node*const stat)                         :stat(stat)                       {}
-single   ::~single   ()                                                                          {delete stat;}
-compound ::compound  ()                                                                          {stats.push_back(nullptr);}
-compound ::~compound ()                                                                          {for(auto s:stats)delete s;}
-_if_     ::_if_      (single*const cond,statement*const st)    :cond(cond),st(st)                {}
-_if_     ::~_if_     ()                                                                          {delete cond;delete st;}
-_else_   ::_else_    (statement*const st)                      :st(st)                           {}
-_else_   ::~_else_   ()                                                                          {delete st;}
-void compound::push_back(statement*const st)
-{
-    stats.back()=st;
-    stats.push_back(nullptr);
-}
-abstract_syntax_tree::abstract_syntax_tree(const tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
+#include"parsing/abstract_syntax_tree.hpp"
+#include<stdexcept>
+using namespace parsing;
+using namespace tokenization;
+abstract_syntax_tree::abstract_syntax_tree(const tokenization::tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
 {
     while(pos_now!=tk.size()){
 	prog->push_back(stat());
@@ -46,7 +15,7 @@ abstract_syntax_tree::~abstract_syntax_tree()
 bool abstract_syntax_tree::consume(TK type)
 {
     if(pos_now<tk.size()){
-	if(auto symp=dynamic_cast<tokenizer::symbol*>(tk[pos_now]);symp!=nullptr&&symp->type==type){
+	if(auto symp=dynamic_cast<tokenization::symbol*>(tk[pos_now]);symp!=nullptr&&symp->type==type){
 	    ++pos_now;
 	    return true;
 	}
@@ -142,10 +111,10 @@ node*abstract_syntax_tree::term()
 	if(!consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
 	return ret;
     }else if(pos_now<tk.size()){
-	if(auto nup=dynamic_cast<tokenizer::numeric*>(tk[pos_now]);nup!=nullptr){
+	if(auto nup=dynamic_cast<tokenization::numeric*>(tk[pos_now]);nup!=nullptr){
 	    ++pos_now;
 	    return new numeric(nup->value);
-	}else if(auto idp=dynamic_cast<tokenizer::ident*>(tk[pos_now]);idp!=nullptr){
+	}else if(auto idp=dynamic_cast<tokenization::ident*>(tk[pos_now]);idp!=nullptr){
 	    ++pos_now;
 	    return new ident(idp->name);
 	}else{

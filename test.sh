@@ -2,7 +2,7 @@
 try() {
     input="$1"
     echo "input : $input"
-    echo -e -n 'result: \e[31m';./mycc "$input";res="$?";echo -e -n '\e[m'
+    echo -e -n 'result: \e[31m';./mycc.out "$input";res="$?";echo -e -n '\e[m'
     if [ $res = 0 ]; then
 	expected="$2"
 	gcc -o tmp tmp.s

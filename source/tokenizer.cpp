@@ -1,13 +1,7 @@
-#include"mycc.hpp"
-using mycc::tokenizer;
-using token  =tokenizer::token;
-using numeric=tokenizer::numeric;
-using ident  =tokenizer::ident;
-using symbol =tokenizer::symbol;
-token  ::~token()                                    {}
-numeric::numeric(int value)             :value(value){}
-ident  ::ident  (const std::string&name):name(name)  {}
-symbol ::symbol (TK type)               :type(type)  {}
+#include"tokenization/tokenizer.hpp"
+#include<stdexcept>
+#include<algorithm>
+using namespace tokenization;
 tokenizer::tokenizer(const std::string&s)
 {
     for(int i=0;i<s.length();++i){
@@ -106,7 +100,7 @@ tokenizer::~tokenizer()
 {
     for(auto t:tokens)delete t;
 }
-tokenizer::token*const tokenizer::operator[](int idx)const
+token*const tokenizer::operator[](int idx)const
 {
     return tokens[idx];
 }

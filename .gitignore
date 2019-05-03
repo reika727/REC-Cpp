@@ -1,6 +1,6 @@
-mycc
-mycc.out
-*.o
+*.out
 *~
 tmp*
 .*.swp
+*.o
+*.d

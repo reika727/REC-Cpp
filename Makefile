@@ -1,12 +1,20 @@
-CPPFLAGS=-std=c++17
-SRCS=$(wildcard *.cpp)
-OBJS=$(SRCS:.cpp=.o)
+PROG=mycc.out
+SRCS=$(wildcard source/*.cpp)
+OBJS=$(SRCS:%.cpp=%.o)
+DEPS=$(SRCS:%.cpp=%.d)
+CXXFLAGS= -MMD -MP -std=c++17
 
-mycc: $(OBJS)
-	g++ -o mycc $(OBJS) $(CPPFLAGS)
-$(OBJS): mycc.hpp
+all: $(PROG)
 
-test: mycc
-	./test.sh
+-include $(DEPS)
+
+$(PROG): $(OBJS)
+	$(CXX) -o $@ $^
+
+%(OBJS):
+
 clean:
-	rm -f mycc mycc.out *.o *~ tmp* .*.swp
+	rm -f *.out *~ tmp* .*.swp source/*.o source/*.d
+
+test: $(PROG)
+	./test.sh
