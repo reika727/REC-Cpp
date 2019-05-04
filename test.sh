@@ -28,7 +28,9 @@ try 'a=2;a+=(2+2'
 try 'a=2;a+return 3;'
 try 'a=2;{2+2;'
 #__CO__
-try 'say_OK();'
+try 'a=10;b=2;c=3;;say_OK();'
+try 'a=21;b=4;c=8;d=a+b*c;e=12;f=e;print_6num(a,b,c,d,e,f);'
+try 'a=21;b=4;c=8;d=a+b*c;e=12;f=e;g=32;h=21;i=g+h;j=21;k=a;l=0;print_12num(a,b,c,d,e,f,g,h,i,j,k,l);'
 << "#__CO__"
 try '((1+2)*3);' 9
 try '+((1+2)*3);' 9
