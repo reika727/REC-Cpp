@@ -132,7 +132,16 @@ node*abstract_syntax_tree::term()
 	    return new numeric(nup->value);
 	}else if(auto idp=dynamic_cast<tokenization::ident*>(tk[pos_now]);idp!=nullptr){
 	    ++pos_now;
-	    return new ident(idp->name);
+	    if(consume(TK::OPARENT)){
+		fcall*ret=new fcall(idp->name);
+		while(!consume(TK::CPARENT)){
+		    if(consume(TK::COMMA))ret->args.push_back(equality());
+		    else                  ret->args.push_back(equality());
+		}
+		return ret;
+	    }else{
+		return new ident(idp->name);
+	    }
 	}else if(auto syp=dynamic_cast<tokenization::symbol*>(tk[pos_now]);syp!=nullptr&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
 	    return new single(nullptr);
 	}else{

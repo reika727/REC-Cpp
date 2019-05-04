@@ -107,3 +107,11 @@ _for_::~_for_()
     delete reinit;
     delete st;
 }
+fcall::fcall(const std::string&name):name(name)
+{
+
+}
+fcall::~fcall()
+{
+    for(auto a:args)delete a;
+}

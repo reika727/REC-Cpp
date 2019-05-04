@@ -69,6 +69,8 @@ void writer::enumerate_var(parsing::node*const node)
 	    write("sub",8,"rsp");
 	    offset[idp->name]=var_size+=8;
 	}
+    }else if(auto cfp=dynamic_cast<parsing::fcall*>(node);cfp!=nullptr){
+	for(auto a:cfp->args)enumerate_var(a);
     }
 }
 void writer::refer_var(parsing::node*const node)
@@ -89,6 +91,50 @@ void writer::RDP(parsing::node*const node)
 	refer_var(idp);
 	write("pop","rax");
 	write("push",derefer("rax"));
+    }else if(auto cfp=dynamic_cast<parsing::fcall*>(node);cfp!=nullptr){
+	    while(cfp->args.size()>6){
+		RDP(cfp->args.back());
+		write("pop","rax");
+		write("push","rax");
+		cfp->args.pop_back();
+	    }
+	    if(cfp->args.size()==6){
+		RDP(cfp->args.back());
+		write("pop","rax");
+		write("mov","rax","r9");
+		cfp->args.pop_back();
+	    }
+	    if(cfp->args.size()==5){
+		RDP(cfp->args.back());
+		write("pop","rax");
+		write("mov","rax","r8");
+		cfp->args.pop_back();
+	    }
+	    if(cfp->args.size()==4){
+		RDP(cfp->args.back());
+		write("pop","rax");
+		write("mov","rax","rdx");
+		cfp->args.pop_back();
+	    }
+	    if(cfp->args.size()==3){
+		RDP(cfp->args.back());
+		write("pop","rax");
+		write("mov","rax","rcx");
+		cfp->args.pop_back();
+	    }
+	    if(cfp->args.size()==2){
+		RDP(cfp->args.back());
+		write("pop","rax");
+		write("mov","rax","rdi");
+		cfp->args.pop_back();
+	    }
+	    if(cfp->args.size()==1){
+		RDP(cfp->args.back());
+		write("pop","rax");
+		write("mov","rax","rsi");
+		cfp->args.pop_back();
+	    }
+	    write("call "+cfp->name);
     }else if(auto uop=dynamic_cast<parsing::unopr*>(node);uop!=nullptr){
 	if(uop->type==ND::UPLUS){
 	    RDP(uop->arg);

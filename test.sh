@@ -5,8 +5,8 @@ try() {
     echo -e -n 'result: \e[31m';./mycc.out "$input";res="$?";echo -e -n '\e[m'
     if [ $res = 0 ]; then
 	expected="$2"
-	gcc -o tmp tmp.s
-	./tmp
+	gcc -o tmp.out tmp.s
+	./tmp.out
 	actual=$?
 	if [ "$actual" = "$expected" ]; then
 	    echo "got $actual"
@@ -16,6 +16,9 @@ try() {
     fi
     echo
 }
+try \
+'say_OK();'
+<< "#__CO__"
 try ');'
 try 'a!;'
 try 'a?v;'
@@ -97,3 +100,4 @@ try \
 'a;'\
 'for   (   a  =  0   ;   a  <  10    ;     )     ++a;'\
 'a;' 10
+#__CO__

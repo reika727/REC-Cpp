@@ -90,4 +90,10 @@ namespace parsing{
 	_for_(single*const init,single*const cond,single*const reinit,statement*const st);
 	~_for_()override;
     };
+    struct fcall:public node{
+	std::string name;
+	std::vector<node*>args;
+	fcall(const std::string&name);
+	~fcall()override;
+    };
 }

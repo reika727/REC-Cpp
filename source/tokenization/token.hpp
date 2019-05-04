@@ -26,6 +26,7 @@ namespace tokenization{
 	CPARENT, // )
 	OBRACE,  // {
 	CBRACE,  // }
+	COMMA,   // ,
 	IF,      // if
 	ELSE,    // else
 	WHILE,   // while

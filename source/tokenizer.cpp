@@ -11,6 +11,7 @@ tokenizer::tokenizer(const std::string&s)
 	else if(s[i]=='{')tokens.emplace_back(new symbol(TK::OBRACE));
 	else if(s[i]=='}')tokens.emplace_back(new symbol(TK::CBRACE));
 	else if(s[i]==';')tokens.emplace_back(new symbol(TK::SCOLON));
+	else if(s[i]==',')tokens.emplace_back(new symbol(TK::COMMA));
 	else if(s[i]=='+'){
 	    if(i!=s.length()-1&&s[i+1]=='+'){
 		tokens.emplace_back(new symbol(TK::PLPL));++i;
