@@ -10,6 +10,7 @@ namespace parsing{
 	    int pos_now;
 	    bool consume(tokenization::TK type);
 	    statement*stat();
+	    single*emptiable_single();
 	    node*assign();
 	    node*equality();
 	    node*relational();

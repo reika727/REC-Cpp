@@ -1,17 +1,7 @@
 #include"parsing/abstract_syntax_tree.hpp"
 #include<stdexcept>
 using namespace parsing;
-using namespace tokenization;
-abstract_syntax_tree::abstract_syntax_tree(const tokenization::tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
-{
-    while(pos_now!=tk.size()){
-	prog->push_back(stat());
-    }
-}
-abstract_syntax_tree::~abstract_syntax_tree()
-{
-    delete prog;
-}
+using TK=tokenization::TK;
 bool abstract_syntax_tree::consume(TK type)
 {
     if(pos_now<tk.size()){
@@ -24,41 +14,48 @@ bool abstract_syntax_tree::consume(TK type)
 }
 statement*abstract_syntax_tree::stat()
 {
-    statement*ret;
     if(consume(TK::IF)){
 	if(!consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	single*cond=new single(assign());
 	if(!consume(TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	statement*st=stat();
-	ret=new _if_(cond,st);
+	return new _if_(cond,st);
     }else if(consume(TK::ELSE)){
 	statement*st=stat();
-	ret=new _else_(st);
+	return new _else_(st);
     }else if(consume(TK::WHILE)){
 	if(!consume(TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
 	single*cond=new single(assign());
 	if(!consume(TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
 	statement*st=stat();
-	ret=new _while_(cond,st);
+	return new _while_(cond,st);
     }else if(consume(TK::FOR)){
 	if(!consume(TK::OPARENT))throw std::runtime_error("forの後ろに括弧がありません");
-	single*init=new single(assign());
+	single*init=emptiable_single();
 	if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
-	single*cond=new single(assign());
+	single*cond=emptiable_single();
 	if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
-	single*reinit=new single(assign());
+	single*reinit=emptiable_single();
 	if(!consume(TK::CPARENT))throw std::runtime_error("forの後ろに括弧がありません");
 	statement*st=stat();
-	ret=new _for_(init,cond,reinit,st);
+	return new _for_(init,cond,reinit,st);
     }else if(consume(TK::OBRACE)){
-	ret=new compound();
-	auto cop=dynamic_cast<compound*>(ret);
-	while(!consume(TK::CBRACE))cop->push_back(stat());
+	compound*ret=new compound();
+	while(!consume(TK::CBRACE))ret->stats.push_back(stat());
+	return ret;
     }else{
-	ret=new single(assign());
+	single*ret=emptiable_single();
 	if(!consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
+	return ret;
     }
-    return ret;
+}
+single*abstract_syntax_tree::emptiable_single()
+{
+    if(auto syp=dynamic_cast<tokenization::symbol*>(tk[pos_now]);syp!=nullptr&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
+	return new single(nullptr);
+    }else{
+	return new single(assign());
+    }
 }
 node*abstract_syntax_tree::assign() // =, +=, -=, *=, /= right to left
 {
@@ -126,28 +123,34 @@ node*abstract_syntax_tree::term()
 	node*ret=equality();
 	if(!consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
 	return ret;
-    }else{
-	if(auto nup=dynamic_cast<tokenization::numeric*>(tk[pos_now]);nup!=nullptr){
-	    ++pos_now;
-	    return new numeric(nup->value);
-	}else if(auto idp=dynamic_cast<tokenization::ident*>(tk[pos_now]);idp!=nullptr){
-	    ++pos_now;
-	    if(consume(TK::OPARENT)){
-		fcall*ret=new fcall(idp->name);
-		while(!consume(TK::CPARENT)){
-		    if(consume(TK::COMMA))ret->args.push_back(equality());
-		    else                  ret->args.push_back(equality());
-		}
-		return ret;
-	    }else{
-		return new ident(idp->name);
+    }else if(auto nup=dynamic_cast<tokenization::numeric*>(tk[pos_now]);nup!=nullptr){
+	++pos_now;
+	return new numeric(nup->value);
+    }else if(auto idp=dynamic_cast<tokenization::ident*>(tk[pos_now]);idp!=nullptr){
+	++pos_now;
+	if(consume(TK::OPARENT)){
+	    fcall*ret=new fcall(idp->name);
+	    while(!consume(TK::CPARENT)){
+		if(consume(TK::COMMA))ret->args.push_back(equality());
+		else                  ret->args.push_back(equality());
 	    }
-	}else if(auto syp=dynamic_cast<tokenization::symbol*>(tk[pos_now]);syp!=nullptr&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
-	    return new single(nullptr);
+	    return ret;
 	}else{
-	    throw std::runtime_error("構文解析ができませんでした");
+	    return new ident(idp->name);
 	}
+    }else{
+	throw std::runtime_error("構文解析ができませんでした");
     }
+}
+abstract_syntax_tree::abstract_syntax_tree(const tokenization::tokenizer&_tk):prog(new compound()),tk(_tk),pos_now(0)
+{
+    while(pos_now!=tk.size()){
+	prog->stats.push_back(stat());
+    }
+}
+abstract_syntax_tree::~abstract_syntax_tree()
+{
+    delete prog;
 }
 const std::vector<statement*>&abstract_syntax_tree::statements()
 {

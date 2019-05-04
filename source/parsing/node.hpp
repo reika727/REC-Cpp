@@ -40,6 +40,12 @@ namespace parsing{
 	ident(const std::string&name);
 	~ident()override;
     };
+    struct fcall:public node{
+	std::string name;
+	std::vector<node*>args;
+	fcall(const std::string&name);
+	~fcall()override;
+    };
     struct unopr:public node{
 	ND type;
 	node*arg;
@@ -63,9 +69,7 @@ namespace parsing{
     };
     struct compound:public statement{
 	std::vector<statement*>stats;
-	compound();
 	~compound()override;
-	void push_back(statement*const st);
     };
     struct _if_:public statement{
 	single*cond;
@@ -89,11 +93,5 @@ namespace parsing{
 	statement*st;
 	_for_(single*const init,single*const cond,single*const reinit,statement*const st);
 	~_for_()override;
-    };
-    struct fcall:public node{
-	std::string name;
-	std::vector<node*>args;
-	fcall(const std::string&name);
-	~fcall()override;
     };
 }

@@ -1,18 +1,14 @@
 #include"assembly_source/writer.hpp"
 #include<sstream>
 using namespace assembly_source;
-using namespace parsing;
-writer::writer(const std::string&filename):ofs(filename),indent(0),serial(0)
+using ND=parsing::ND;
+std::string writer::label(const std::string&base)
 {
-    write(".global main");
+    return '.'+base+std::to_string(serial++);
 }
 std::string writer::p(const std::string&str)
 {
     return (str[0]=='('||str[0]=='.'?"":"%")+str;
-}
-std::string writer::label(const std::string&base)
-{
-    return '.'+base+std::to_string(serial++);
 }
 void writer::write(const std::string&str)
 {
@@ -278,7 +274,7 @@ void writer::eval(const std::vector<parsing::statement*>&sv)
 {
     for(int i=0;i<sv.size();++i){
 	if(auto cif=dynamic_cast<parsing::_if_*>(sv[i]);cif!=nullptr){
-	    if(auto cel=dynamic_cast<parsing::_else_*>(sv[i+1]);cel!=nullptr){
+	    if(auto cel=dynamic_cast<parsing::_else_*>(i+1<sv.size()?sv[i+1]:nullptr);cel!=nullptr){
 		std::string el=label("Lelse");
 		std::string end=label("Lend");
 		eval(cif->cond);
@@ -325,6 +321,10 @@ void writer::eval(const std::vector<parsing::statement*>&sv)
 	}
     }
 }
+writer::writer(const std::string&filename):ofs(filename),indent(0),serial(0)
+{
+    write(".global main");
+}
 void writer::enter(const std::string&func)
 {
     write(func+':');
@@ -337,7 +337,7 @@ void writer::leave()
 {
     write("mov","rbp","rsp");
     write("pop","rbp");
-    write("retq");
+    write("ret");
     --indent;
     offset.clear();
 }

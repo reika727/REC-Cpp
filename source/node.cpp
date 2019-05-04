@@ -20,6 +20,14 @@ ident::~ident()
 {
 
 }
+fcall::fcall(const std::string&name):name(name)
+{
+
+}
+fcall::~fcall()
+{
+    for(auto a:args)delete a;
+}
 unopr::unopr(ND type,node*const arg):type(type),arg(arg)
 {
 
@@ -41,13 +49,9 @@ statement::~statement()
 {
 
 }
-single::single(node*const _stat)
+single::single(node*const stat):stat(stat)
 {
-    if(auto sp=dynamic_cast<single*>(_stat);sp!=nullptr&&sp->stat==nullptr){
-	stat=nullptr;
-    }else{
-	stat=_stat;
-    }
+
 }
 single::~single()
 {
@@ -57,18 +61,9 @@ bool single::is_nop()
 {
     return stat==nullptr;
 }
-compound::compound()
-{
-    stats.push_back(nullptr);
-}
 compound::~compound()
 {
     for(auto s:stats)delete s;
-}
-void compound::push_back(statement*const st)
-{
-    stats.back()=st;
-    stats.push_back(nullptr);
 }
 _if_::_if_(single*const cond,statement*const st):cond(cond),st(st)
 {
@@ -106,12 +101,4 @@ _for_::~_for_()
     delete cond;
     delete reinit;
     delete st;
-}
-fcall::fcall(const std::string&name):name(name)
-{
-
-}
-fcall::~fcall()
-{
-    for(auto a:args)delete a;
 }
