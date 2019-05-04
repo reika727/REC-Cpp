@@ -16,7 +16,17 @@ try() {
     fi
     echo
 }
-<< "#__CO__"
+try_link() {
+    input="$1"
+    echo "input : $input"
+    echo -e -n 'result: \e[31m';./mycc.out "$input";res="$?";echo -e -n '\e[m'
+    if [ $res = 0 ]; then
+	gcc -o tmp.out tmp.s func.c
+	./tmp.out
+    fi
+    echo
+}
+#<< "#__CO__"
 try ');'
 try 'a!;'
 try 'a?v;'
@@ -28,10 +38,7 @@ try 'a=2;a+=(2+2'
 try 'a=2;a+return 3;'
 try 'a=2;{2+2;'
 #__CO__
-try 'a=10;b=2;c=3;;say_OK();'
-try 'a=21;b=4;c=8;d=a+b*c;e=12;f=e;print_6num(a,b,c,d,e,f);'
-try 'a=21;b=4;c=8;d=a+b*c;e=12;f=e;g=32;h=21;i=g+h;j=21;k=a;l=0;print_12num(a,b,c,d,e,f,g,h,i,j,k,l);'
-<< "#__CO__"
+#<<"#__CO__"
 try '((1+2)*3);' 9
 try '+((1+2)*3);' 9
 try '+(2);' 2
@@ -107,4 +114,7 @@ try \
 '{'\
 ';'\
 '}' 10
+try_link 'a=10;b=2;c=3;;say_OK();'
+try_link 'a=21;b=4;c=8;d=a+b*c;e=12;f=e;print_6num(a,b,c,d,e,f);'
+try_link 'a=21;b=4;c=8;d=a+b*c;e=12;f=e;g=32;h=21;i=g+h;j=21;k=a;l=0;print_12num(a,b,c,d,e,f,g,h,i,j,k,l);'
 #__CO__
