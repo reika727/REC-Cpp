@@ -8,7 +8,7 @@ namespace tokenization{
 	public:
 	    tokenizer(const std::string&s);
 	    ~tokenizer();
-	    token*const operator[](int idx)const;
-	    size_t size()const;
+	    std::vector<token*>::const_iterator begin()const;
+	    std::vector<token*>::const_iterator end()const;
     };
 }

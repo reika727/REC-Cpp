@@ -1,5 +1,5 @@
 #pragma once
-#include"../parsing/node.hpp"
+#include"../abstract_syntax_tree/node.hpp"
 #include<fstream>
 #include<map>
 #include<string>
@@ -23,14 +23,14 @@ namespace assembly_source{
 	    std::string derefer(int dis,const std::string&base,int scl);
 	    std::string derefer(const std::string&base,const std::string&ofs,int scl=1);
 	    std::string derefer(const std::string&base,int scl=1);
-	    void enumerate_var(parsing::node*const node);
-	    void refer_var(parsing::node*const node);
-	    void RDP(parsing::node*const node);
-	    void eval(parsing::statement*const st);
-	    void eval(parsing::single*const sg);
+	    void enumerate_var(abstract_syntax_tree::node*const node);
+	    void refer_var(abstract_syntax_tree::node*const node);
+	    void RDP(abstract_syntax_tree::node*const node);
+	    void eval(abstract_syntax_tree::statement*const st);
+	    void eval(abstract_syntax_tree::single*const sg);
 	public:
 	    writer(const std::string&filename);
-	    void eval(const std::vector<parsing::statement*>&sv);
+	    void eval(const std::vector<abstract_syntax_tree::statement*>&sv);
 	    void enter(const std::string&func);
 	    void leave();
     };

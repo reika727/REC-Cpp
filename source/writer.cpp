@@ -1,7 +1,7 @@
 #include"assembly_source/writer.hpp"
 #include<sstream>
 using namespace assembly_source;
-using ND=parsing::ND;
+using ND=abstract_syntax_tree::ND;
 std::string writer::label(const std::string&base)
 {
     return '.'+base+std::to_string(serial++);
@@ -53,25 +53,25 @@ std::string writer::derefer(const std::string&base,int scl)
 {
     return derefer(0,base,"",scl);
 }
-void writer::enumerate_var(parsing::node*const node)
+void writer::enumerate_var(abstract_syntax_tree::node*const node)
 {
-    if(auto bop=dynamic_cast<parsing::biopr*>(node);bop!=nullptr){
+    if(auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);bop!=nullptr){
 	enumerate_var(bop->larg);
 	enumerate_var(bop->rarg);
-    }else if(auto uop=dynamic_cast<parsing::unopr*>(node);uop!=nullptr){
+    }else if(auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);uop!=nullptr){
 	enumerate_var(uop->arg);
-    }else if(auto idp=dynamic_cast<parsing::ident*>(node);idp!=nullptr){
+    }else if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);idp!=nullptr){
 	if(!offset.count(idp->name)){
 	    write("sub",8,"rsp");
 	    offset[idp->name]=var_size+=8;
 	}
-    }else if(auto cfp=dynamic_cast<parsing::fcall*>(node);cfp!=nullptr){
+    }else if(auto cfp=dynamic_cast<abstract_syntax_tree::fcall*>(node);cfp!=nullptr){
 	for(auto a:cfp->args)enumerate_var(a);
     }
 }
-void writer::refer_var(parsing::node*const node)
+void writer::refer_var(abstract_syntax_tree::node*const node)
 {
-    if(auto idp=dynamic_cast<parsing::ident*>(node);idp!=nullptr){
+    if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);idp!=nullptr){
 	write("mov","rbp","rax");
 	write("sub",offset[idp->name],"rax");
 	write("push","rax");
@@ -79,15 +79,15 @@ void writer::refer_var(parsing::node*const node)
 	throw std::runtime_error("右辺値への代入はできません");
     }
 }
-void writer::RDP(parsing::node*const node)
+void writer::RDP(abstract_syntax_tree::node*const node)
 {
-    if(auto nup=dynamic_cast<parsing::numeric*>(node);nup!=nullptr){
+    if(auto nup=dynamic_cast<abstract_syntax_tree::numeric*>(node);nup!=nullptr){
 	write("push",nup->value);
-    }else if(auto idp=dynamic_cast<parsing::ident*>(node);idp!=nullptr){
+    }else if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node);idp!=nullptr){
 	refer_var(idp);
 	write("pop","rax");
 	write("push",derefer("rax"));
-    }else if(auto cfp=dynamic_cast<parsing::fcall*>(node);cfp!=nullptr){
+    }else if(auto cfp=dynamic_cast<abstract_syntax_tree::fcall*>(node);cfp!=nullptr){
 	for(;!cfp->args.empty();cfp->args.pop_back()){
 	    RDP(cfp->args.back());
 	    write("pop","rax");
@@ -103,7 +103,7 @@ void writer::RDP(parsing::node*const node)
 	}
 	write("sub",(16-var_size%16)%16,"rsp");
 	write("call "+cfp->name);
-    }else if(auto uop=dynamic_cast<parsing::unopr*>(node);uop!=nullptr){
+    }else if(auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node);uop!=nullptr){
 	if(uop->type==ND::UPLUS){
 	    RDP(uop->arg);
 	}else if(uop->type==ND::UMINUS){
@@ -126,7 +126,7 @@ void writer::RDP(parsing::node*const node)
 	    }
 	    write("push",derefer("rax"));
 	}
-    }else if(auto bop=dynamic_cast<parsing::biopr*>(node);bop!=nullptr){
+    }else if(auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node);bop!=nullptr){
 	if(ND::ASSIGN<=bop->type&&bop->type<=ND::RMASGN){
 	    refer_var(bop->larg);
 	    RDP(bop->rarg);
@@ -226,15 +226,15 @@ void writer::RDP(parsing::node*const node)
 	}
     }
 }
-void writer::eval(parsing::statement*const st)
+void writer::eval(abstract_syntax_tree::statement*const st)
 {
-    if(auto sg=dynamic_cast<parsing::single*>(st);sg!=nullptr){
+    if(auto sg=dynamic_cast<abstract_syntax_tree::single*>(st);sg!=nullptr){
 	eval(sg);
-    }else if(auto com=dynamic_cast<parsing::compound*>(st);com!=nullptr){
+    }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*>(st);com!=nullptr){
 	eval(com->stats);
     }
 }
-void writer::eval(parsing::single*const sg)
+void writer::eval(abstract_syntax_tree::single*const sg)
 {
     if(!sg->is_nop()){
 	enumerate_var(sg->stat);
@@ -242,11 +242,11 @@ void writer::eval(parsing::single*const sg)
 	write("pop","rax");
     }
 }
-void writer::eval(const std::vector<parsing::statement*>&sv)
+void writer::eval(const std::vector<abstract_syntax_tree::statement*>&sv)
 {
     for(int i=0;i<sv.size();++i){
-	if(auto cif=dynamic_cast<parsing::_if_*>(sv[i]);cif!=nullptr){
-	    if(auto cel=dynamic_cast<parsing::_else_*>(i+1<sv.size()?sv[i+1]:nullptr);cel!=nullptr){
+	if(auto cif=dynamic_cast<abstract_syntax_tree::_if_*>(sv[i]);cif!=nullptr){
+	    if(auto cel=dynamic_cast<abstract_syntax_tree::_else_*>(i+1<sv.size()?sv[i+1]:nullptr);cel!=nullptr){
 		std::string el=label("Lelse");
 		std::string end=label("Lend");
 		eval(cif->cond);
@@ -265,7 +265,7 @@ void writer::eval(const std::vector<parsing::statement*>&sv)
 		eval(cif->st);
 		write(end+':');
 	    }
-	}else if(auto cwh=dynamic_cast<parsing::_while_*>(sv[i]);cwh!=nullptr){
+	}else if(auto cwh=dynamic_cast<abstract_syntax_tree::_while_*>(sv[i]);cwh!=nullptr){
 	    std::string beg=label("Lbegin");
 	    std::string end=label("Lend");
 	    write(beg+':');
@@ -275,7 +275,7 @@ void writer::eval(const std::vector<parsing::statement*>&sv)
 	    eval(cwh->st);
 	    write("jmp",beg);
 	    write(end+':');
-	}else if(auto cfo=dynamic_cast<parsing::_for_*>(sv[i]);cfo!=nullptr){
+	}else if(auto cfo=dynamic_cast<abstract_syntax_tree::_for_*>(sv[i]);cfo!=nullptr){
 	    std::string beg=label("Lbegin");
 	    std::string end=label("Lend");
 	    eval(cfo->init);

@@ -1,5 +1,5 @@
-#include"parsing/node.hpp"
-using namespace parsing;
+#include"abstract_syntax_tree/node.hpp"
+using namespace abstract_syntax_tree;
 node::~node()
 {
 

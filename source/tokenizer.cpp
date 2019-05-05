@@ -107,11 +107,11 @@ tokenizer::~tokenizer()
 {
     for(auto t:tokens)delete t;
 }
-token*const tokenizer::operator[](int idx)const
+std::vector<token*>::const_iterator tokenizer::begin()const
 {
-    return tokens[idx];
+    return tokens.begin();
 }
-size_t tokenizer::size()const
+std::vector<token*>::const_iterator tokenizer::end()const
 {
-    return tokens.size();
+    return tokens.end();
 }
