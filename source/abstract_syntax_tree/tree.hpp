@@ -1,12 +1,11 @@
 #pragma once
-#include"node.hpp"
-#include"../tokenization/reader.hpp"
-#include<vector>
+#include"nodes.hpp"
+#include"../tokenization/token_array.hpp"
 namespace abstract_syntax_tree{
     class tree{
-	private:
-	    tokenization::reader tr;
+	    tokenization::token_array&ta;
 	    compound*rt;
+	private:
 	    statement*stat();
 	    single*emptiable_single();
 	    node*assign();
@@ -17,8 +16,8 @@ namespace abstract_syntax_tree{
 	    node*unary();
 	    node*term();
 	public:
-	    tree(const tokenization::tokenizer&tk);
+	    tree(tokenization::token_array&ta);
 	    ~tree();
-	    const std::vector<statement*>&root();
+	    compound*const root();
     };
 }
