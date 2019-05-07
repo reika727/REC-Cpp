@@ -8,15 +8,7 @@ numeric::numeric(int value):value(value)
 {
 
 }
-numeric::~numeric()
-{
-
-}
 ident::ident(const std::string&name):name(name)
-{
-
-}
-ident::~ident()
 {
 
 }
@@ -64,6 +56,10 @@ bool single::is_nop()
 compound::~compound()
 {
     for(auto s:stats)delete s;
+}
+declare::declare(const std::string&name):name(name)
+{
+
 }
 _if_::_if_(single*const cond,statement*const st):cond(cond),st(st)
 {

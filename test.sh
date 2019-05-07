@@ -45,10 +45,10 @@ try '+(2);' 2
 try '+(2+1);' 3
 try '+(1*2);' 2
 try '-(-3-2+-3);' 8
-try 'a=4;a/(1+1);' 2
-try 'a=53;a%(1+8);' 8
-try 'a=2;' 2
-try 'a=+2;' 2
+try 'char a;a=4;a/(1+1);' 2
+try 'char a;a=53;a%(1+8);' 8
+try 'char a;a=2;' 2
+try 'char a=+2;' 2
 try 'a=+(2);' 2
 try 'a=+23;b=a*-2;b+(+47);' 1
 try 'a=1;bc=1;a==bc;' 1

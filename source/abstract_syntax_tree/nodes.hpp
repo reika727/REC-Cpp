@@ -33,12 +33,10 @@ namespace abstract_syntax_tree{
     struct numeric:public node{
 	int value;
 	numeric(int value);
-	~numeric()override;
     };
     struct ident:public node{
 	std::string name;
 	ident(const std::string&name);
-	~ident()override;
     };
     struct fcall:public node{
 	std::string name;
@@ -70,6 +68,10 @@ namespace abstract_syntax_tree{
     struct compound:public statement{
 	std::vector<statement*>stats;
 	~compound()override;
+    };
+    struct declare:public statement{
+	const std::string&name;
+	declare(const std::string&name);
     };
     struct _if_:public statement{
 	single*cond;

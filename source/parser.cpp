@@ -1,28 +1,16 @@
 #include"assembly_source/parser.hpp"
 using namespace assembly_source;
 using ND=abstract_syntax_tree::ND;
-void parser::enumerate_var(abstract_syntax_tree::node*const node)
-{
-    if(auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node)){
-	enumerate_var(bop->larg);
-	enumerate_var(bop->rarg);
-    }else if(auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node)){
-	enumerate_var(uop->arg);
-    }else if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node)){
-	if(!offset.count(idp->name)){
-	    wr.write("sub",8,"rsp");
-	    offset[idp->name]=var_size+=8;
-	}
-    }else if(auto cfp=dynamic_cast<abstract_syntax_tree::fcall*>(node)){
-	for(auto a:cfp->args)enumerate_var(a);
-    }
-}
 void parser::refer_var(abstract_syntax_tree::node*const node)
 {
     if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node)){
-	wr.write("mov","rbp","rax");
-	wr.write("sub",offset[idp->name],"rax");
-	wr.write("push","rax");
+	if(offset.count(idp->name)){
+	    wr.write("mov","rbp","rax");
+	    wr.write("sub",offset[idp->name],"rax");
+	    wr.write("push","rax");
+	}else{
+	    throw std::runtime_error("未定義の変数です: "+idp->name);
+	}
     }else{
 	throw std::runtime_error("右辺値への代入はできません");
     }
@@ -177,23 +165,25 @@ void parser::RDP(abstract_syntax_tree::node*const node)
 void parser::eval(abstract_syntax_tree::statement*const st)
 {
     if(auto sg=dynamic_cast<abstract_syntax_tree::single*>(st)){
-	eval(sg);
+	if(!sg->is_nop()){
+	    RDP(sg->stat);
+	    wr.write("pop","rax");
+	}
     }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*>(st)){
 	eval(com->stats);
-    }
-}
-void parser::eval(abstract_syntax_tree::single*const sg)
-{
-    if(!sg->is_nop()){
-	enumerate_var(sg->stat);
-	RDP(sg->stat);
-	wr.write("pop","rax");
     }
 }
 void parser::eval(const std::vector<abstract_syntax_tree::statement*>&sv)
 {
     for(int i=0;i<sv.size();++i){
-	if(auto cif=dynamic_cast<abstract_syntax_tree::_if_*>(sv[i])){
+	if(auto dep=dynamic_cast<abstract_syntax_tree::declare*>(sv[i])){
+	    if(!offset.count(dep->name)){
+		wr.write("sub",8,"rsp");
+		offset[dep->name]=var_size+=8;
+	    }else{
+		throw std::runtime_error("同名の変数が再定義されています");
+	    }
+	}else if(auto cif=dynamic_cast<abstract_syntax_tree::_if_*>(sv[i])){
 	    if(auto cel=dynamic_cast<abstract_syntax_tree::_else_*>(i+1<sv.size()?sv[i+1]:nullptr)){
 		std::string el=wr.unique_label("Lelse");
 		std::string end=wr.unique_label("Lend");

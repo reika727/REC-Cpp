@@ -77,6 +77,9 @@ token_array::token_array(const std::string&s)
 	    }else{
 		tv.emplace_back(new symbol(TK::GREAT));
 	    }
+	}else if(s.substr(i,4)=="char"&&i+4<s.length()&&isspace(s[i+4])){
+	    tv.emplace_back(new symbol(TK::CHAR));
+	    i+=3;
 	}else if(s.substr(i,2)=="if"&&i+2<s.length()&&(s[i+2]=='('||isspace(s[i+2]))){
 	    tv.emplace_back(new symbol(TK::IF));
 	    ++i;
