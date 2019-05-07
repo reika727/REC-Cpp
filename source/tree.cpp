@@ -5,10 +5,15 @@ using TK=tokenization::TK;
 statement*tree::stat()
 {
     if(ta.consume(TK::CHAR)){
-	declare*ret;
-	if(auto dep=ta.consume_id())ret=new declare(*dep);
-	else throw std::runtime_error("無効な宣言です");
-	if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
+	declare*ret=new declare;
+	while(true){
+	    if(auto dep=ta.consume_id())ret->vars.push_back(std::make_pair(*dep,nullptr));
+	    else throw std::runtime_error("無効な宣言です");
+	    if(ta.consume(TK::EQUAL))ret->vars.back().second=assign();
+	    if(ta.consume(TK::COMMA))continue;
+	    else if(ta.consume(TK::SCOLON))break;
+	    else throw std::runtime_error("不正な区切り文字です");
+	}
 	return ret;
     }else if(ta.consume(TK::IF)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");

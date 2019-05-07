@@ -57,9 +57,9 @@ compound::~compound()
 {
     for(auto s:stats)delete s;
 }
-declare::declare(const std::string&name):name(name)
+declare::~declare()
 {
-
+    for(auto v:vars)delete v.second;
 }
 _if_::_if_(single*const cond,statement*const st):cond(cond),st(st)
 {

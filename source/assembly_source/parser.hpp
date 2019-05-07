@@ -9,7 +9,7 @@ namespace assembly_source{
 	    int var_size;
 	    std::map<std::string,int>offset;
 	private:
-	    void refer_var(abstract_syntax_tree::node*const node);
+	    void refer(abstract_syntax_tree::node*const node);
 	    void RDP(abstract_syntax_tree::node*const node);
 	    void eval(abstract_syntax_tree::statement*const st);
 	    void eval(const std::vector<abstract_syntax_tree::statement*>&sv);

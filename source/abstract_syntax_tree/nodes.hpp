@@ -1,6 +1,7 @@
 #pragma once
 #include<string>
 #include<vector>
+#include<utility>
 namespace abstract_syntax_tree{
     enum class ND{
 	/*算術演算子*/
@@ -70,8 +71,8 @@ namespace abstract_syntax_tree{
 	~compound()override;
     };
     struct declare:public statement{
-	const std::string&name;
-	declare(const std::string&name);
+	std::vector<std::pair<std::string,node*>>vars;
+	~declare()override;
     };
     struct _if_:public statement{
 	single*cond;

@@ -1,7 +1,7 @@
 #include"assembly_source/parser.hpp"
 using namespace assembly_source;
 using ND=abstract_syntax_tree::ND;
-void parser::refer_var(abstract_syntax_tree::node*const node)
+void parser::refer(abstract_syntax_tree::node*const node)
 {
     if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node)){
 	if(offset.count(idp->name)){
@@ -20,7 +20,7 @@ void parser::RDP(abstract_syntax_tree::node*const node)
     if(auto nup=dynamic_cast<abstract_syntax_tree::numeric*>(node)){
 	wr.write("push",nup->value);
     }else if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node)){
-	refer_var(idp);
+	refer(idp);
 	wr.write("pop","rax");
 	wr.write("push",writer::derefer("rax"));
     }else if(auto cfp=dynamic_cast<abstract_syntax_tree::fcall*>(node)){
@@ -50,7 +50,7 @@ void parser::RDP(abstract_syntax_tree::node*const node)
 	    wr.write("sub","rax","rdi");
 	    wr.write("push","rdi");
 	}else if(uop->type==ND::PREINC||uop->type==ND::PREDEC){
-	    refer_var(uop->arg);
+	    refer(uop->arg);
 	    wr.write("pop","rax");
 	    switch(uop->type){
 		case ND::PREINC:
@@ -64,7 +64,7 @@ void parser::RDP(abstract_syntax_tree::node*const node)
 	}
     }else if(auto bop=dynamic_cast<abstract_syntax_tree::biopr*>(node)){
 	if(ND::ASSIGN<=bop->type&&bop->type<=ND::RMASGN){
-	    refer_var(bop->larg);
+	    refer(bop->larg);
 	    RDP(bop->rarg);
 	    wr.write("pop","rdi");
 	    wr.write("pop","rax");
@@ -164,12 +164,13 @@ void parser::RDP(abstract_syntax_tree::node*const node)
 }
 void parser::eval(abstract_syntax_tree::statement*const st)
 {
-    if(auto sg=dynamic_cast<abstract_syntax_tree::single*>(st)){
+    if(auto sg=dynamic_cast<abstract_syntax_tree::single*const>(st)){
 	if(!sg->is_nop()){
 	    RDP(sg->stat);
 	    wr.write("pop","rax");
 	}
-    }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*>(st)){
+    }
+    else if(auto com=dynamic_cast<abstract_syntax_tree::compound*const>(st)){
 	eval(com->stats);
     }
 }
@@ -177,11 +178,18 @@ void parser::eval(const std::vector<abstract_syntax_tree::statement*>&sv)
 {
     for(int i=0;i<sv.size();++i){
 	if(auto dep=dynamic_cast<abstract_syntax_tree::declare*>(sv[i])){
-	    if(!offset.count(dep->name)){
-		wr.write("sub",8,"rsp");
-		offset[dep->name]=var_size+=8;
-	    }else{
-		throw std::runtime_error("同名の変数が再定義されています");
+	    for(auto v:dep->vars){
+		if(!offset.count(v.first)){
+		    wr.write("sub",8,"rsp");
+		    offset[v.first]=var_size+=8;
+		    if(v.second){
+			RDP(v.second);
+			wr.write("pop","rsi");
+			wr.write("mov","rsi",writer::derefer("rsp"));
+		    }
+		}else{
+		    throw std::runtime_error("同名の変数が再定義されています");
+		}
 	    }
 	}else if(auto cif=dynamic_cast<abstract_syntax_tree::_if_*>(sv[i])){
 	    if(auto cel=dynamic_cast<abstract_syntax_tree::_else_*>(i+1<sv.size()?sv[i+1]:nullptr)){
