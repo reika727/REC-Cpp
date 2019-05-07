@@ -1,5 +1,7 @@
 #include"writer.hpp"
 #include"../abstract_syntax_tree/nodes.hpp"
+#include"registries.hpp"
+#include"instructions.hpp"
 #include<map>
 #include<string>
 #include<vector>

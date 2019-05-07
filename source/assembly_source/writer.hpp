@@ -4,8 +4,6 @@
 namespace assembly_source{
     class writer{
 	    mutable std::ofstream ofs;
-	private:
-	    static std::string p(const std::string&str);
 	public:
 	    writer(const std::string&filename);
 	    void write(const std::string&str)const;
