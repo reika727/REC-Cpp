@@ -151,7 +151,7 @@ tree::~tree()
 {
     delete rt;
 }
-compound*const tree::root()
+compound*tree::root()
 {
     return rt;
 }

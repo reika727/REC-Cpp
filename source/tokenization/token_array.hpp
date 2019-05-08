@@ -4,11 +4,11 @@
 namespace tokenization{
     class token_array{
 	    std::vector<token*>tv;
-	    std::vector<token*>::const_iterator itr;
+	    decltype(tv)::const_iterator itr;
 	public:
 	    token_array(const std::string&s);
 	    ~token_array();
-	    const std::vector<token*>::const_iterator&pos();
+	    const decltype(itr)&pos();
 	    bool consume(tokenization::TK type);
 	    int*consume_num();
 	    std::string*consume_id();

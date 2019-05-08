@@ -18,6 +18,6 @@ namespace abstract_syntax_tree{
 	public:
 	    tree(tokenization::token_array&ta);
 	    ~tree();
-	    compound*const root();
+	    compound*root();
     };
 }

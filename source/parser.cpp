@@ -1,7 +1,7 @@
 #include"assembly_source/parser.hpp"
 using namespace assembly_source;
 using ND=abstract_syntax_tree::ND;
-void parser::refer(abstract_syntax_tree::node*const node)
+void parser::refer(abstract_syntax_tree::node*node)
 {
     if(auto idp=dynamic_cast<abstract_syntax_tree::ident*>(node)){
 	if(offset.count(idp->name)){
@@ -15,7 +15,7 @@ void parser::refer(abstract_syntax_tree::node*const node)
 	throw std::runtime_error("右辺値への代入はできません");
     }
 }
-void parser::RDP(abstract_syntax_tree::node*const node)
+void parser::RDP(abstract_syntax_tree::node*node)
 {
     if(auto nup=dynamic_cast<abstract_syntax_tree::numeric*>(node)){
 	wr.write(push,nup->value);
@@ -162,14 +162,14 @@ void parser::RDP(abstract_syntax_tree::node*const node)
 	}
     }
 }
-void parser::eval(abstract_syntax_tree::statement*const st)
+void parser::eval(abstract_syntax_tree::statement*st)
 {
-    if(auto sg=dynamic_cast<abstract_syntax_tree::single*const>(st)){
+    if(auto sg=dynamic_cast<abstract_syntax_tree::single*>(st)){
 	if(!sg->is_nop()){
 	    RDP(sg->stat);
 	    wr.write(pop,rax);
 	}
-    }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*const>(st)){
+    }else if(auto com=dynamic_cast<abstract_syntax_tree::compound*>(st)){
 	eval(com->stats);
     }
 }
@@ -238,7 +238,7 @@ void parser::eval(const std::vector<abstract_syntax_tree::statement*>&sv)
 	}
     }
 }
-parser::parser(abstract_syntax_tree::compound*const rt,std::string filename):wr(filename),var_size(0)
+parser::parser(abstract_syntax_tree::compound*rt,std::string filename):wr(filename),var_size(0)
 {
     //TODO
 	wr.write("main:");

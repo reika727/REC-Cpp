@@ -20,7 +20,7 @@ fcall::~fcall()
 {
     for(auto a:args)delete a;
 }
-unopr::unopr(ND type,node*const arg):type(type),arg(arg)
+unopr::unopr(ND type,node*arg):type(type),arg(arg)
 {
 
 }
@@ -28,7 +28,7 @@ unopr::~unopr()
 {
     delete arg;
 }
-biopr::biopr(node*const left,ND type,node*const right):larg(left),type(type),rarg(right)
+biopr::biopr(node*left,ND type,node*right):larg(left),type(type),rarg(right)
 {
 
 }
@@ -41,7 +41,7 @@ statement::~statement()
 {
 
 }
-single::single(node*const stat):stat(stat)
+single::single(node*stat):stat(stat)
 {
 
 }
@@ -61,7 +61,7 @@ declare::~declare()
 {
     for(auto v:vars)delete v.second;
 }
-_if_::_if_(single*const cond,statement*const st):cond(cond),st(st)
+_if_::_if_(single*cond,statement*st):cond(cond),st(st)
 {
 
 }
@@ -70,7 +70,7 @@ _if_::~_if_()
     delete cond;
     delete st;
 }
-_else_::_else_(statement*const st):st(st)
+_else_::_else_(statement*st):st(st)
 {
 
 }
@@ -78,7 +78,7 @@ _else_::~_else_()
 {
     delete st;
 }
-_while_::_while_(single*const cond,statement*const st):cond(cond),st(st)
+_while_::_while_(single*cond,statement*st):cond(cond),st(st)
 {
 
 }
@@ -87,7 +87,7 @@ _while_::~_while_()
     delete cond;
     delete st;
 }
-_for_::_for_(single*const init,single*const cond,single*const reinit,statement*const st):init(init),cond(cond),reinit(reinit),st(st)
+_for_::_for_(single*init,single*cond,single*reinit,statement*st):init(init),cond(cond),reinit(reinit),st(st)
 {
 
 }

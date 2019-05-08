@@ -48,13 +48,13 @@ namespace abstract_syntax_tree{
     struct unopr:public node{
 	ND type;
 	node*arg;
-	unopr(ND type,node*const arg);
+	unopr(ND type,node*arg);
 	~unopr()override;
     };
     struct biopr:public node{
 	ND type;
 	node*larg,*rarg;
-	biopr(node*const left,ND type,node*const right);
+	biopr(node*left,ND type,node*right);
 	~biopr()override;
     };
     struct statement:public node{
@@ -77,24 +77,24 @@ namespace abstract_syntax_tree{
     struct _if_:public statement{
 	single*cond;
 	statement*st;
-	_if_(single*const cond,statement*const st);
+	_if_(single*cond,statement*st);
 	~_if_()override;
     };
     struct _else_:public statement{
 	statement*st;
-	_else_(statement*const st);
+	_else_(statement*st);
 	~_else_()override;
     };
     struct _while_:public statement{
 	single*cond;
 	statement*st;
-	_while_(single*const cond,statement*const st);
+	_while_(single*cond,statement*st);
 	~_while_()override;
     };
     struct _for_:public statement{
 	single*init,*cond,*reinit;
 	statement*st;
-	_for_(single*const init,single*const cond,single*const reinit,statement*const st);
+	_for_(single*init,single*cond,single*reinit,statement*st);
 	~_for_()override;
     };
 }

@@ -11,11 +11,11 @@ namespace assembly_source{
 	    int var_size;
 	    std::map<std::string,int>offset;
 	private:
-	    void refer(abstract_syntax_tree::node*const node);
-	    void RDP(abstract_syntax_tree::node*const node);
-	    void eval(abstract_syntax_tree::statement*const st);
+	    void refer(abstract_syntax_tree::node*node);
+	    void RDP(abstract_syntax_tree::node*node);
+	    void eval(abstract_syntax_tree::statement*st);
 	    void eval(const std::vector<abstract_syntax_tree::statement*>&sv);
 	public:
-	    parser(abstract_syntax_tree::compound*const rt,std::string filename);
+	    parser(abstract_syntax_tree::compound*rt,std::string filename);
     };
 }
