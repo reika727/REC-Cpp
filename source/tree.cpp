@@ -127,16 +127,7 @@ node*tree::term()
     }else if(auto nump=ta.consume_num()){
 	return new numeric(*nump);
     }else if(auto namep=ta.consume_id()){
-	if(ta.consume(TK::OPARENT)){
-	    fcall*ret=new fcall(*namep);
-	    while(!ta.consume(TK::CPARENT)){
-		if(ta.consume(TK::COMMA))ret->args.push_back(equality());
-		else                     ret->args.push_back(equality());
-	    }
-	    return ret;
-	}else{
-	    return new ident(*namep);
-	}
+	return new ident(*namep);
     }else{
 	throw std::runtime_error("構文解析ができませんでした");
     }

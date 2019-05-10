@@ -38,12 +38,6 @@ namespace abstract_syntax_tree{
 	std::string name;
 	ident(const std::string&name);
     };
-    struct fcall:public node{
-	std::string name;
-	std::vector<node*>args;
-	fcall(const std::string&name);
-	~fcall()override;
-    };
     struct unopr:public node{
 	ND type;
 	node*arg;

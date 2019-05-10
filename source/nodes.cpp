@@ -12,14 +12,6 @@ ident::ident(const std::string&name):name(name)
 {
 
 }
-fcall::fcall(const std::string&name):name(name)
-{
-
-}
-fcall::~fcall()
-{
-    for(auto a:args)delete a;
-}
 unopr::unopr(ND type,node*arg):type(type),arg(arg)
 {
 

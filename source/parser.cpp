@@ -25,22 +25,6 @@ void parser::RDP(abstract_syntax_tree::node*node)
 	refer(idp);
 	wr.write(pop,rax);
 	wr.write(push,writer::derefer(rax));
-    }else if(auto cfp=dynamic_cast<abstract_syntax_tree::fcall*>(node)){
-	for(;!cfp->args.empty();cfp->args.pop_back()){
-	    RDP(cfp->args.back());
-	    wr.write(pop,rax);
-	    switch(cfp->args.size()){
-		case 1 :wr.write(mov,rax,rdi);break;
-		case 2 :wr.write(mov,rax,rsi);break;
-		case 3 :wr.write(mov,rax,rdx);break;
-		case 4 :wr.write(mov,rax,rcx);break;
-		case 5 :wr.write(mov,rax,r8); break;
-		case 6 :wr.write(mov,rax,r9); break;
-		default:wr.write(push,rax);   break;
-	    }
-	}
-	wr.write(sub,(16-var_size%16)%16,rsp);
-	wr.write(call,cfp->name);
     }else if(auto uop=dynamic_cast<abstract_syntax_tree::unopr*>(node)){
 	if(uop->type==ND::UPLUS){
 	    RDP(uop->arg);
