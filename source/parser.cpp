@@ -1,4 +1,6 @@
 #include"assembly_source/parser.hpp"
+#include"assembly_source/registries.hpp"
+#include"assembly_source/instructions.hpp"
 using namespace assembly_source;
 using ND=abstract_syntax_tree::ND;
 void parser::refer(abstract_syntax_tree::node*node)
