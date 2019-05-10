@@ -1,7 +1,7 @@
-#include"tokenization/token_array.hpp"
+#include"lexicon/token_array.hpp"
 #include<stdexcept>
 #include<algorithm>
-using namespace tokenization;
+using namespace lexicon;
 token_array::token_array(const std::string&s)
 {
     for(int i=0;i<s.length();++i){
@@ -118,7 +118,7 @@ const std::vector<token*>::const_iterator&token_array::pos()
 bool token_array::consume(TK type)
 {
     if(itr!=tv.end()){
-	if(auto symp=dynamic_cast<tokenization::symbol*>(*itr)){
+	if(auto symp=dynamic_cast<symbol*>(*itr)){
 	    if(symp->type==type){
 		++itr;
 		return true;
@@ -130,7 +130,7 @@ bool token_array::consume(TK type)
 int*token_array::consume_num()
 {
     if(itr!=tv.end()){
-	if(auto ptr=dynamic_cast<tokenization::numeric*>(*itr)){
+	if(auto ptr=dynamic_cast<numeric*>(*itr)){
 	    ++itr;
 	    return &ptr->value;
 	}
@@ -140,7 +140,7 @@ int*token_array::consume_num()
 std::string*token_array::consume_id()
 {
     if(itr!=tv.end()){
-	if(auto ptr=dynamic_cast<tokenization::ident*>(*itr)){
+	if(auto ptr=dynamic_cast<ident*>(*itr)){
 	    ++itr;
 	    return &ptr->name;
 	}

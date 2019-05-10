@@ -1,7 +1,7 @@
 #pragma once
 #include"tokens.hpp"
 #include<vector>
-namespace tokenization{
+namespace lexicon{
     class token_array{
 	    std::vector<token*>tv;
 	    decltype(tv)::const_iterator itr;
@@ -9,7 +9,7 @@ namespace tokenization{
 	    token_array(const std::string&s);
 	    ~token_array();
 	    const decltype(itr)&pos();
-	    bool consume(tokenization::TK type);
+	    bool consume(TK type);
 	    int*consume_num();
 	    std::string*consume_id();
 	    bool is_all_read();

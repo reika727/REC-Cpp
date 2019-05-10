@@ -1,7 +1,7 @@
 #pragma once
 #include<utility>
 #include"nodes.hpp"
-namespace abstract_syntax_tree{
+namespace syntax{
     struct statement{
 	virtual ~statement();
     };

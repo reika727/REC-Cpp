@@ -1,7 +1,7 @@
 #pragma once
 #include<string>
 #include<vector>
-namespace abstract_syntax_tree{
+namespace syntax{
     enum class ND{
 	/*算術演算子*/
 	UPLUS,    // 単項プラス

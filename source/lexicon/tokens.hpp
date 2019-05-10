@@ -1,6 +1,6 @@
 #pragma once
 #include<string>
-namespace tokenization{
+namespace lexicon{
     enum class TK{
 	PLUS,    // +
 	MINUS,   // -

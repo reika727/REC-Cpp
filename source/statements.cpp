@@ -1,5 +1,5 @@
-#include"abstract_syntax_tree/statements.hpp"
-using namespace abstract_syntax_tree;
+#include"syntax/statements.hpp"
+using namespace syntax;
 statement::~statement()
 {
 

@@ -1,7 +1,7 @@
-#include"abstract_syntax_tree/tree.hpp"
+#include"syntax/tree.hpp"
 #include<stdexcept>
-using namespace abstract_syntax_tree;
-using TK=tokenization::TK;
+using namespace syntax;
+using TK=lexicon::TK;
 statement*tree::stat()
 {
     if(ta.consume(TK::CHAR)){
@@ -52,7 +52,7 @@ statement*tree::stat()
 }
 single*tree::emptiable_single()
 {
-    if(auto syp=dynamic_cast<tokenization::symbol*>(*ta.pos());syp&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
+    if(auto syp=dynamic_cast<lexicon::symbol*>(*ta.pos());syp&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
 	return new single(nullptr);
     }else{
 	return new single(assign());
@@ -132,7 +132,7 @@ node*tree::term()
 	throw std::runtime_error("構文解析ができませんでした");
     }
 }
-tree::tree(tokenization::token_array&ta):ta(ta),rt(new compound())
+tree::tree(lexicon::token_array&ta):ta(ta),rt(new compound())
 {
     while(!ta.is_all_read()){
 	rt->stats.push_back(stat());

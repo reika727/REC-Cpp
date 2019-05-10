@@ -1,9 +1,9 @@
 #pragma once
 #include"statements.hpp"
-#include"../tokenization/token_array.hpp"
-namespace abstract_syntax_tree{
+#include"../lexicon/token_array.hpp"
+namespace syntax{
     class tree{
-	    tokenization::token_array&ta;
+	    lexicon::token_array&ta;
 	    compound*rt;
 	private:
 	    statement*stat();
@@ -16,7 +16,7 @@ namespace abstract_syntax_tree{
 	    node*unary();
 	    node*term();
 	public:
-	    tree(tokenization::token_array&ta);
+	    tree(lexicon::token_array&ta);
 	    ~tree();
 	    compound*root();
     };

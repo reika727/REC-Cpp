@@ -1,5 +1,5 @@
-#include"tokenization/tokens.hpp"
-using namespace tokenization;
+#include"lexicon/tokens.hpp"
+using namespace lexicon;
 token::~token()
 {
 

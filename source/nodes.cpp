@@ -1,5 +1,5 @@
-#include"abstract_syntax_tree/nodes.hpp"
-using namespace abstract_syntax_tree;
+#include"syntax/nodes.hpp"
+using namespace syntax;
 node::~node()
 {
 
