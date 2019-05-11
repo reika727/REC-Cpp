@@ -8,7 +8,7 @@ const statement*tree::stat()
 	auto ret=new declare;
 	while(true){
 	    if(auto dep=ta.consume_id()){
-		ret->push_back_var(std::make_pair(*dep,ta.consume(TK::EQUAL)?asgn():nullptr));
+		ret->push_back_var(std::make_pair(*dep,ta.consume(TK::EQUAL)?order14():nullptr));
 		if(ta.consume(TK::COMMA))continue;
 		else if(ta.consume(TK::SCOLON))break;
 		else throw std::runtime_error("不正な区切り文字です");
@@ -19,14 +19,14 @@ const statement*tree::stat()
 	return ret;
     }else if(ta.consume(TK::IF)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
-	auto cond=new single(coma());
+	auto cond=new single(order15());
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	auto st1=stat();
 	auto st2=ta.consume(TK::ELSE)?stat():new single(nullptr);
 	return new _if_else_(cond,st1,st2);
     }else if(ta.consume(TK::WHILE)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
-	auto cond=new single(coma());
+	auto cond=new single(order15());
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
 	auto st=stat();
 	return new _while_(cond,st);
@@ -55,81 +55,81 @@ const single*tree::emptiable_single()
     if(auto syp=dynamic_cast<lexicon::symbol*>(*ta.pos());syp&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
 	return new single(nullptr);
     }else{
-	return new single(coma());
+	return new single(order15());
     }
 }
-const node*tree::coma() // , left to right
+const node*tree::order15() // , left to right
 {
-    auto ret=asgn();
+    auto ret=order14();
     while(true){
-	     if(ta.consume(TK::COMMA))ret=new comma(ret,asgn());
+	     if(ta.consume(TK::COMMA))ret=new comma(ret,order14());
 	else                          return ret;
     }
 }
-const node*tree::asgn() // =, +=, -=, *=, /= right to left
+const node*tree::order14() // = += -= *= /= right to left
 {
-    auto ret=equality();
+    auto ret=order07();
     while(true){
- 	     if(ta.consume(TK::EQUAL))ret=new assign(ret,asgn());
-	else if(ta.consume(TK::PLEQ)) ret=new plasgn(ret,asgn());
-	else if(ta.consume(TK::MIEQ)) ret=new miasgn(ret,asgn());
-	else if(ta.consume(TK::ASEQ)) ret=new muasgn(ret,asgn());
-	else if(ta.consume(TK::SLEQ)) ret=new diasgn(ret,asgn());
-	else if(ta.consume(TK::PEEQ)) ret=new rmasgn(ret,asgn());
+ 	     if(ta.consume(TK::EQUAL))ret=new assign(ret,order14());
+	else if(ta.consume(TK::PLEQ)) ret=new plasgn(ret,order14());
+	else if(ta.consume(TK::MIEQ)) ret=new miasgn(ret,order14());
+	else if(ta.consume(TK::ASEQ)) ret=new muasgn(ret,order14());
+	else if(ta.consume(TK::SLEQ)) ret=new diasgn(ret,order14());
+	else if(ta.consume(TK::PEEQ)) ret=new rmasgn(ret,order14());
 	else                          return ret;
     }
 }
-const node*tree::equality() // ==, != left to right
+const node*tree::order07() // == != left to right
 {
-    auto ret=relational();
+    auto ret=order06();
     while(true){
-	     if(ta.consume(TK::EQEQ))ret=new equal(ret,relational());
-	else if(ta.consume(TK::EXEQ))ret=new nequal(ret,relational());
+	     if(ta.consume(TK::EQEQ))ret=new equal (ret,order06());
+	else if(ta.consume(TK::EXEQ))ret=new nequal(ret,order06());
 	else                         return ret;
     }
 }
-const node*tree::relational() // <, >, <=, >= left to right
+const node*tree::order06() // < > <= >= left to right
 {
-    auto ret=add();
+    auto ret=order04();
     while(true){
-	     if(ta.consume(TK::LESS)) ret=new less(ret,add());
-	else if(ta.consume(TK::GREAT))ret=new greater(ret,add());
-	else if(ta.consume(TK::LEEQ)) ret=new leeq(ret,add());
-	else if(ta.consume(TK::GREQ)) ret=new greq(ret,add());
+	     if(ta.consume(TK::LESS)) ret=new less   (ret,order04());
+	else if(ta.consume(TK::GREAT))ret=new greater(ret,order04());
+	else if(ta.consume(TK::LEEQ)) ret=new leeq   (ret,order04());
+	else if(ta.consume(TK::GREQ)) ret=new greq   (ret,order04());
 	else                          return ret;
     }
 }
-const node*tree::add() // +, - left to right
+const node*tree::order04() // + - left to right
 {
-    auto ret=mul();
+    auto ret=order03();
     while(true){
-	     if(ta.consume(TK::PLUS)) ret=new plus(ret,mul());
-	else if(ta.consume(TK::MINUS))ret=new minus(ret,mul());
+	     if(ta.consume(TK::PLUS)) ret=new plus (ret,order03());
+	else if(ta.consume(TK::MINUS))ret=new minus(ret,order03());
 	else                          return ret;
     }
 }
-const node*tree::mul() // *, /, % left to right
+const node*tree::order03() // * / % left to right
 {
-    auto ret=unary();
+    auto ret=order02();
     while(true){
-	     if(ta.consume(TK::ASTER))  ret=new multi(ret,unary());
-	else if(ta.consume(TK::SLASH))  ret=new divide(ret,unary());
-	else if(ta.consume(TK::PERCENT))ret=new remain(ret,unary());
+	     if(ta.consume(TK::ASTER))  ret=new multi (ret,order02());
+	else if(ta.consume(TK::SLASH))  ret=new divide(ret,order02());
+	else if(ta.consume(TK::PERCENT))ret=new remain(ret,order02());
 	else                            return ret;
     }
 }
-const node*tree::unary() // +, -, ++, -- right to left
+const node*tree::order02() // + - ++ -- right to left
 {
-         if(ta.consume(TK::PLUS)) return new uplus(unary());
-    else if(ta.consume(TK::MINUS))return new uminus(unary());
-    else if(ta.consume(TK::PLPL)) return new preinc(unary());
-    else if(ta.consume(TK::MIMI)) return new predec(unary());
-    else                          return term();
+         if(ta.consume(TK::PLUS)) return new uplus(order02());
+    else if(ta.consume(TK::MINUS))return new uminus(order02());
+    else if(ta.consume(TK::PLPL)) return new preinc(order02());
+    else if(ta.consume(TK::MIMI)) return new predec(order02());
+    else                          return order01();
 }
-const node*tree::term() // () left to right
+const node*tree::order01() // () left to right
 {
     if(ta.consume(TK::OPARENT)){
-	auto ret=asgn();
+	auto ret=order15();
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
 	return ret;
     }else if(auto nump=ta.consume_num()){
@@ -140,7 +140,7 @@ const node*tree::term() // () left to right
 	    auto ret=new fcall(id);
 	    if(!ta.consume(TK::CPARENT)){
 		while(true){
-		    ret->push_back_var(equality());
+		    ret->push_back_var(order14());
 		    if(ta.consume(TK::CPARENT))break;
 		    else if(ta.consume(TK::COMMA))continue;
 		    else throw std::runtime_error("無効な関数呼び出しです");

@@ -9,14 +9,14 @@ namespace syntax{
 	private:
 	    const statement*stat();
 	    const single*emptiable_single();
-	    const node*coma();
-	    const node*asgn();
-	    const node*equality();
-	    const node*relational();
-	    const node*add();
-	    const node*mul();
-	    const node*unary();
-	    const node*term();
+	    const node*order15();
+	    const node*order14();
+	    const node*order07();
+	    const node*order06();
+	    const node*order04();
+	    const node*order03();
+	    const node*order02();
+	    const node*order01();
 	public:
 	    tree(lexicon::token_array&ta);
 	    ~tree();
