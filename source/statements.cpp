@@ -4,8 +4,8 @@
 #include"code/gcfuncs.hpp"
 #include"code/assembly/instructions.hpp"
 #include"code/assembly/registries.hpp"
+#include<stdexcept>
 using namespace syntax;
-using namespace code::assembly;
 using code::derefer;
 using code::unique_label;
 void single::eval(const code::generator&gen)const

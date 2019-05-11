@@ -1,5 +1,4 @@
 #include"code/generator.hpp"
-#include<sstream>
 using namespace code;
 generator::generator(const std::string&filename):ofs(filename),var_size(0)
 {

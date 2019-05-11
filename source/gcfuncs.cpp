@@ -1,5 +1,5 @@
+#include"code/gcfuncs.hpp"
 #include<sstream>
-#include"code/generator.hpp"
 namespace code{
     std::string unique_label(const std::string&base)
     {

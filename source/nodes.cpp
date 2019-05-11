@@ -1,13 +1,12 @@
-#include<stdexcept>
-#include<typeinfo>
 #include"syntax/nodes.hpp"
 #include"semantics/analyzer.hpp"
 #include"code/generator.hpp"
 #include"code/gcfuncs.hpp"
 #include"code/assembly/instructions.hpp"
 #include"code/assembly/registries.hpp"
+#include<stdexcept>
+#include<typeinfo>
 using namespace syntax;
-using namespace code::assembly;
 using code::derefer;
 void numeric::to_asm(const code::generator&gen)const
 {

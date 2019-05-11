@@ -1,9 +1,10 @@
 #pragma once
-#include<vector>
-#include<utility>
 #include"nodes.hpp"
 #include"../semantics/analyzer.hpp"
 #include"../code/generator.hpp"
+#include<string>
+#include<vector>
+#include<utility>
 namespace syntax{
     class statement{
 	public:

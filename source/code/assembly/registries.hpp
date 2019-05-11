@@ -1,18 +1,15 @@
-namespace code{
-    namespace assembly{
-	constexpr char rax[]="%rax";
-	constexpr char rcx[]="%rcx";
-	constexpr char rdx[]="%rdx";
-	
-	constexpr char rsi[]="%rsi";
-	constexpr char rdi[]="%rdi";
-	
-	constexpr char rbp[]="%rbp";
-	constexpr char rsp[]="%rsp";
-	
-	constexpr char r8[]="%r8";
-	constexpr char r9[]="%r9";
-	
-	constexpr char al[]="%al";
-    }
-}
+#pragma once
+#define rax "%rax"
+#define rcx "%rcx"
+#define rdx "%rdx"
+
+#define rsi "%rsi"
+#define rdi "%rdi"
+
+#define rbp "%rbp"
+#define rsp "%rsp"
+
+#define r8  "%r8"
+#define r9  "%r9"
+
+#define al  "%al"

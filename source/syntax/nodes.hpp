@@ -1,7 +1,7 @@
 #pragma once
-#include<string>
 #include"../semantics/analyzer.hpp"
 #include"../code/generator.hpp"
+#include<string>
 namespace syntax{
     class node{
 	public:

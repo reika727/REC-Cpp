@@ -1,5 +1,6 @@
 #pragma once
 #include"tokens.hpp"
+#include<string>
 #include<vector>
 namespace lexicon{
     class token_array{
