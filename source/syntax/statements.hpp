@@ -5,7 +5,7 @@
 namespace syntax{
     struct statement{
 	virtual ~statement();
-	virtual void eval(const code::generator&gen);
+	virtual void eval(const code::generator&gen)=0;
     };
     struct single:public statement{
 	node*stat;

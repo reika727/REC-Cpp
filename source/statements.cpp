@@ -7,10 +7,6 @@ using namespace syntax;
 using namespace code::assembly;
 using code::derefer;
 using code::unique_label;
-void statement::eval(const code::generator&gen)
-{
-
-}
 void single::eval(const code::generator&gen)
 {
     if(stat){
@@ -74,14 +70,14 @@ void _for_::eval(const code::generator&gen)
     gen.write(jmp,beg);
     gen.write(end+':');
 }
-statement::~statement(){}
-single::single(node*stat):stat(stat){}
-_if_else_::_if_else_(single*cond,statement*st1,statement*st2):cond(cond),st1(st1),st2(st2){}
-_while_::_while_(single*cond,statement*st):cond(cond),st(st){}
-_for_::_for_(single*init,single*cond,single*reinit,statement*st):init(init),cond(cond),reinit(reinit),st(st){}
-single::~single(){delete stat;}
-compound::~compound(){for(auto s:stats)delete s;}
-declare::~declare(){for(auto v:vars)delete v.second;}
-_if_else_::~_if_else_(){delete cond;delete st1;delete st2;}
-_while_::~_while_(){delete cond;delete st;}
-_for_::~_for_(){delete init;delete cond;delete reinit;delete st;}
+single   ::single(node*stat)                                        :stat(stat)                                 {}
+_if_else_::_if_else_(single*cond,statement*st1,statement*st2)       :cond(cond),st1(st1),st2(st2)               {}
+_while_  ::_while_(single*cond,statement*st)                        :cond(cond),st(st)                          {}
+_for_    ::_for_(single*init,single*cond,single*reinit,statement*st):init(init),cond(cond),reinit(reinit),st(st){}
+statement::~statement()                                                                                         {}
+single   ::~single()                                                                                            {delete stat;}
+compound ::~compound()                                                                                          {for(auto s:stats)delete s;}
+declare  ::~declare()                                                                                           {for(auto v:vars)delete v.second;}
+_if_else_::~_if_else_()                                                                                         {delete cond;delete st1;delete st2;}
+_while_  ::~_while_()                                                                                           {delete cond;delete st;}
+_for_    ::~_for_()                                                                                             {delete init;delete cond;delete reinit;delete st;}

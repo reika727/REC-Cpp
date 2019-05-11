@@ -5,7 +5,7 @@
 namespace syntax{
     struct node{
 	virtual ~node();
-	virtual void to_asm(const code::generator&gen);
+	virtual void to_asm(const code::generator&gen)=0;
     };
     struct numeric:public node{
 	int value;

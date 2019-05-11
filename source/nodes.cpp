@@ -230,35 +230,31 @@ void rmasgn::to_asm(const code::generator&gen)
     gen.write(mov,rsi,rax);
     gen.write(push,derefer(rax));
 }
-
-node::~node(){}
-void node::to_asm(const code::generator&gen){}
-numeric::numeric(int value):value(value){}
-ident::ident(const std::string&name):name(name){}
-
-unopr ::unopr (node*arg):arg(arg){}
-unopr ::~unopr(){delete arg;}
-uplus ::uplus (node*arg):unopr(arg){}
-uminus::uminus(node*arg):unopr(arg){}
-preinc::preinc(node*arg):unopr(arg){}
-predec::predec(node*arg):unopr(arg){}
-
-biopr  ::biopr  (node*larg,node*rarg):larg(larg),rarg(rarg){}
-biopr  ::~biopr (){delete larg;delete rarg;}
-plus   ::plus   (node*larg,node*rarg):biopr(larg,rarg){}
-minus  ::minus  (node*larg,node*rarg):biopr(larg,rarg){}
-multi  ::multi  (node*larg,node*rarg):biopr(larg,rarg){}
-divide ::divide (node*larg,node*rarg):biopr(larg,rarg){}
-remain ::remain (node*larg,node*rarg):biopr(larg,rarg){}
-equal  ::equal  (node*larg,node*rarg):biopr(larg,rarg){}
-nequal ::nequal (node*larg,node*rarg):biopr(larg,rarg){}
-less   ::less   (node*larg,node*rarg):biopr(larg,rarg){}
-greater::greater(node*larg,node*rarg):biopr(larg,rarg){}
-leeq   ::leeq   (node*larg,node*rarg):biopr(larg,rarg){}
-greq   ::greq   (node*larg,node*rarg):biopr(larg,rarg){}
-assign ::assign (node*larg,node*rarg):biopr(larg,rarg){}
-plasgn ::plasgn (node*larg,node*rarg):biopr(larg,rarg){}
-miasgn ::miasgn (node*larg,node*rarg):biopr(larg,rarg){}
-muasgn ::muasgn (node*larg,node*rarg):biopr(larg,rarg){}
-diasgn ::diasgn (node*larg,node*rarg):biopr(larg,rarg){}
-rmasgn ::rmasgn (node*larg,node*rarg):biopr(larg,rarg){}
+numeric::numeric(int value)             :value(value)         {}
+ident  ::ident  (const std::string&name):name(name)           {}
+unopr  ::unopr  (node*arg)              :arg(arg)             {}
+uplus  ::uplus  (node*arg):unopr(arg)                         {}
+uminus ::uminus (node*arg)              :unopr(arg)           {}
+preinc ::preinc (node*arg)              :unopr(arg)           {}
+predec ::predec (node*arg)              :unopr(arg)           {}
+biopr  ::biopr  (node*larg,node*rarg)   :larg(larg),rarg(rarg){}
+plus   ::plus   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+minus  ::minus  (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+multi  ::multi  (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+divide ::divide (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+remain ::remain (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+equal  ::equal  (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+nequal ::nequal (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+less   ::less   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+greater::greater(node*larg,node*rarg)   :biopr(larg,rarg)     {}
+leeq   ::leeq   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+greq   ::greq   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+assign ::assign (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+plasgn ::plasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+miasgn ::miasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+muasgn ::muasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+diasgn ::diasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+rmasgn ::rmasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
+node   ::~node  ()                                            {}
+unopr  ::~unopr ()                                            {delete arg;}
+biopr  ::~biopr ()                                            {delete larg;delete rarg;}
