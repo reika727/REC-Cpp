@@ -1,6 +1,6 @@
 #include"code/generator.hpp"
 using namespace code;
-generator::generator(const std::string&filename):ofs(filename),var_size(0)
+generator::generator(const std::string&filename):ofs(filename),vsize(0)
 {
     write(".global main");
 }
@@ -30,5 +30,9 @@ int generator::offset(const std::string&name)const
 }
 void generator::set_offset(const std::string&name)const
 {
-    ofst[name]=var_size+=8;
+    ofst[name]=vsize+=8;
+}
+int generator::var_size()const
+{
+    return vsize;
 }

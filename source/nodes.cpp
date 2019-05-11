@@ -24,6 +24,27 @@ void ident::refer(const code::generator&gen)const
     gen.write(sub,gen.offset(name),rax);
     gen.write(push,rax);
 }
+void fcall::to_asm(const code::generator&gen)const
+{
+    int align=(16-gen.var_size()%16)%16;
+    gen.write(sub,align,rsp);
+    for(int i=vars.size()-1;i>=0;--i){
+	vars[i]->to_asm(gen);
+	gen.write(pop,rax);
+	switch(i){
+	    case 0 :gen.write(mov,rax,rdi);break;
+	    case 1 :gen.write(mov,rax,rsi);break;
+	    case 2 :gen.write(mov,rax,rdx);break;
+	    case 3 :gen.write(mov,rax,rcx);break;
+	    case 4 :gen.write(mov,rax,r8); break;
+	    case 5 :gen.write(mov,rax,r9); break;
+	    default:gen.write(push,rax);   break;
+	}
+    }
+    gen.write(call,id->name);
+    gen.write(add,align,rsp);
+    gen.write(push,rax);
+}
 void uplus::to_asm(const code::generator&gen)const
 {
     arg->to_asm(gen);
@@ -240,6 +261,11 @@ void ident::check(const semantics::analyzer&analy)const
 {
     if(!analy.declared(name))throw std::runtime_error("未定義の変数です: "+name);
 }
+void fcall::check(const semantics::analyzer&analy)const
+{
+    id->check(analy);
+    for(auto v:vars)v->check(analy);
+}
 void unopr::check(const semantics::analyzer&analy)const
 {
     arg->check(analy);
@@ -259,8 +285,13 @@ void biopr_l::check(const semantics::analyzer&analy)const
     biopr::check(analy);
     if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
 }
+void fcall::push_back_var(const syntax::node*var)const
+{
+    vars.push_back(var);
+}
 numeric::numeric(int value)                      :value(value)         {}
 ident  ::ident  (const std::string&name)         :name(name)           {}
+fcall  ::fcall  (const ident*id)                 :id(id)               {}
 unopr  ::unopr  (const node*arg)                 :arg(arg)             {}
 uplus  ::uplus  (const node*arg)                 :unopr(arg)           {}
 uminus ::uminus (const node*arg)                 :unopr(arg)           {}
@@ -287,5 +318,6 @@ muasgn ::muasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
 diasgn ::diasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
 rmasgn ::rmasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
 node   ::~node  ()                                                     {}
+fcall  ::~fcall ()                  {delete id;for(auto v:vars)delete v;}
 unopr  ::~unopr ()                                          {delete arg;}
 biopr  ::~biopr ()                             {delete larg;delete rarg;}

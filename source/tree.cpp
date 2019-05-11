@@ -118,7 +118,7 @@ const node*tree::unary() // +, -, ++, -- right to left
     else if(ta.consume(TK::MIMI)) return new predec(unary());
     else                          return term();
 }
-const node*tree::term()
+const node*tree::term() // () left to right
 {
     if(ta.consume(TK::OPARENT)){
 	auto ret=equality();
@@ -127,7 +127,21 @@ const node*tree::term()
     }else if(auto nump=ta.consume_num()){
 	return new numeric(*nump);
     }else if(auto namep=ta.consume_id()){
-	return new ident(*namep);
+	auto id=new ident(*namep);
+	if(ta.consume(TK::OPARENT)){
+	    auto ret=new fcall(id);
+	    if(!ta.consume(TK::CPARENT)){
+		while(true){
+		    ret->push_back_var(equality());
+		    if(ta.consume(TK::CPARENT))break;
+		    else if(ta.consume(TK::COMMA))continue;
+		    else throw std::runtime_error("無効な関数呼び出しです");
+		}
+	    }
+	    return ret;
+	}else{
+	    return id;
+	}
     }else{
 	throw std::runtime_error("構文解析ができませんでした");
     }

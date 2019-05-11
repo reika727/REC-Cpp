@@ -2,6 +2,7 @@
 #include"../semantics/analyzer.hpp"
 #include"../code/generator.hpp"
 #include<string>
+#include<vector>
 namespace syntax{
     class node{
 	public:
@@ -10,25 +11,35 @@ namespace syntax{
 	    virtual void to_asm(const code::generator&gen)const=0;
     };
     class numeric:public node{
-	    int value;
 	public:
+	    const int value;
 	    numeric(int value);
 	    void check(const semantics::analyzer&analy)const override;
 	    void to_asm(const code::generator&gen)const override;
     };
     class ident:public node{
-	    std::string name;
 	public:
+	    const std::string name;
 	    ident(const std::string&name);
 	    void check(const semantics::analyzer&analy)const override;
 	    void to_asm(const code::generator&gen)const override;
 	    void refer(const code::generator&gen)const;
     };
+    class fcall:public node{
+	    mutable std::vector<const node*>vars;
+	public:
+	    const ident*const id;
+	    fcall(const ident*id);
+	    ~fcall()override;
+	    void check(const semantics::analyzer&analy)const override;
+	    void to_asm(const code::generator&gen)const override;
+	    void push_back_var(const node*var)const;
+    };
     class unopr:public node{
 	public:
 	    const node*const arg;
 	    unopr(const node*arg);
-	    virtual ~unopr();
+	    virtual ~unopr()override;
 	    void check(const semantics::analyzer&analy)const override;
     };
     class uplus:public unopr{
@@ -60,7 +71,7 @@ namespace syntax{
 	public:
 	    const node*const larg,*const rarg;
 	    biopr(const node*larg,const node*rarg);
-	    virtual ~biopr();
+	    virtual ~biopr()override;
 	    void check(const semantics::analyzer&analy)const override;
     };
     class plus:public biopr{

@@ -111,7 +111,8 @@ try \
 '{'\
 ';'\
 '}a;' 10
-#try_link 'char a=10,b=2,c=3;;say_OK();'
-#try_link 'char a=21,b=4,c=8,d=a+b*c,e=12,f=e;print_6num(a,b,c,d,e,f);'
-#try_link 'char a=21,b=4,c=8,d=a+b*c,e=12,f=e,g=32,h=21,i=g+h,j=21,k=a,l=0;print_12num(a,b,c,d,e,f,g,h,i,j,k,l);'
+try_link 'char say_OK;say_OK();'
+try_link 'char say_OK;char a=10,b=2,c=3;;say_OK();'
+try_link 'char print_6num;char a=21,b=4,c=8,d=a+b*c,e=12,f=e;print_6num(a,b,c,d,e,f);'
+try_link 'char print_12num;char a=21,b=4,c=8,d=a+b*c,e=12,f=e,g=32,h=21,i=g+h,j=21,k=a,l=0;print_12num(a,b,c,d,e,f,g,h,i,j,k,l);'
 #__CO__

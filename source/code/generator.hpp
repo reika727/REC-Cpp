@@ -6,7 +6,7 @@ namespace code{
     class generator{
 	    mutable std::ofstream ofs;
 	    mutable std::map<std::string,int>ofst;
-	    mutable int var_size;
+	    mutable int vsize;
 	public:
 	    generator(const std::string&filename);
 	    void write(const std::string&str)const;
@@ -16,5 +16,6 @@ namespace code{
 	    void write(const std::string&inst,int arg)const;
 	    int offset(const std::string&name)const;
 	    void set_offset(const std::string&name)const;
+	    int var_size()const;
     };
 }
