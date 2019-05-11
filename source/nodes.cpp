@@ -241,113 +241,23 @@ void ident::check(const semantics::analyzer&analy)const
 {
     if(!analy.declared(name))throw std::runtime_error("未定義の変数です: "+name);
 }
-void uplus::check(const semantics::analyzer&analy)const
+void unopr::check(const semantics::analyzer&analy)const
 {
     arg->check(analy);
 }
-void uminus::check(const semantics::analyzer&analy)const
+void unopr_l::check(const semantics::analyzer&analy)const
 {
-    arg->check(analy);
-}
-void preinc::check(const semantics::analyzer&analy)const
-{
-    arg->check(analy);
+    unopr::check(analy);
     if(typeid(*arg)!=typeid(ident))throw std::runtime_error("右辺値への操作です");
 }
-void predec::check(const semantics::analyzer&analy)const
-{
-    arg->check(analy);
-    if(typeid(*arg)!=typeid(ident))throw std::runtime_error("右辺値への操作です");
-}
-void plus::check(const semantics::analyzer&analy)const
+void biopr::check(const semantics::analyzer&analy)const
 {
     larg->check(analy);
     rarg->check(analy);
 }
-void minus::check(const semantics::analyzer&analy)const
+void biopr_l::check(const semantics::analyzer&analy)const
 {
-    larg->check(analy);
-    rarg->check(analy);
-}
-void multi::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void divide::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void remain::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void equal::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void nequal::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void less::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void greater::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void leeq::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void greq::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void assign::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
-}
-void plasgn::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
-}
-void miasgn::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
-}
-void muasgn::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
-}
-void diasgn::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
-}
-void rmasgn::check(const semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
+    biopr::check(analy);
     if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
 }
 numeric::numeric(int value)                      :value(value)         {}
@@ -355,8 +265,9 @@ ident  ::ident  (const std::string&name)         :name(name)           {}
 unopr  ::unopr  (const node*arg)                 :arg(arg)             {}
 uplus  ::uplus  (const node*arg)                 :unopr(arg)           {}
 uminus ::uminus (const node*arg)                 :unopr(arg)           {}
-preinc ::preinc (const node*arg)                 :unopr(arg)           {}
-predec ::predec (const node*arg)                 :unopr(arg)           {}
+unopr_l::unopr_l(const node*arg)                 :unopr(arg)           {}
+preinc ::preinc (const node*arg)                 :unopr_l(arg)         {}
+predec ::predec (const node*arg)                 :unopr_l(arg)         {}
 biopr  ::biopr  (const node*larg,const node*rarg):larg(larg),rarg(rarg){}
 plus   ::plus   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
 minus  ::minus  (const node*larg,const node*rarg):biopr(larg,rarg)     {}
@@ -369,12 +280,13 @@ less   ::less   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
 greater::greater(const node*larg,const node*rarg):biopr(larg,rarg)     {}
 leeq   ::leeq   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
 greq   ::greq   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
-assign ::assign (const node*larg,const node*rarg):biopr(larg,rarg)     {}
-plasgn ::plasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
-miasgn ::miasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
-muasgn ::muasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
-diasgn ::diasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
-rmasgn ::rmasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+biopr_l::biopr_l(const node*larg,const node*rarg):biopr(larg,rarg)     {}
+assign ::assign (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
+plasgn ::plasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
+miasgn ::miasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
+muasgn ::muasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
+diasgn ::diasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
+rmasgn ::rmasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
 node   ::~node  ()                                                     {}
 unopr  ::~unopr ()                                          {delete arg;}
 biopr  ::~biopr ()                             {delete larg;delete rarg;}
