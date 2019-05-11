@@ -9,6 +9,7 @@ namespace syntax{
 	private:
 	    const statement*stat();
 	    const single*emptiable_single();
+	    const node*coma();
 	    const node*asgn();
 	    const node*equality();
 	    const node*relational();

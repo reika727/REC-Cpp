@@ -129,6 +129,11 @@ namespace syntax{
 	    greq(const node*larg,const node*rarg);
 	    void to_asm(const code::generator&gen)const override;
     };
+    class comma:public biopr{
+	public:
+	    comma(const node*larg,const node*rarg);
+	    void to_asm(const code::generator&gen)const override;
+    };
     class biopr_l:public biopr{
 	public:
 	    biopr_l(const node*larg,const node*rarg);

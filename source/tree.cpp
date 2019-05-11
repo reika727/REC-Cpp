@@ -19,14 +19,14 @@ const statement*tree::stat()
 	return ret;
     }else if(ta.consume(TK::IF)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
-	auto cond=new single(asgn());
+	auto cond=new single(coma());
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	auto st1=stat();
 	auto st2=ta.consume(TK::ELSE)?stat():new single(nullptr);
 	return new _if_else_(cond,st1,st2);
     }else if(ta.consume(TK::WHILE)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
-	auto cond=new single(asgn());
+	auto cond=new single(coma());
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
 	auto st=stat();
 	return new _while_(cond,st);
@@ -55,7 +55,15 @@ const single*tree::emptiable_single()
     if(auto syp=dynamic_cast<lexicon::symbol*>(*ta.pos());syp&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
 	return new single(nullptr);
     }else{
-	return new single(asgn());
+	return new single(coma());
+    }
+}
+const node*tree::coma() // , left to right
+{
+    auto ret=asgn();
+    while(true){
+	     if(ta.consume(TK::COMMA))ret=new comma(ret,asgn());
+	else                          return ret;
     }
 }
 const node*tree::asgn() // =, +=, -=, *=, /= right to left

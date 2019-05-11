@@ -41,16 +41,13 @@ if((A__*300<=b_c)!=0)          print_num(19);
 a=2;
 a+=3;
 if(a!=5)                       print_num(20);
-a=2;
-b=3;
+a=2,b=3;
 char c=2;
 if((a+=b+=c)!=7)                 print_num(21);
 a=24;
 a-=13;
 if(a!=11)                      print_num(22);
-a=31;
-b=12;
-c=9;
+a=31,b=12,c=9;
 if((a-=b-=c)!=28)                print_num(23);
 a=12;
 b=9;
@@ -70,29 +67,23 @@ d/=c;
 char e=173;
 if((e%=d)!=3)                    print_num(27);
 a=23;
-++a;
-++a;
+++a,++a;
 b=++a;
 if(b!=26)                      print_num(28);
 a=32;
---a;
---a;
+--a,--a;
 b=--a;
 if(b!=29)                      print_num(29);
-a=32;
-b=++a;
-++b;
-++a;
+a=32,b=++a;
+++b,++a;
 c=(a+b);
 if(--c!=67)                    print_num(30);
-a=32;
-b=2;
+a=32,b=2;
 {
     b=a;
 }
 if(b!=32)                      print_num(31);
-a=32;
-b=2;
+a=32,b=2;
 {
     c=a;
     {
@@ -103,8 +94,7 @@ b=2;
     a+=c;
 }
 if(a+b!=133)                   print_num(32);
-a=32;
-b=46;
+a=32,b=46;
 ++b;
 if(b>a){
     c=a+b;
@@ -117,8 +107,7 @@ if(b>a){
     b=c;
 }
 if((a=b)!=166)                   print_num(33);
-a=10;
-b=5;
+a=10,b=5;
 while(b>0){
     ++a;
     --b;
@@ -139,10 +128,10 @@ a=10;
 {
     ;
 }if(a!=10)                     print_num(38);
-a=21;b=4;c=8;d=a+b*c;e=12;
+a=21,b=4,c=8,d=a+b*c,e=12;
 char f=e;
 print_6num(a,b,c,d,e,f);
-a=21;b=4;c=8;d=a+b*c;e=12;f=e;
+a=21,b=4,c=8,d=a+b*c,e=12,f=e;
 char g=32,h=21;
 i=g+h;
 char j=21,k=a,l=0;

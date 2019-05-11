@@ -185,6 +185,12 @@ void greq::to_asm(const code::generator&gen)const
     gen.write(movzb,al,rax);
     gen.write(push,rax);
 }
+void comma::to_asm(const code::generator&gen)const
+{
+    larg->to_asm(gen);
+    gen.write(pop,rax);
+    rarg->to_asm(gen);
+}
 void assign::to_asm(const code::generator&gen)const
 {
     dynamic_cast<const ident*>(larg)->refer(gen);
@@ -310,6 +316,7 @@ less   ::less   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
 greater::greater(const node*larg,const node*rarg):biopr(larg,rarg)     {}
 leeq   ::leeq   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
 greq   ::greq   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+comma  ::comma  (const node*larg,const node*rarg):biopr(larg,rarg)     {}
 biopr_l::biopr_l(const node*larg,const node*rarg):biopr(larg,rarg)     {}
 assign ::assign (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
 plasgn ::plasgn (const node*larg,const node*rarg):biopr_l(larg,rarg)   {}
