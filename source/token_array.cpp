@@ -75,7 +75,7 @@ token_array::token_array(const std::string&s)
 		tv.emplace_back(new symbol(TK::GREQ));
 		++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::GREAT));
+		tv.emplace_back(new symbol(TK::GREATER));
 	    }
 	}else if(s.substr(i,4)=="char"&&i+4<s.length()&&isspace(s[i+4])){
 	    tv.emplace_back(new symbol(TK::CHAR));

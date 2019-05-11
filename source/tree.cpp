@@ -92,11 +92,11 @@ const node*tree::order06() // < > <= >= left to right
 {
     auto ret=order04();
     while(true){
-	     if(ta.consume(TK::LESS)) ret=new less   (ret,order04());
-	else if(ta.consume(TK::GREAT))ret=new greater(ret,order04());
-	else if(ta.consume(TK::LEEQ)) ret=new leeq   (ret,order04());
-	else if(ta.consume(TK::GREQ)) ret=new greq   (ret,order04());
-	else                          return ret;
+	     if(ta.consume(TK::LESS))   ret=new less   (ret,order04());
+	else if(ta.consume(TK::GREATER))ret=new greater(ret,order04());
+	else if(ta.consume(TK::LEEQ))   ret=new leeq   (ret,order04());
+	else if(ta.consume(TK::GREQ))   ret=new greq   (ret,order04());
+	else                            return ret;
     }
 }
 const node*tree::order04() // + - left to right

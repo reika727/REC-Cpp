@@ -18,7 +18,7 @@ namespace lexicon{
 	EQEQ,    // ==
 	EXEQ,    // !=
 	LESS,    // <
-	GREAT,   // >
+	GREATER, // >
 	LEEQ,    // <=
 	GREQ,    // >=
 	SCOLON,  // ;
