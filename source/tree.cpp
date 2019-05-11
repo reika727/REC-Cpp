@@ -121,7 +121,7 @@ const node*tree::unary() // +, -, ++, -- right to left
 const node*tree::term() // () left to right
 {
     if(ta.consume(TK::OPARENT)){
-	auto ret=equality();
+	auto ret=asgn();
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
 	return ret;
     }else if(auto nump=ta.consume_num()){

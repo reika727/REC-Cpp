@@ -4,6 +4,11 @@ int say_OK()
     printf("OK\n");
     return 0;
 }
+int print_num(int a)
+{
+    printf("%d\n",a);
+    return 0;
+}
 int print_6num(int a,int b,int c,int d,int e,int f)
 {
     printf("%d %d %d %d %d %d\n",a,b,c,d,e,f);

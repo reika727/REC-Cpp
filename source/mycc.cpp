@@ -10,10 +10,14 @@ int main(int argc,char**argv)
 	if(argc==1){
 	    throw std::runtime_error("引数が不足しています");
 	}else{
-	    lexicon::token_array ta(argv[1]);
+	    std::ifstream ifs(argv[1]);
+	    std::string src((std::istreambuf_iterator<char>(ifs)),std::istreambuf_iterator<char>());
+	    std::string dest(argc==2?"tmp.s":argv[2]);
+	    
+	    lexicon::token_array ta(src);
 	    syntax::tree tr(ta);
 	    semantics::analyzer analy;tr.root()->check(analy);
-	    code::generator gen(argc==2?"tmp.s":argv[2]);
+	    code::generator gen(dest);
 	    
 	    // TODO
 		gen.write("main:");
