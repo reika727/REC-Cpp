@@ -1,4 +1,4 @@
-#include"../syntax/statements.hpp"
+#pragma once
 #include<set>
 namespace semantics{	
     /* 
@@ -8,8 +8,10 @@ namespace semantics{
      * 変数の二重定義
      */    
     class analyzer{
-	    std::set<std::string>vars;
+	    mutable std::set<std::string>vars;
 	public:
-	    analyzer(const syntax::compound*rt);
+	    analyzer();
+	    void declare_var(const std::string&name)const;
+	    bool declared(const std::string&name)const;
     };
 }

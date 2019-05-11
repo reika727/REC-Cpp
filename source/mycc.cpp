@@ -12,16 +12,20 @@ int main(int argc,char**argv)
 	}else{
 	    lexicon::token_array ta(argv[1]);
 	    syntax::tree tr(ta);
-	    //semantics::analyzer(tr);
+	    semantics::analyzer analy;tr.root()->check(analy);
 	    code::generator gen(argc==2?"tmp.s":argv[2]);
+	    
 	    // TODO
 		gen.write("main:");
 		gen.write("push","%rbp");
 		gen.write("mov","%rsp","%rbp");
+
 	    tr.root()->eval(gen);
+
+	    //TODO
 		gen.write("mov","%rbp","%rsp");
 		gen.write("pop","%rbp");
-	    gen.write("ret");
+		gen.write("ret");
 	}
     }catch(const std::exception&e){
 	std::cout<<e.what()<<std::endl;

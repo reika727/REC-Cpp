@@ -1,4 +1,5 @@
 #include"syntax/statements.hpp"
+#include"semantics/analyzer.hpp"
 #include"code/generator.hpp"
 #include"code/gcfuncs.hpp"
 #include"code/assembly/instructions.hpp"
@@ -69,6 +70,40 @@ void _for_::eval(const code::generator&gen)const
     reinit->eval(gen);
     gen.write(jmp,beg);
     gen.write(end+':');
+}
+void single::check(const semantics::analyzer&analy)const
+{
+    if(stat)stat->check(analy);
+}
+void compound::check(const semantics::analyzer&analy)const
+{
+    for(auto s:stats)s->check(analy);
+}
+void declare::check(const semantics::analyzer&analy)const
+{
+    for(auto v:vars){
+	if(analy.declared(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+	analy.declare_var(v.first);
+	if(v.second)v.second->check(analy);
+    }
+}
+void _if_else_::check(const semantics::analyzer&analy)const
+{
+    cond->check(analy);
+    st1->check(analy);
+    st2->check(analy);
+}
+void _while_::check(const semantics::analyzer&analy)const
+{
+    cond->check(analy);
+    st->check(analy);
+}
+void _for_::check(const semantics::analyzer&analy)const
+{
+    init->check(analy);
+    cond->check(analy);
+    reinit->check(analy);
+    st->check(analy);
 }
 single   ::single    (const node*stat)                                                           :stat(stat)                                 {}
 _if_else_::_if_else_ (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}

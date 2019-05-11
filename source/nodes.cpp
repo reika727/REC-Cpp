@@ -1,4 +1,7 @@
+#include<stdexcept>
+#include<typeinfo>
 #include"syntax/nodes.hpp"
+#include"semantics/analyzer.hpp"
 #include"code/generator.hpp"
 #include"code/gcfuncs.hpp"
 #include"code/assembly/instructions.hpp"
@@ -37,14 +40,14 @@ void uminus::to_asm(const code::generator&gen)const
 }
 void preinc::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(arg)->refer(gen);
+    dynamic_cast<const ident*>(arg)->refer(gen);
     gen.write(pop,rax);
     gen.write(add,1,derefer(rax));
     gen.write(push,derefer(rax));
 }
 void predec::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(arg)->refer(gen);
+    dynamic_cast<const ident*>(arg)->refer(gen);
     gen.write(pop,rax);
     gen.write(sub,1,derefer(rax));
     gen.write(push,derefer(rax));
@@ -164,7 +167,7 @@ void greq::to_asm(const code::generator&gen)const
 }
 void assign::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(larg)->refer(gen);
+    dynamic_cast<const ident*>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -173,7 +176,7 @@ void assign::to_asm(const code::generator&gen)const
 }
 void plasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(larg)->refer(gen);
+    dynamic_cast<const ident*>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -182,7 +185,7 @@ void plasgn::to_asm(const code::generator&gen)const
 }
 void miasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(larg)->refer(gen);
+    dynamic_cast<const ident*>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -191,7 +194,7 @@ void miasgn::to_asm(const code::generator&gen)const
 }
 void muasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(larg)->refer(gen);
+    dynamic_cast<const ident*>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -204,7 +207,7 @@ void muasgn::to_asm(const code::generator&gen)const
 }
 void diasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(larg)->refer(gen);
+    dynamic_cast<const ident*>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -218,7 +221,7 @@ void diasgn::to_asm(const code::generator&gen)const
 }
 void rmasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<const ident*const>(larg)->refer(gen);
+    dynamic_cast<const ident*>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -229,6 +232,123 @@ void rmasgn::to_asm(const code::generator&gen)const
     gen.write(mov,rdx,derefer(rsi));
     gen.write(mov,rsi,rax);
     gen.write(push,derefer(rax));
+}
+void numeric::check(const semantics::analyzer&analy)const
+{
+    return;
+}
+void ident::check(const semantics::analyzer&analy)const
+{
+    if(!analy.declared(name))throw std::runtime_error("未定義の変数です: "+name);
+}
+void uplus::check(const semantics::analyzer&analy)const
+{
+    arg->check(analy);
+}
+void uminus::check(const semantics::analyzer&analy)const
+{
+    arg->check(analy);
+}
+void preinc::check(const semantics::analyzer&analy)const
+{
+    arg->check(analy);
+    if(typeid(*arg)!=typeid(ident))throw std::runtime_error("右辺値への操作です");
+}
+void predec::check(const semantics::analyzer&analy)const
+{
+    arg->check(analy);
+    if(typeid(*arg)!=typeid(ident))throw std::runtime_error("右辺値への操作です");
+}
+void plus::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void minus::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void multi::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void divide::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void remain::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void equal::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void nequal::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void less::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void greater::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void leeq::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void greq::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void assign::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
+}
+void plasgn::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
+}
+void miasgn::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
+}
+void muasgn::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
+}
+void diasgn::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
+}
+void rmasgn::check(const semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
 }
 numeric::numeric(int value)                      :value(value)         {}
 ident  ::ident  (const std::string&name)         :name(name)           {}
