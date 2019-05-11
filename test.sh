@@ -26,21 +26,18 @@ try_link() {
     fi
     echo
 }
-#<< "#__CO__"
 try 'a?v;'
 try '12adada=13;'
-
 try 'a!;'
 try 'a'
 try ');'
 try 'a=+(1+2)*3);'
 try 'a=2;a+=(2+2'
 try 'a=2;{2+2;'
-
+<< "#__CO__"
 try 'a+2=3;'
-#try 'char a=2;{char b=23;}a=b;' 23
 #__CO__
-<<"#__CO__"
+try 'char a=2;{char b=23;}a=b;' 23
 try '((1+2)*3);' 9
 try '+((1+2)*3);' 9
 try '+(2);' 2
@@ -116,7 +113,7 @@ try \
 '{'\
 ';'\
 '}a;' 10
-try_link 'char a=10,b=2,c=3;;say_OK();'
-try_link 'char a=21,b=4,c=8,d=a+b*c,e=12,f=e;print_6num(a,b,c,d,e,f);'
-try_link 'char a=21,b=4,c=8,d=a+b*c,e=12,f=e,g=32,h=21,i=g+h,j=21,k=a,l=0;print_12num(a,b,c,d,e,f,g,h,i,j,k,l);'
+#try_link 'char a=10,b=2,c=3;;say_OK();'
+#try_link 'char a=21,b=4,c=8,d=a+b*c,e=12,f=e;print_6num(a,b,c,d,e,f);'
+#try_link 'char a=21,b=4,c=8,d=a+b*c,e=12,f=e,g=32,h=21,i=g+h,j=21,k=a,l=0;print_12num(a,b,c,d,e,f,g,h,i,j,k,l);'
 #__CO__

@@ -9,7 +9,7 @@ statement*tree::stat()
 	while(true){
 	    if(auto dep=ta.consume_id())ret->vars.push_back(std::make_pair(*dep,nullptr));
 	    else throw std::runtime_error("無効な宣言です");
-	    if(ta.consume(TK::EQUAL))ret->vars.back().second=assign();
+	    if(ta.consume(TK::EQUAL))ret->vars.back().second=asgn();
 	    if(ta.consume(TK::COMMA))continue;
 	    else if(ta.consume(TK::SCOLON))break;
 	    else throw std::runtime_error("不正な区切り文字です");
@@ -17,16 +17,14 @@ statement*tree::stat()
 	return ret;
     }else if(ta.consume(TK::IF)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
-	single*cond=new single(assign());
+	single*cond=new single(asgn());
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
-	statement*st=stat();
-	return new _if_(cond,st);
-    }else if(ta.consume(TK::ELSE)){
-	statement*st=stat();
-	return new _else_(st);
+	statement*st1=stat();
+	statement*st2=ta.consume(TK::ELSE)?stat():new single(nullptr);
+	return new _if_else_(cond,st1,st2);
     }else if(ta.consume(TK::WHILE)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
-	single*cond=new single(assign());
+	single*cond=new single(asgn());
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
 	statement*st=stat();
 	return new _while_(cond,st);
@@ -55,19 +53,19 @@ single*tree::emptiable_single()
     if(auto syp=dynamic_cast<lexicon::symbol*>(*ta.pos());syp&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
 	return new single(nullptr);
     }else{
-	return new single(assign());
+	return new single(asgn());
     }
 }
-node*tree::assign() // =, +=, -=, *=, /= right to left
+node*tree::asgn() // =, +=, -=, *=, /= right to left
 {
     node*ret=equality();
     while(true){
- 	     if(ta.consume(TK::EQUAL))ret=new biopr(ret,ND::ASSIGN,assign());
-	else if(ta.consume(TK::PLEQ)) ret=new biopr(ret,ND::PLASGN,assign());
-	else if(ta.consume(TK::MIEQ)) ret=new biopr(ret,ND::MIASGN,assign());
-	else if(ta.consume(TK::ASEQ)) ret=new biopr(ret,ND::MUASGN,assign());
-	else if(ta.consume(TK::SLEQ)) ret=new biopr(ret,ND::DIASGN,assign());
-	else if(ta.consume(TK::PEEQ)) ret=new biopr(ret,ND::RMASGN,assign());
+ 	     if(ta.consume(TK::EQUAL))ret=new assign(ret,asgn());
+	else if(ta.consume(TK::PLEQ)) ret=new plasgn(ret,asgn());
+	else if(ta.consume(TK::MIEQ)) ret=new miasgn(ret,asgn());
+	else if(ta.consume(TK::ASEQ)) ret=new muasgn(ret,asgn());
+	else if(ta.consume(TK::SLEQ)) ret=new diasgn(ret,asgn());
+	else if(ta.consume(TK::PEEQ)) ret=new rmasgn(ret,asgn());
 	else                          return ret;
     }
 }
@@ -75,8 +73,8 @@ node*tree::equality() // ==, != left to right
 {
     node*ret=relational();
     while(true){
-	     if(ta.consume(TK::EQEQ))ret=new biopr(ret,ND::EQUAL,relational());
-	else if(ta.consume(TK::EXEQ))ret=new biopr(ret,ND::NEQUAL,relational());
+	     if(ta.consume(TK::EQEQ))ret=new equal(ret,relational());
+	else if(ta.consume(TK::EXEQ))ret=new nequal(ret,relational());
 	else                         return ret;
     }
 }
@@ -84,10 +82,10 @@ node*tree::relational() // <, >, <=, >= left to right
 {
     node*ret=add();
     while(true){
-	     if(ta.consume(TK::LESS)) ret=new biopr(ret,ND::LESS,add());
-	else if(ta.consume(TK::GREAT))ret=new biopr(ret,ND::GREAT,add());
-	else if(ta.consume(TK::LEEQ)) ret=new biopr(ret,ND::LEEQ,add());
-	else if(ta.consume(TK::GREQ)) ret=new biopr(ret,ND::GREQ,add());
+	     if(ta.consume(TK::LESS)) ret=new less(ret,add());
+	else if(ta.consume(TK::GREAT))ret=new greater(ret,add());
+	else if(ta.consume(TK::LEEQ)) ret=new leeq(ret,add());
+	else if(ta.consume(TK::GREQ)) ret=new greq(ret,add());
 	else                          return ret;
     }
 }
@@ -95,8 +93,8 @@ node*tree::add() // +, - left to right
 {
     node*ret=mul();
     while(true){
-	     if(ta.consume(TK::PLUS)) ret=new biopr(ret,ND::PLUS,mul());
-	else if(ta.consume(TK::MINUS))ret=new biopr(ret,ND::MINUS,mul());
+	     if(ta.consume(TK::PLUS)) ret=new plus(ret,mul());
+	else if(ta.consume(TK::MINUS))ret=new minus(ret,mul());
 	else                          return ret;
     }
 }
@@ -104,18 +102,18 @@ node*tree::mul() // *, /, % left to right
 {
     node*ret=unary();
     while(true){
-	     if(ta.consume(TK::ASTER))  ret=new biopr(ret,ND::MULTI,unary());
-	else if(ta.consume(TK::SLASH))  ret=new biopr(ret,ND::DIVIDE,unary());
-	else if(ta.consume(TK::PERCENT))ret=new biopr(ret,ND::REMAIN,unary());
+	     if(ta.consume(TK::ASTER))  ret=new multi(ret,unary());
+	else if(ta.consume(TK::SLASH))  ret=new divide(ret,unary());
+	else if(ta.consume(TK::PERCENT))ret=new remain(ret,unary());
 	else                            return ret;
     }
 }
 node*tree::unary() // +, -, ++, -- right to left
 {
-         if(ta.consume(TK::PLUS)) return new unopr(ND::UPLUS,unary());
-    else if(ta.consume(TK::MINUS))return new unopr(ND::UMINUS,unary());
-    else if(ta.consume(TK::PLPL)) return new unopr(ND::PREINC,unary());
-    else if(ta.consume(TK::MIMI)) return new unopr(ND::PREDEC,unary());
+         if(ta.consume(TK::PLUS)) return new uplus(unary());
+    else if(ta.consume(TK::MINUS))return new uminus(unary());
+    else if(ta.consume(TK::PLPL)) return new preinc(unary());
+    else if(ta.consume(TK::MIMI)) return new predec(unary());
     else                          return term();
 }
 node*tree::term()

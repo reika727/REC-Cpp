@@ -8,7 +8,7 @@ namespace syntax{
 	private:
 	    statement*stat();
 	    single*emptiable_single();
-	    node*assign();
+	    node*asgn();
 	    node*equality();
 	    node*relational();
 	    node*add();
