@@ -230,31 +230,31 @@ void rmasgn::to_asm(const code::generator&gen)const
     gen.write(mov,rsi,rax);
     gen.write(push,derefer(rax));
 }
-numeric::numeric(int value)             :value(value)         {}
-ident  ::ident  (const std::string&name):name(name)           {}
-unopr  ::unopr  (node*arg)              :arg(arg)             {}
-uplus  ::uplus  (node*arg):unopr(arg)                         {}
-uminus ::uminus (node*arg)              :unopr(arg)           {}
-preinc ::preinc (node*arg)              :unopr(arg)           {}
-predec ::predec (node*arg)              :unopr(arg)           {}
-biopr  ::biopr  (node*larg,node*rarg)   :larg(larg),rarg(rarg){}
-plus   ::plus   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-minus  ::minus  (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-multi  ::multi  (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-divide ::divide (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-remain ::remain (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-equal  ::equal  (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-nequal ::nequal (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-less   ::less   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-greater::greater(node*larg,node*rarg)   :biopr(larg,rarg)     {}
-leeq   ::leeq   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-greq   ::greq   (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-assign ::assign (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-plasgn ::plasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-miasgn ::miasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-muasgn ::muasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-diasgn ::diasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-rmasgn ::rmasgn (node*larg,node*rarg)   :biopr(larg,rarg)     {}
-node   ::~node  ()                                            {}
-unopr  ::~unopr ()                                            {delete arg;}
-biopr  ::~biopr ()                                            {delete larg;delete rarg;}
+numeric::numeric(int value)                      :value(value)         {}
+ident  ::ident  (const std::string&name)         :name(name)           {}
+unopr  ::unopr  (const node*arg)                 :arg(arg)             {}
+uplus  ::uplus  (const node*arg)                 :unopr(arg)           {}
+uminus ::uminus (const node*arg)                 :unopr(arg)           {}
+preinc ::preinc (const node*arg)                 :unopr(arg)           {}
+predec ::predec (const node*arg)                 :unopr(arg)           {}
+biopr  ::biopr  (const node*larg,const node*rarg):larg(larg),rarg(rarg){}
+plus   ::plus   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+minus  ::minus  (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+multi  ::multi  (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+divide ::divide (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+remain ::remain (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+equal  ::equal  (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+nequal ::nequal (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+less   ::less   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+greater::greater(const node*larg,const node*rarg):biopr(larg,rarg)     {}
+leeq   ::leeq   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+greq   ::greq   (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+assign ::assign (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+plasgn ::plasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+miasgn ::miasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+muasgn ::muasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+diasgn ::diasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+rmasgn ::rmasgn (const node*larg,const node*rarg):biopr(larg,rarg)     {}
+node   ::~node  ()                                                     {}
+unopr  ::~unopr ()                                          {delete arg;}
+biopr  ::~biopr ()                             {delete larg;delete rarg;}

@@ -6,18 +6,18 @@ namespace syntax{
 	    lexicon::token_array&ta;
 	    compound*rt;
 	private:
-	    statement*stat();
-	    single*emptiable_single();
-	    node*asgn();
-	    node*equality();
-	    node*relational();
-	    node*add();
-	    node*mul();
-	    node*unary();
-	    node*term();
+	    const statement*stat();
+	    const single*emptiable_single();
+	    const node*asgn();
+	    const node*equality();
+	    const node*relational();
+	    const node*add();
+	    const node*mul();
+	    const node*unary();
+	    const node*term();
 	public:
 	    tree(lexicon::token_array&ta);
 	    ~tree();
-	    compound*root();
+	    const compound*root();
     };
 }

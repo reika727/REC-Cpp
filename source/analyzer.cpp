@@ -1,6 +1,6 @@
 #include"semantics/analyzer.hpp"
 using namespace semantics;
-analyzer::analyzer(syntax::compound*rt)
+analyzer::analyzer(const syntax::compound*rt)
 {
 
 }

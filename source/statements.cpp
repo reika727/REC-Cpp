@@ -70,22 +70,22 @@ void _for_::eval(const code::generator&gen)const
     gen.write(jmp,beg);
     gen.write(end+':');
 }
-single   ::single(node*stat)                                        :stat(stat)                                 {}
-_if_else_::_if_else_(single*cond,statement*st1,statement*st2)       :cond(cond),st1(st1),st2(st2)               {}
-_while_  ::_while_(single*cond,statement*st)                        :cond(cond),st(st)                          {}
-_for_    ::_for_(single*init,single*cond,single*reinit,statement*st):init(init),cond(cond),reinit(reinit),st(st){}
-statement::~statement()                                                                                         {}
-single   ::~single()                                                                                            {delete stat;}
-compound ::~compound()                                                                                          {for(auto s:stats)delete s;}
-declare  ::~declare()                                                                                           {for(auto v:vars)delete v.second;}
-_if_else_::~_if_else_()                                                                                         {delete cond;delete st1;delete st2;}
-_while_  ::~_while_()                                                                                           {delete cond;delete st;}
-_for_    ::~_for_()                                                                                             {delete init;delete cond;delete reinit;delete st;}
-void compound::push_back_stat(statement*st)
+single   ::single    (const node*stat)                                                           :stat(stat)                                 {}
+_if_else_::_if_else_ (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
+_while_  ::_while_   (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
+_for_    ::_for_     (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st){}
+statement::~statement()                                                                                                                      {}
+single   ::~single   ()                                                                                                          {delete stat;}
+compound ::~compound ()                                                                                            {for(auto s:stats)delete s;}
+declare  ::~declare  ()                                                                                      {for(auto v:vars)delete v.second;}
+_if_else_::~_if_else_()                                                                                    {delete cond;delete st1;delete st2;}
+_while_  ::~_while_  ()                                                                                                {delete cond;delete st;}
+_for_    ::~_for_    ()                                                                      {delete init;delete cond;delete reinit;delete st;}
+void compound::push_back_stat(const statement*st)
 {
     stats.push_back(st);
 }
-void declare::push_back_var(std::pair<std::string,node*>var)
+void declare::push_back_var(std::pair<std::string,const node*>var)
 {
     vars.push_back(var);
 }

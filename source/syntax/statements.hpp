@@ -11,29 +11,29 @@ namespace syntax{
     class single:public statement{
 	public:
 	    const node*const stat;
-	    single(node*stat);
+	    single(const node*stat);
 	    ~single()override;
 	    void eval(const code::generator&gen)const override;
     };
     class compound:public statement{
-	    std::vector<statement*>stats;
+	    std::vector<const statement*>stats;
 	public:
 	    ~compound()override;
 	    void eval(const code::generator&gen)const override;
-	    void push_back_stat(statement*st);
+	    void push_back_stat(const statement*st);
     };
     class declare:public statement{
-	    std::vector<std::pair<std::string,node*>>vars;
+	    std::vector<std::pair<std::string,const node*>>vars;
 	public:
 	    ~declare()override;
 	    void eval(const code::generator&gen)const override;
-	    void push_back_var(std::pair<std::string,node*>var);
+	    void push_back_var(std::pair<std::string,const node*>var);
     };
     class _if_else_:public statement{
 	public:
 	    const single*const cond;
 	    const statement*const st1,*const st2;
-	    _if_else_(single*cond,statement*st1,statement*st2);
+	    _if_else_(const single*cond,const statement*st1,const statement*st2);
 	    ~_if_else_()override;
 	    void eval(const code::generator&gen)const override;
     };
@@ -41,7 +41,7 @@ namespace syntax{
 	public:
 	    const single*const cond;
 	    const statement*const st;
-	    _while_(single*cond,statement*st);
+	    _while_(const single*cond,const statement*st);
 	    ~_while_()override;
 	    void eval(const code::generator&gen)const override;
     };
@@ -49,7 +49,7 @@ namespace syntax{
 	public:
 	    const single*const init,*const cond,*const reinit;
 	    const statement*const st;
-	    _for_(single*init,single*cond,single*reinit,statement*st);
+	    _for_(const single*init,const single*cond,const single*reinit,const statement*st);
 	    ~_for_()override;
 	    void eval(const code::generator&gen)const override;
     };

@@ -10,6 +10,6 @@ namespace semantics{
     class analyzer{
 	    std::set<std::string>vars;
 	public:
-	    analyzer(syntax::compound*rt);
+	    analyzer(const syntax::compound*rt);
     };
 }
