@@ -10,8 +10,8 @@ namespace lexicon{
 	    ~token_array();
 	    const decltype(itr)&pos();
 	    bool consume(TK type);
-	    int*consume_num();
-	    std::string*consume_id();
+	    const int*consume_num();
+	    const std::string*consume_id();
 	    bool is_all_read();
     };
 }

@@ -6,27 +6,27 @@
 using namespace syntax;
 using namespace code::assembly;
 using code::derefer;
-void numeric::to_asm(const code::generator&gen)
+void numeric::to_asm(const code::generator&gen)const
 {
     gen.write(push,value);
 }
-void ident::to_asm(const code::generator&gen)
+void ident::to_asm(const code::generator&gen)const
 {
     gen.write(mov,rbp,rax);
     gen.write(sub,gen.offset(name),rax);
     gen.write(push,derefer(rax));
 }
-void ident::refer(const code::generator&gen)
+void ident::refer(const code::generator&gen)const
 {
     gen.write(mov,rbp,rax);
     gen.write(sub,gen.offset(name),rax);
     gen.write(push,rax);
 }
-void uplus::to_asm(const code::generator&gen)
+void uplus::to_asm(const code::generator&gen)const
 {
     arg->to_asm(gen);
 }
-void uminus::to_asm(const code::generator&gen)
+void uminus::to_asm(const code::generator&gen)const
 {
     arg->to_asm(gen);
     gen.write(pop,rax);
@@ -35,21 +35,21 @@ void uminus::to_asm(const code::generator&gen)
     gen.write(sub,rax,rdi);
     gen.write(push,rdi);
 }
-void preinc::to_asm(const code::generator&gen)
+void preinc::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(arg)->refer(gen);
+    dynamic_cast<const ident*const>(arg)->refer(gen);
     gen.write(pop,rax);
     gen.write(add,1,derefer(rax));
     gen.write(push,derefer(rax));
 }
-void predec::to_asm(const code::generator&gen)
+void predec::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(arg)->refer(gen);
+    dynamic_cast<const ident*const>(arg)->refer(gen);
     gen.write(pop,rax);
     gen.write(sub,1,derefer(rax));
     gen.write(push,derefer(rax));
 }
-void plus::to_asm(const code::generator&gen)
+void plus::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -58,7 +58,7 @@ void plus::to_asm(const code::generator&gen)
     gen.write(add,rdi,rax);
     gen.write(push,rax);
 }
-void minus::to_asm(const code::generator&gen)
+void minus::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -67,7 +67,7 @@ void minus::to_asm(const code::generator&gen)
     gen.write(sub,rdi,rax);
     gen.write(push,rax);
 }
-void multi::to_asm(const code::generator&gen)
+void multi::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -76,7 +76,7 @@ void multi::to_asm(const code::generator&gen)
     gen.write(mul,rdi);
     gen.write(push,rax);
 }
-void divide::to_asm(const code::generator&gen)
+void divide::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -86,7 +86,7 @@ void divide::to_asm(const code::generator&gen)
     gen.write(div,rdi);
     gen.write(push,rax);
 }
-void remain::to_asm(const code::generator&gen)
+void remain::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -96,7 +96,7 @@ void remain::to_asm(const code::generator&gen)
     gen.write(div,rdi);
     gen.write(push,rdx);
 }
-void equal::to_asm(const code::generator&gen)
+void equal::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -107,7 +107,7 @@ void equal::to_asm(const code::generator&gen)
     gen.write(movzb,al,rax);
     gen.write(push,rax);
 }
-void nequal::to_asm(const code::generator&gen)
+void nequal::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -118,7 +118,7 @@ void nequal::to_asm(const code::generator&gen)
     gen.write(movzb,al,rax);
     gen.write(push,rax);
 }
-void less::to_asm(const code::generator&gen)
+void less::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -129,7 +129,7 @@ void less::to_asm(const code::generator&gen)
     gen.write(movzb,al,rax);
     gen.write(push,rax);
 }
-void greater::to_asm(const code::generator&gen)
+void greater::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -140,7 +140,7 @@ void greater::to_asm(const code::generator&gen)
     gen.write(movzb,al,rax);
     gen.write(push,rax);
 }
-void leeq::to_asm(const code::generator&gen)
+void leeq::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -151,7 +151,7 @@ void leeq::to_asm(const code::generator&gen)
     gen.write(movzb,al,rax);
     gen.write(push,rax);
 }
-void greq::to_asm(const code::generator&gen)
+void greq::to_asm(const code::generator&gen)const
 {
     larg->to_asm(gen);
     rarg->to_asm(gen);
@@ -162,36 +162,36 @@ void greq::to_asm(const code::generator&gen)
     gen.write(movzb,al,rax);
     gen.write(push,rax);
 }
-void assign::to_asm(const code::generator&gen)
+void assign::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(larg)->refer(gen);
+    dynamic_cast<const ident*const>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
     gen.write(mov,rdi,derefer(rax));
     gen.write(push,derefer(rax));
 }
-void plasgn::to_asm(const code::generator&gen)
+void plasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(larg)->refer(gen);
+    dynamic_cast<const ident*const>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
     gen.write(add,rdi,derefer(rax));
     gen.write(push,derefer(rax));
 }
-void miasgn::to_asm(const code::generator&gen)
+void miasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(larg)->refer(gen);
+    dynamic_cast<const ident*const>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
     gen.write(sub,rdi,derefer(rax));
     gen.write(push,derefer(rax));
 }
-void muasgn::to_asm(const code::generator&gen)
+void muasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(larg)->refer(gen);
+    dynamic_cast<const ident*const>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -202,9 +202,9 @@ void muasgn::to_asm(const code::generator&gen)
     gen.write(mov,rsi,rax);
     gen.write(push,derefer(rax));
 }
-void diasgn::to_asm(const code::generator&gen)
+void diasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(larg)->refer(gen);
+    dynamic_cast<const ident*const>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
@@ -216,9 +216,9 @@ void diasgn::to_asm(const code::generator&gen)
     gen.write(mov,rsi,rax);
     gen.write(push,derefer(rax));
 }
-void rmasgn::to_asm(const code::generator&gen)
+void rmasgn::to_asm(const code::generator&gen)const
 {
-    dynamic_cast<ident*>(larg)->refer(gen);
+    dynamic_cast<const ident*const>(larg)->refer(gen);
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);

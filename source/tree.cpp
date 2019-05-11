@@ -7,12 +7,14 @@ statement*tree::stat()
     if(ta.consume(TK::CHAR)){
 	declare*ret=new declare;
 	while(true){
-	    if(auto dep=ta.consume_id())ret->vars.push_back(std::make_pair(*dep,nullptr));
-	    else throw std::runtime_error("無効な宣言です");
-	    if(ta.consume(TK::EQUAL))ret->vars.back().second=asgn();
-	    if(ta.consume(TK::COMMA))continue;
-	    else if(ta.consume(TK::SCOLON))break;
-	    else throw std::runtime_error("不正な区切り文字です");
+	    if(auto dep=ta.consume_id()){
+		ret->push_back_var(std::make_pair(*dep,ta.consume(TK::EQUAL)?asgn():nullptr));
+		if(ta.consume(TK::COMMA))continue;
+		else if(ta.consume(TK::SCOLON))break;
+		else throw std::runtime_error("不正な区切り文字です");
+	    }else{
+		throw std::runtime_error("無効な宣言です");
+	    }
 	}
 	return ret;
     }else if(ta.consume(TK::IF)){
@@ -40,7 +42,7 @@ statement*tree::stat()
 	return new _for_(init,cond,reinit,st);
     }else if(ta.consume(TK::OBRACE)){
 	compound*ret=new compound();
-	while(!ta.consume(TK::CBRACE))ret->stats.push_back(stat());
+	while(!ta.consume(TK::CBRACE))ret->push_back_stat(stat());
 	return ret;
     }else{
 	single*ret=emptiable_single();
@@ -133,7 +135,7 @@ node*tree::term()
 tree::tree(lexicon::token_array&ta):ta(ta),rt(new compound())
 {
     while(!ta.is_all_read()){
-	rt->stats.push_back(stat());
+	rt->push_back_stat(stat());
     }
 }
 tree::~tree()

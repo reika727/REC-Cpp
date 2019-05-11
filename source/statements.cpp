@@ -7,18 +7,18 @@ using namespace syntax;
 using namespace code::assembly;
 using code::derefer;
 using code::unique_label;
-void single::eval(const code::generator&gen)
+void single::eval(const code::generator&gen)const
 {
     if(stat){
 	stat->to_asm(gen);
 	gen.write(pop,rax);
     }
 }
-void compound::eval(const code::generator&gen)
+void compound::eval(const code::generator&gen)const
 {
     for(auto s:stats)s->eval(gen);
 }
-void declare::eval(const code::generator&gen)
+void declare::eval(const code::generator&gen)const
 {
     for(auto v:vars){
 	gen.write(sub,8,rsp);
@@ -30,7 +30,7 @@ void declare::eval(const code::generator&gen)
 	}
     }
 }
-void _if_else_::eval(const code::generator&gen)
+void _if_else_::eval(const code::generator&gen)const
 {
     std::string el=unique_label(".Lelse");
     std::string end=unique_label(".Lend");
@@ -43,7 +43,7 @@ void _if_else_::eval(const code::generator&gen)
     st2->eval(gen);
     gen.write(end+':');
 }
-void _while_::eval(const code::generator&gen)
+void _while_::eval(const code::generator&gen)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
@@ -55,7 +55,7 @@ void _while_::eval(const code::generator&gen)
     gen.write(jmp,beg);
     gen.write(end+':');
 }
-void _for_::eval(const code::generator&gen)
+void _for_::eval(const code::generator&gen)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
@@ -81,3 +81,11 @@ declare  ::~declare()                                                           
 _if_else_::~_if_else_()                                                                                         {delete cond;delete st1;delete st2;}
 _while_  ::~_while_()                                                                                           {delete cond;delete st;}
 _for_    ::~_for_()                                                                                             {delete init;delete cond;delete reinit;delete st;}
+void compound::push_back_stat(statement*st)
+{
+    stats.push_back(st);
+}
+void declare::push_back_var(std::pair<std::string,node*>var)
+{
+    vars.push_back(var);
+}

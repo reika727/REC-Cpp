@@ -127,7 +127,7 @@ bool token_array::consume(TK type)
     }
     return false;
 }
-int*token_array::consume_num()
+const int*token_array::consume_num()
 {
     if(itr!=tv.end()){
 	if(auto ptr=dynamic_cast<numeric*>(*itr)){
@@ -137,7 +137,7 @@ int*token_array::consume_num()
     }
     return nullptr;
 }
-std::string*token_array::consume_id()
+const std::string*token_array::consume_id()
 {
     if(itr!=tv.end()){
 	if(auto ptr=dynamic_cast<ident*>(*itr)){

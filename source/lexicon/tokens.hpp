@@ -33,19 +33,23 @@ namespace lexicon{
 	WHILE,   // while
 	FOR,     // for
     };
-    struct token{
-	virtual ~token();
+    class token{
+	public:
+	    virtual ~token();
     };
-    struct numeric:public token{
-	int value;
-	numeric(int value);
+    class numeric:public token{
+	public:
+	    const int value;
+	    numeric(int value);
     };
-    struct ident:public token{
-	std::string name;
-	ident(const std::string&name);
+    class ident:public token{
+	public:
+	    const std::string name;
+	    ident(const std::string&name);
     };
-    struct symbol:public token{
-	TK type;
-	symbol(TK type);
+    class symbol:public token{
+	public:
+	    const TK type;
+	    symbol(TK type);
     };
 }

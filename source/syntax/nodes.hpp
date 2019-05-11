@@ -3,113 +3,139 @@
 #include<vector>
 #include"../code/generator.hpp"
 namespace syntax{
-    struct node{
-	virtual ~node();
-	virtual void to_asm(const code::generator&gen)=0;
+    class node{
+	public:
+	    virtual ~node();
+	    virtual void to_asm(const code::generator&gen)const=0;
     };
-    struct numeric:public node{
-	int value;
-	numeric(int value);
-	void to_asm(const code::generator&gen)override;
+    class numeric:public node{
+	    int value;
+	public:
+	    numeric(int value);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct ident:public node{
-	std::string name;
-	ident(const std::string&name);
-	void to_asm(const code::generator&gen)override;
-	void refer(const code::generator&gen);
+    class ident:public node{
+	    std::string name;
+	public:
+	    ident(const std::string&name);
+	    void to_asm(const code::generator&gen)const override;
+	    void refer(const code::generator&gen)const;
     };
-    struct unopr:public node{
-	node*arg;
-	unopr(node*arg);
-	virtual ~unopr();
+    class unopr:public node{
+	public:
+	    const node*const arg;
+	    unopr(node*arg);
+	    virtual ~unopr();
     };
-    struct uplus:public unopr{
-	uplus(node*arg);
-	void to_asm(const code::generator&gen)override;
+    class uplus:public unopr{
+	public:
+	    uplus(node*arg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct uminus:public unopr{
-	uminus(node*arg);
-	void to_asm(const code::generator&gen)override;
+    class uminus:public unopr{
+	public:
+	    uminus(node*arg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct preinc:public unopr{
-	preinc(node*arg);
-	void to_asm(const code::generator&gen)override;
+    class preinc:public unopr{
+	public:
+	    preinc(node*arg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct predec:public unopr{
-	predec(node*arg);
-	void to_asm(const code::generator&gen)override;
+    class predec:public unopr{
+	public:
+	    predec(node*arg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct biopr:public node{
-	node*larg,*rarg;
-	biopr(node*larg,node*rarg);
-	virtual ~biopr();
+    class biopr:public node{
+	public:
+	    const node*const larg,*const rarg;
+	    biopr(node*larg,node*rarg);
+	    virtual ~biopr();
     };
-    struct plus:biopr{
-	plus(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class plus:public biopr{
+	public:
+	    plus(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct minus:biopr{
-	minus(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class minus:public biopr{
+	public:
+	    minus(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct multi:biopr{
-	multi(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class multi:public biopr{
+	public:
+	    multi(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct divide:biopr{
-	divide(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class divide:public biopr{
+	public:
+	    divide(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct remain:biopr{
-	remain(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class remain:public biopr{
+	public:
+	    remain(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct equal:biopr{
-	equal(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class equal:public biopr{
+	public:
+	    equal(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct nequal:biopr{
-	nequal(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class nequal:public biopr{
+	public:
+	    nequal(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct less:biopr{
-	less(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class less:public biopr{
+	public:
+	    less(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct greater:biopr{
-	greater(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class greater:public biopr{
+	public:
+	    greater(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct leeq:biopr{
-	leeq(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class leeq:public biopr{
+	public:
+	    leeq(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct greq:biopr{
-	greq(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class greq:public biopr{
+	public:
+	    greq(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct assign:public biopr{
-	assign(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class assign:public biopr{
+	public:
+	    assign(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct plasgn:public biopr{
-	plasgn(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class plasgn:public biopr{
+	public:
+	    plasgn(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct miasgn:public biopr{
-	miasgn(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class miasgn:public biopr{
+	public:
+	    miasgn(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct muasgn:public biopr{
-	muasgn(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class muasgn:public biopr{
+	public:
+	    muasgn(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct diasgn:public biopr{
-	diasgn(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class diasgn:public biopr{
+	public:
+	    diasgn(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
-    struct rmasgn:public biopr{
-	rmasgn(node*larg,node*rarg);
-	void to_asm(const code::generator&gen)override;
+    class rmasgn:public biopr{
+	public:
+	    rmasgn(node*larg,node*rarg);
+	    void to_asm(const code::generator&gen)const override;
     };
 }
