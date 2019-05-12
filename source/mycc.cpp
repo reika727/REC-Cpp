@@ -2,8 +2,6 @@
 #include"syntax/tree.hpp"
 #include"semantics/analyzer.hpp"
 #include"code/generator.hpp"
-#include<string>
-#include<fstream>
 #include<iostream>
 #include<stdexcept>
 int main(int argc,char**argv)

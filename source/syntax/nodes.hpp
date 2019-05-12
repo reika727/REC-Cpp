@@ -29,7 +29,7 @@ namespace syntax{
 	public:
 	    const ident*const id;
 	    const std::vector<const node*>*const vars;
-	    fcall(const ident*id,const std::vector<const node*>*vars);
+	    fcall(const ident*id,decltype(vars)vars);
 	    ~fcall()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::generator&gen)const override;

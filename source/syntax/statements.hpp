@@ -21,20 +21,20 @@ namespace syntax{
 	    void eval(code::generator&gen)const override;
     };
     class compound:public statement{
-	    std::vector<const statement*>stats;
 	public:
+	    const std::vector<const statement*>*const stats;
+	    compound(decltype(stats)stats);
 	    ~compound()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void eval(code::generator&gen)const override;
-	    void push_back_stat(const statement*st);
     };
     class declare:public statement{
-	    std::vector<std::pair<std::string,const node*>>vars;
 	public:
+	    const std::vector<std::pair<std::string,const node*>>*vars;
+	    declare(decltype(vars)vars);
 	    ~declare()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void eval(code::generator&gen)const override;
-	    void push_back_var(std::pair<std::string,const node*>var);
     };
     class _if_else_:public statement{
 	public:

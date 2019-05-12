@@ -5,10 +5,10 @@ using TK=lexicon::TK;
 const statement*tree::stat()
 {
     if(ta.consume(TK::CHAR)){
-	auto ret=new declare;
+	auto vars=new std::vector<std::pair<std::string,const node*>>;
 	while(true){
 	    if(auto dep=ta.consume_id()){
-		ret->push_back_var(std::make_pair(*dep,ta.consume(TK::EQUAL)?order14():nullptr));
+		vars->push_back(std::make_pair(*dep,ta.consume(TK::EQUAL)?order14():nullptr));
 		if(ta.consume(TK::COMMA))continue;
 		else if(ta.consume(TK::SCOLON))break;
 		else throw std::runtime_error("不正な区切り文字です");
@@ -16,7 +16,7 @@ const statement*tree::stat()
 		throw std::runtime_error("無効な宣言です");
 	    }
 	}
-	return ret;
+	return new declare(vars);
     }else if(ta.consume(TK::IF)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	auto cond=new single(order15());
@@ -41,9 +41,9 @@ const statement*tree::stat()
 	auto st=stat();
 	return new _for_(init,cond,reinit,st);
     }else if(ta.consume(TK::OBRACE)){
-	auto ret=new compound();
-	while(!ta.consume(TK::CBRACE))ret->push_back_stat(stat());
-	return ret;
+	auto stats=new std::vector<const statement*>;
+	while(!ta.consume(TK::CBRACE))stats->push_back(stat());
+	return new compound(stats);
     }else{
 	auto ret=emptiable_single();
 	if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
@@ -154,11 +154,13 @@ const node*tree::order01() // () left to right
 	throw std::runtime_error("構文解析ができませんでした");
     }
 }
-tree::tree(lexicon::token_array&ta):ta(ta),root(new compound())
+tree::tree(lexicon::token_array&ta):ta(ta)
 {
+    auto stats=new std::vector<const statement*>;
     while(!ta.is_all_read()){
-	root->push_back_stat(stat());
+	stats->push_back(stat());
     }
+    root=new compound(stats);
 }
 tree::~tree()
 {
