@@ -6,7 +6,7 @@
 #include"code/assembly/registries.hpp"
 #include<stdexcept>
 using namespace syntax;
-using code::derefer;
+using code::address;
 using code::unique_label;
 void single::eval(code::generator&gen)const
 {
@@ -27,7 +27,7 @@ void declare::eval(code::generator&gen)const
 	if(v.second){
 	    v.second->to_asm(gen);
 	    gen.write(pop,rax);
-	    gen.write(mov,rax,derefer(rsp));
+	    gen.write(mov,rax,address(rsp));
 	}
     }
 }

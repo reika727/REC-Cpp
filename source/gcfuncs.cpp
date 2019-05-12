@@ -6,7 +6,7 @@ namespace code{
 	static unsigned int serial=0;
 	return base+std::to_string(serial++);
     } 
-    std::string derefer(int dis,const std::string&base,const std::string&ofs,int scl)
+    std::string address(int dis,const std::string&base,const std::string&ofs,int scl)
     {
 	std::stringstream ss;
 	if(dis!=0)ss<<dis;
@@ -17,16 +17,16 @@ namespace code{
 	ss<<')';
 	return ss.str();
     }
-    std::string derefer(int dis,const std::string&base,int scl)
+    std::string address(int dis,const std::string&base,int scl)
     {
-	return derefer(dis,base,"",scl);
+	return address(dis,base,"",scl);
     }
-    std::string derefer(const std::string&base,const std::string&ofs,int scl)
+    std::string address(const std::string&base,const std::string&ofs,int scl)
     {
-	return derefer(0,base,ofs,scl);
+	return address(0,base,ofs,scl);
     }
-    std::string derefer(const std::string&base,int scl)
+    std::string address(const std::string&base,int scl)
     {
-	return derefer(0,base,"",scl);
+	return address(0,base,"",scl);
     }
 }

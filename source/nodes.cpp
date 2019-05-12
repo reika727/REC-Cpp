@@ -7,18 +7,18 @@
 #include<stdexcept>
 #include<typeinfo>
 using namespace syntax;
-using code::derefer;
+using code::address;
 void numeric::to_asm(code::generator&gen)const
 {
     gen.write(push,value);
 }
 void ident::to_asm(code::generator&gen)const
 {
-    gen.write(push,derefer(-gen.get_offset(name),rbp));
+    gen.write(push,address(-gen.get_offset(name),rbp));
 }
 void ident::refer(code::generator&gen)const
 {
-    gen.write(lea,derefer(-gen.get_offset(name),rbp),rax);
+    gen.write(lea,address(-gen.get_offset(name),rbp),rax);
     gen.write(push,rax);
 }
 void fcall::to_asm(code::generator&gen)const
@@ -57,15 +57,15 @@ void preinc::to_asm(code::generator&gen)const
 {
     dynamic_cast<const ident*>(arg)->refer(gen);
     gen.write(pop,rax);
-    gen.write(add,1,derefer(rax));
-    gen.write(push,derefer(rax));
+    gen.write(add,1,address(rax));
+    gen.write(push,address(rax));
 }
 void predec::to_asm(code::generator&gen)const
 {
     dynamic_cast<const ident*>(arg)->refer(gen);
     gen.write(pop,rax);
-    gen.write(sub,1,derefer(rax));
-    gen.write(push,derefer(rax));
+    gen.write(sub,1,address(rax));
+    gen.write(push,address(rax));
 }
 void plus::to_asm(code::generator&gen)const
 {
@@ -192,8 +192,8 @@ void assign::to_asm(code::generator&gen)const
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
-    gen.write(mov,rdi,derefer(rax));
-    gen.write(push,derefer(rax));
+    gen.write(mov,rdi,address(rax));
+    gen.write(push,address(rax));
 }
 void plasgn::to_asm(code::generator&gen)const
 {
@@ -201,8 +201,8 @@ void plasgn::to_asm(code::generator&gen)const
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
-    gen.write(add,rdi,derefer(rax));
-    gen.write(push,derefer(rax));
+    gen.write(add,rdi,address(rax));
+    gen.write(push,address(rax));
 }
 void miasgn::to_asm(code::generator&gen)const
 {
@@ -210,8 +210,8 @@ void miasgn::to_asm(code::generator&gen)const
     rarg->to_asm(gen);
     gen.write(pop,rdi);
     gen.write(pop,rax);
-    gen.write(sub,rdi,derefer(rax));
-    gen.write(push,derefer(rax));
+    gen.write(sub,rdi,address(rax));
+    gen.write(push,address(rax));
 }
 void muasgn::to_asm(code::generator&gen)const
 {
@@ -220,11 +220,11 @@ void muasgn::to_asm(code::generator&gen)const
     gen.write(pop,rdi);
     gen.write(pop,rax);
     gen.write(mov,rax,rsi);
-    gen.write(mov,derefer(rax),rax);
+    gen.write(mov,address(rax),rax);
     gen.write(mul,rdi);
-    gen.write(mov,rax,derefer(rsi));
+    gen.write(mov,rax,address(rsi));
     gen.write(mov,rsi,rax);
-    gen.write(push,derefer(rax));
+    gen.write(push,address(rax));
 }
 void diasgn::to_asm(code::generator&gen)const
 {
@@ -233,12 +233,12 @@ void diasgn::to_asm(code::generator&gen)const
     gen.write(pop,rdi);
     gen.write(pop,rax);
     gen.write(mov,rax,rsi);
-    gen.write(mov,derefer(rax),rax);
+    gen.write(mov,address(rax),rax);
     gen.write(mov,0,rdx);
     gen.write(div,rdi);
-    gen.write(mov,rax,derefer(rsi));
+    gen.write(mov,rax,address(rsi));
     gen.write(mov,rsi,rax);
-    gen.write(push,derefer(rax));
+    gen.write(push,address(rax));
 }
 void rmasgn::to_asm(code::generator&gen)const
 {
@@ -247,12 +247,12 @@ void rmasgn::to_asm(code::generator&gen)const
     gen.write(pop,rdi);
     gen.write(pop,rax);
     gen.write(mov,rax,rsi);
-    gen.write(mov,derefer(rax),rax);
+    gen.write(mov,address(rax),rax);
     gen.write(mov,0,rdx);
     gen.write(div,rdi);
-    gen.write(mov,rdx,derefer(rsi));
+    gen.write(mov,rdx,address(rsi));
     gen.write(mov,rsi,rax);
-    gen.write(push,derefer(rax));
+    gen.write(push,address(rax));
 }
 void numeric::check(semantics::analyzer&analy)const
 {
