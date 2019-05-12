@@ -137,16 +137,16 @@ const node*tree::order01() // () left to right
     }else if(auto namep=ta.consume_id()){
 	auto id=new ident(*namep);
 	if(ta.consume(TK::OPARENT)){
-	    auto ret=new fcall(id);
+	    auto vars=new std::vector<const node*>;
 	    if(!ta.consume(TK::CPARENT)){
 		while(true){
-		    ret->push_back_var(order14());
+		    vars->push_back(order14());
 		    if(ta.consume(TK::CPARENT))break;
 		    else if(ta.consume(TK::COMMA))continue;
 		    else throw std::runtime_error("無効な関数呼び出しです");
 		}
 	    }
-	    return ret;
+	    return new fcall(id,vars);
 	}else{
 	    return id;
 	}

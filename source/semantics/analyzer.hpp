@@ -9,10 +9,10 @@ namespace semantics{
      * 変数の二重定義
      */    
     class analyzer{
-	    mutable std::set<std::string>vars;
+	    std::set<std::string>vars;
 	public:
 	    analyzer();
-	    void declare(const std::string&name)const;
-	    bool is_declared(const std::string&name)const;
+	    void declare(const std::string&name);
+	    bool is_declared(const std::string&name);
     };
 }

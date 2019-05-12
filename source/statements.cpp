@@ -8,18 +8,18 @@
 using namespace syntax;
 using code::derefer;
 using code::unique_label;
-void single::eval(const code::generator&gen)const
+void single::eval(code::generator&gen)const
 {
     if(stat){
 	stat->to_asm(gen);
 	gen.write(pop,rax);
     }
 }
-void compound::eval(const code::generator&gen)const
+void compound::eval(code::generator&gen)const
 {
     for(auto s:stats)s->eval(gen);
 }
-void declare::eval(const code::generator&gen)const
+void declare::eval(code::generator&gen)const
 {
     for(auto v:vars){
 	gen.write(sub,8,rsp);
@@ -31,7 +31,7 @@ void declare::eval(const code::generator&gen)const
 	}
     }
 }
-void _if_else_::eval(const code::generator&gen)const
+void _if_else_::eval(code::generator&gen)const
 {
     std::string el=unique_label(".Lelse");
     std::string end=unique_label(".Lend");
@@ -44,7 +44,7 @@ void _if_else_::eval(const code::generator&gen)const
     st2->eval(gen);
     gen.write(end+':');
 }
-void _while_::eval(const code::generator&gen)const
+void _while_::eval(code::generator&gen)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
@@ -56,7 +56,7 @@ void _while_::eval(const code::generator&gen)const
     gen.write(jmp,beg);
     gen.write(end+':');
 }
-void _for_::eval(const code::generator&gen)const
+void _for_::eval(code::generator&gen)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
@@ -71,15 +71,15 @@ void _for_::eval(const code::generator&gen)const
     gen.write(jmp,beg);
     gen.write(end+':');
 }
-void single::check(const semantics::analyzer&analy)const
+void single::check(semantics::analyzer&analy)const
 {
     if(stat)stat->check(analy);
 }
-void compound::check(const semantics::analyzer&analy)const
+void compound::check(semantics::analyzer&analy)const
 {
     for(auto s:stats)s->check(analy);
 }
-void declare::check(const semantics::analyzer&analy)const
+void declare::check(semantics::analyzer&analy)const
 {
     for(auto v:vars){
 	if(analy.is_declared(v.first))throw std::runtime_error("二重定義されました: "+v.first);
@@ -87,18 +87,18 @@ void declare::check(const semantics::analyzer&analy)const
 	if(v.second)v.second->check(analy);
     }
 }
-void _if_else_::check(const semantics::analyzer&analy)const
+void _if_else_::check(semantics::analyzer&analy)const
 {
     cond->check(analy);
     st1->check(analy);
     st2->check(analy);
 }
-void _while_::check(const semantics::analyzer&analy)const
+void _while_::check(semantics::analyzer&analy)const
 {
     cond->check(analy);
     st->check(analy);
 }
-void _for_::check(const semantics::analyzer&analy)const
+void _for_::check(semantics::analyzer&analy)const
 {
     init->check(analy);
     cond->check(analy);
