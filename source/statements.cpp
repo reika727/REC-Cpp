@@ -82,8 +82,8 @@ void compound::check(const semantics::analyzer&analy)const
 void declare::check(const semantics::analyzer&analy)const
 {
     for(auto v:vars){
-	if(analy.declared(v.first))throw std::runtime_error("二重定義されました: "+v.first);
-	analy.declare_var(v.first);
+	if(analy.is_declared(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+	analy.declare(v.first);
 	if(v.second)v.second->check(analy);
     }
 }
@@ -105,6 +105,14 @@ void _for_::check(const semantics::analyzer&analy)const
     reinit->check(analy);
     st->check(analy);
 }
+void compound::push_back_stat(const statement*st)
+{
+    stats.push_back(st);
+}
+void declare::push_back_var(std::pair<std::string,const node*>var)
+{
+    vars.push_back(var);
+}
 single   ::single    (const node*stat)                                                           :stat(stat)                                 {}
 _if_else_::_if_else_ (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
 _while_  ::_while_   (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
@@ -116,11 +124,3 @@ declare  ::~declare  ()                                                         
 _if_else_::~_if_else_()                                                                                    {delete cond;delete st1;delete st2;}
 _while_  ::~_while_  ()                                                                                                {delete cond;delete st;}
 _for_    ::~_for_    ()                                                                      {delete init;delete cond;delete reinit;delete st;}
-void compound::push_back_stat(const statement*st)
-{
-    stats.push_back(st);
-}
-void declare::push_back_var(std::pair<std::string,const node*>var)
-{
-    vars.push_back(var);
-}

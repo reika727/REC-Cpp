@@ -15,18 +15,18 @@ void numeric::to_asm(const code::generator&gen)const
 void ident::to_asm(const code::generator&gen)const
 {
     gen.write(mov,rbp,rax);
-    gen.write(sub,gen.offset(name),rax);
+    gen.write(sub,gen.get_offset(name),rax);
     gen.write(push,derefer(rax));
 }
 void ident::refer(const code::generator&gen)const
 {
     gen.write(mov,rbp,rax);
-    gen.write(sub,gen.offset(name),rax);
+    gen.write(sub,gen.get_offset(name),rax);
     gen.write(push,rax);
 }
 void fcall::to_asm(const code::generator&gen)const
 {
-    int align=(16-gen.var_size()%16)%16;
+    int align=(16-gen.get_var_size()%16)%16;
     gen.write(sub,align,rsp);
     for(int i=vars.size()-1;i>=0;--i){
 	vars[i]->to_asm(gen);
@@ -265,7 +265,7 @@ void numeric::check(const semantics::analyzer&analy)const
 }
 void ident::check(const semantics::analyzer&analy)const
 {
-    if(!analy.declared(name))throw std::runtime_error("未定義の変数です: "+name);
+    if(!analy.is_declared(name))throw std::runtime_error("未定義の変数です: "+name);
 }
 void fcall::check(const semantics::analyzer&analy)const
 {

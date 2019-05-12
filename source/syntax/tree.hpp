@@ -5,7 +5,7 @@
 namespace syntax{
     class tree{
 	    lexicon::token_array&ta;
-	    compound*rt;
+	    compound*root;
 	private:
 	    const statement*stat();
 	    const single*emptiable_single();
@@ -20,6 +20,6 @@ namespace syntax{
 	public:
 	    tree(lexicon::token_array&ta);
 	    ~tree();
-	    const compound*root();
+	    const compound*get_root();
     };
 }

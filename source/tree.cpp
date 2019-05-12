@@ -154,17 +154,17 @@ const node*tree::order01() // () left to right
 	throw std::runtime_error("構文解析ができませんでした");
     }
 }
-tree::tree(lexicon::token_array&ta):ta(ta),rt(new compound())
+tree::tree(lexicon::token_array&ta):ta(ta),root(new compound())
 {
     while(!ta.is_all_read()){
-	rt->push_back_stat(stat());
+	root->push_back_stat(stat());
     }
 }
 tree::~tree()
 {
-    delete rt;
+    delete root;
 }
-const compound*tree::root()
+const compound*tree::get_root()
 {
-    return rt;
+    return root;
 }

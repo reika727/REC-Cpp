@@ -12,7 +12,7 @@ namespace semantics{
 	    mutable std::set<std::string>vars;
 	public:
 	    analyzer();
-	    void declare_var(const std::string&name)const;
-	    bool declared(const std::string&name)const;
+	    void declare(const std::string&name)const;
+	    bool is_declared(const std::string&name)const;
     };
 }

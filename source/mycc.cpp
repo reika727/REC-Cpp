@@ -2,6 +2,8 @@
 #include"syntax/tree.hpp"
 #include"semantics/analyzer.hpp"
 #include"code/generator.hpp"
+#include<string>
+#include<fstream>
 #include<iostream>
 #include<stdexcept>
 int main(int argc,char**argv)
@@ -16,7 +18,7 @@ int main(int argc,char**argv)
 	    
 	    lexicon::token_array ta(src);
 	    syntax::tree tr(ta);
-	    semantics::analyzer analy;tr.root()->check(analy);
+	    semantics::analyzer analy;tr.get_root()->check(analy);
 	    code::generator gen(dest);
 	    
 	    // TODO
@@ -24,7 +26,7 @@ int main(int argc,char**argv)
 		gen.write("push","%rbp");
 		gen.write("mov","%rsp","%rbp");
 
-	    tr.root()->eval(gen);
+	    tr.get_root()->eval(gen);
 
 	    //TODO
 		gen.write("mov","%rbp","%rsp");
