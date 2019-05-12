@@ -14,14 +14,11 @@ void numeric::to_asm(code::generator&gen)const
 }
 void ident::to_asm(code::generator&gen)const
 {
-    gen.write(mov,rbp,rax);
-    gen.write(sub,gen.get_offset(name),rax);
-    gen.write(push,derefer(rax));
+    gen.write(push,derefer(-gen.get_offset(name),rbp));
 }
 void ident::refer(code::generator&gen)const
 {
-    gen.write(mov,rbp,rax);
-    gen.write(sub,gen.get_offset(name),rax);
+    gen.write(lea,derefer(-gen.get_offset(name),rbp),rax);
     gen.write(push,rax);
 }
 void fcall::to_asm(code::generator&gen)const
@@ -30,15 +27,13 @@ void fcall::to_asm(code::generator&gen)const
     gen.write(sub,align,rsp);
     for(int i=vars->size()-1;i>=0;--i){
 	(*vars)[i]->to_asm(gen);
-	gen.write(pop,rax);
 	switch(i){
-	    case 0 :gen.write(mov,rax,rdi);break;
-	    case 1 :gen.write(mov,rax,rsi);break;
-	    case 2 :gen.write(mov,rax,rdx);break;
-	    case 3 :gen.write(mov,rax,rcx);break;
-	    case 4 :gen.write(mov,rax,r8); break;
-	    case 5 :gen.write(mov,rax,r9); break;
-	    default:gen.write(push,rax);   break;
+	    case 0 :gen.write(pop,rdi);break;
+	    case 1 :gen.write(pop,rsi);break;
+	    case 2 :gen.write(pop,rdx);break;
+	    case 3 :gen.write(pop,rcx);break;
+	    case 4 :gen.write(pop,r8); break;
+	    case 5 :gen.write(pop,r9); break;
 	}
     }
     gen.write(call,id->name);

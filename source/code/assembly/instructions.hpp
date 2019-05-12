@@ -17,6 +17,8 @@
 #define mov   "mov"
 #define movzb "movzb"
 
+#define lea   "lea"
+
 #define push  "push"
 #define pop   "pop"
 

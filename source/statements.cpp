@@ -26,8 +26,8 @@ void declare::eval(code::generator&gen)const
 	gen.set_offset(v.first);
 	if(v.second){
 	    v.second->to_asm(gen);
-	    gen.write(pop,rsi);
-	    gen.write(mov,rsi,derefer(rsp));
+	    gen.write(pop,rax);
+	    gen.write(mov,rax,derefer(rsp));
 	}
     }
 }
