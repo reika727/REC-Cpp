@@ -2,8 +2,6 @@
 #include"semantics/analyzer.hpp"
 #include"code/generator.hpp"
 #include"code/gcfuncs.hpp"
-#include"code/assembly/instructions.hpp"
-#include"code/assembly/registries.hpp"
 #include<stdexcept>
 using namespace syntax;
 using code::address;
@@ -12,7 +10,7 @@ void single::eval(code::generator&gen)const
 {
     if(stat){
 	stat->to_asm(gen);
-	gen.write(pop,rax);
+	gen.write("pop","%rax");
     }
 }
 void compound::eval(code::generator&gen)const
@@ -22,12 +20,12 @@ void compound::eval(code::generator&gen)const
 void declare::eval(code::generator&gen)const
 {
     for(auto v:*vars){
-	gen.write(sub,8,rsp);
+	gen.write("sub",8,"%rsp");
 	gen.set_offset(v.first);
 	if(v.second){
 	    v.second->to_asm(gen);
-	    gen.write(pop,rax);
-	    gen.write(mov,rax,address(rsp));
+	    gen.write("pop","%rax");
+	    gen.write("mov","%rax",address("%rsp"));
 	}
     }
 }
@@ -36,10 +34,10 @@ void _if_else_::eval(code::generator&gen)const
     std::string el=unique_label(".Lelse");
     std::string end=unique_label(".Lend");
     cond->eval(gen);
-    gen.write(cmp,0,rax);
-    gen.write(je,el);
+    gen.write("cmp",0,"%rax");
+    gen.write("je",el);
     st1->eval(gen);
-    gen.write(jmp,end);
+    gen.write("jmp",end);
     gen.write(el+':');
     st2->eval(gen);
     gen.write(end+':');
@@ -50,10 +48,10 @@ void _while_::eval(code::generator&gen)const
     std::string end=unique_label(".Lend");
     gen.write(beg+':');
     cond->eval(gen);
-    gen.write(cmp,0,rax);
-    gen.write(je,end);
+    gen.write("cmp",0,"%rax");
+    gen.write("je",end);
     st->eval(gen);
-    gen.write(jmp,beg);
+    gen.write("jmp",beg);
     gen.write(end+':');
 }
 void _for_::eval(code::generator&gen)const
@@ -62,13 +60,13 @@ void _for_::eval(code::generator&gen)const
     std::string end=unique_label(".Lend");
     init->eval(gen);
     gen.write(beg+':');
-    gen.write(mov,1,rax);
+    gen.write("mov",1,"%rax");
     cond->eval(gen);
-    gen.write(cmp,0,rax);
-    gen.write(je,end);
+    gen.write("cmp",0,"%rax");
+    gen.write("je",end);
     st->eval(gen);
     reinit->eval(gen);
-    gen.write(jmp,beg);
+    gen.write("jmp",beg);
     gen.write(end+':');
 }
 void single::check(semantics::analyzer&analy)const
