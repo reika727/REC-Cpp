@@ -129,7 +129,11 @@ const node*tree::order02() // + - ++ -- right to left
 const node*tree::order01() // () left to right
 {
     auto ret=order00();
-    if(ta.consume(TK::OPARENT)){
+    if(ta.consume(TK::PLPL)){
+	ret=new postinc(ret);
+    }else if(ta.consume(TK::MIMI)){
+	ret=new postdec(ret);
+    }else if(ta.consume(TK::OPARENT)){
 	auto vars=new std::vector<const node*>;
 	if(!ta.consume(TK::CPARENT)){
 	    while(true){

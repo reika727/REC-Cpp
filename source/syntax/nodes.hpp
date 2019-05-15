@@ -66,6 +66,16 @@ namespace syntax{
 	    predec(const node*arg);
 	    void to_asm(code::generator&gen)const override;
     };
+    class postinc:public unopr_l{
+	public:
+	    postinc(const node*arg);
+	    void to_asm(code::generator&gen)const override;
+    };
+    class postdec:public unopr_l{
+	public:
+	    postdec(const node*arg);
+	    void to_asm(code::generator&gen)const override;
+    };
     class biopr:public node{
 	public:
 	    const node*const larg,*const rarg;

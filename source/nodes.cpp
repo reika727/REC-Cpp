@@ -65,6 +65,20 @@ void predec::to_asm(code::generator&gen)const
     gen.write("sub",1,address("%rax"));
     gen.write("push",address("%rax"));
 }
+void postinc::to_asm(code::generator&gen)const
+{
+    dynamic_cast<const ident*>(arg)->refer(gen);
+    gen.write("pop","%rax");
+    gen.write("push",address("%rax"));
+    gen.write("add",1,address("%rax"));
+}
+void postdec::to_asm(code::generator&gen)const
+{
+    dynamic_cast<const ident*>(arg)->refer(gen);
+    gen.write("pop","%rax");
+    gen.write("push",address("%rax"));
+    gen.write("sub",1,address("%rax"));
+}
 void plus::to_asm(code::generator&gen)const
 {
     larg->to_asm(gen);
@@ -294,6 +308,8 @@ uminus ::uminus (const node*arg)                                    :unopr(arg) 
 unopr_l::unopr_l(const node*arg)                                    :unopr(arg)            {}
 preinc ::preinc (const node*arg)                                    :unopr_l(arg)          {}
 predec ::predec (const node*arg)                                    :unopr_l(arg)          {}
+postinc::postinc(const node*arg)                                    :unopr_l(arg)          {}
+postdec::postdec(const node*arg)                                    :unopr_l(arg)          {}
 biopr  ::biopr  (const node*larg,const node*rarg)                   :larg(larg),rarg(rarg) {}
 plus   ::plus   (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
 minus  ::minus  (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}

@@ -127,7 +127,13 @@ if(a!=10)                      print_num(37);
 a=10;
 {
     ;
-}if(a!=10)                     print_num(38);
+}
+if(a!=10)                      print_num(38);
+a=21;
+if(a++!=21)                    print_num(39);
+if(a!=22)                      print_num(40);
+if(a--!=22)                    print_num(41);
+if(a!=21)                      print_num(42);
 a=21,b=4,c=8,d=a+b*c,e=12;
 char f=e;
 print_6num(a,b,c,d,e,f);
