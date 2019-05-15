@@ -5,7 +5,7 @@ using TK=lexicon::TK;
 const statement*tree::stat()
 {
     if(ta.consume(TK::CHAR)){
-	auto vars=new std::vector<std::pair<std::string,const node*>>;
+	auto vars=new std::vector<std::pair<std::string,const expression*>>;
 	while(true){
 	    if(auto dep=ta.consume_id()){
 		vars->push_back(std::make_pair(*dep,ta.consume(TK::EQUAL)?order14():nullptr));
@@ -58,7 +58,7 @@ const single*tree::emptiable_single()
 	return new single(order15());
     }
 }
-const node*tree::order15() // , left to right
+const expression*tree::order15() // , left to right
 {
     auto ret=order14();
     while(true){
@@ -66,7 +66,7 @@ const node*tree::order15() // , left to right
 	else                          return ret;
     }
 }
-const node*tree::order14() // = += -= *= /= right to left
+const expression*tree::order14() // = += -= *= /= right to left
 {
     auto ret=order07();
     while(true){
@@ -79,7 +79,7 @@ const node*tree::order14() // = += -= *= /= right to left
 	else                          return ret;
     }
 }
-const node*tree::order07() // == != left to right
+const expression*tree::order07() // == != left to right
 {
     auto ret=order06();
     while(true){
@@ -88,7 +88,7 @@ const node*tree::order07() // == != left to right
 	else                         return ret;
     }
 }
-const node*tree::order06() // < > <= >= left to right
+const expression*tree::order06() // < > <= >= left to right
 {
     auto ret=order04();
     while(true){
@@ -99,7 +99,7 @@ const node*tree::order06() // < > <= >= left to right
 	else                            return ret;
     }
 }
-const node*tree::order04() // + - left to right
+const expression*tree::order04() // + - left to right
 {
     auto ret=order03();
     while(true){
@@ -108,7 +108,7 @@ const node*tree::order04() // + - left to right
 	else                          return ret;
     }
 }
-const node*tree::order03() // * / % left to right
+const expression*tree::order03() // * / % left to right
 {
     auto ret=order02();
     while(true){
@@ -118,7 +118,7 @@ const node*tree::order03() // * / % left to right
 	else                            return ret;
     }
 }
-const node*tree::order02() // + - ++ -- right to left
+const expression*tree::order02() // + - ++ -- right to left
 {
          if(ta.consume(TK::PLUS)) return new uplus(order02());
     else if(ta.consume(TK::MINUS))return new uminus(order02());
@@ -126,7 +126,7 @@ const node*tree::order02() // + - ++ -- right to left
     else if(ta.consume(TK::MIMI)) return new predec(order02());
     else                          return order01();
 }
-const node*tree::order01() // () left to right
+const expression*tree::order01() // () left to right
 {
     auto ret=order00();
     if(ta.consume(TK::PLPL)){
@@ -134,7 +134,7 @@ const node*tree::order01() // () left to right
     }else if(ta.consume(TK::MIMI)){
 	ret=new postdec(ret);
     }else if(ta.consume(TK::OPARENT)){
-	auto vars=new std::vector<const node*>;
+	auto vars=new std::vector<const expression*>;
 	if(!ta.consume(TK::CPARENT)){
 	    while(true){
 		vars->push_back(order14());
@@ -147,7 +147,7 @@ const node*tree::order01() // () left to right
     }
     return ret;
 }
-const node*tree::order00() // literal, identifier, enclosed expression
+const expression*tree::order00() // literal, identifier, enclosed expression
 {
     if(auto nump=ta.consume_num()){
 	return new numeric(*nump);

@@ -24,7 +24,7 @@ int main(int argc,char**argv)
 		gen.write("push","%rbp");
 		gen.write("mov","%rsp","%rbp");
 
-	    tr.get_root()->eval(gen);
+	    tr.get_root()->to_asm(gen);
 
 	    //TODO
 		gen.write("mov","%rbp","%rsp");

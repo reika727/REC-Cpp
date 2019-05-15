@@ -6,18 +6,18 @@
 using namespace syntax;
 using code::address;
 using code::unique_label;
-void single::eval(code::generator&gen)const
+void single::to_asm(code::generator&gen)const
 {
     if(stat){
 	stat->to_asm(gen);
 	gen.write("pop","%rax");
     }
 }
-void compound::eval(code::generator&gen)const
+void compound::to_asm(code::generator&gen)const
 {
-    for(auto s:*stats)s->eval(gen);
+    for(auto s:*stats)s->to_asm(gen);
 }
-void declare::eval(code::generator&gen)const
+void declare::to_asm(code::generator&gen)const
 {
     for(auto v:*vars){
 	gen.write("sub",8,"%rsp");
@@ -29,43 +29,43 @@ void declare::eval(code::generator&gen)const
 	}
     }
 }
-void _if_else_::eval(code::generator&gen)const
+void _if_else_::to_asm(code::generator&gen)const
 {
     std::string el=unique_label(".Lelse");
     std::string end=unique_label(".Lend");
-    cond->eval(gen);
+    cond->to_asm(gen);
     gen.write("cmp",0,"%rax");
     gen.write("je",el);
-    st1->eval(gen);
+    st1->to_asm(gen);
     gen.write("jmp",end);
     gen.write(el+':');
-    st2->eval(gen);
+    st2->to_asm(gen);
     gen.write(end+':');
 }
-void _while_::eval(code::generator&gen)const
+void _while_::to_asm(code::generator&gen)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
     gen.write(beg+':');
-    cond->eval(gen);
+    cond->to_asm(gen);
     gen.write("cmp",0,"%rax");
     gen.write("je",end);
-    st->eval(gen);
+    st->to_asm(gen);
     gen.write("jmp",beg);
     gen.write(end+':');
 }
-void _for_::eval(code::generator&gen)const
+void _for_::to_asm(code::generator&gen)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
-    init->eval(gen);
+    init->to_asm(gen);
     gen.write(beg+':');
     gen.write("mov",1,"%rax");
-    cond->eval(gen);
+    cond->to_asm(gen);
     gen.write("cmp",0,"%rax");
     gen.write("je",end);
-    st->eval(gen);
-    reinit->eval(gen);
+    st->to_asm(gen);
+    reinit->to_asm(gen);
     gen.write("jmp",beg);
     gen.write(end+':');
 }
@@ -103,9 +103,9 @@ void _for_::check(semantics::analyzer&analy)const
     reinit->check(analy);
     st->check(analy);
 }
-single   ::single    (const node*stat)                                                           :stat(stat)                                 {}
+single   ::single    (const expression*stat)                                                           :stat(stat)                                 {}
 compound ::compound  (const std::vector<const statement*>*stats)                                 :stats(stats)                               {}
-declare  ::declare   (const std::vector<std::pair<std::string,const node*>>*vars)                :vars(vars)                                 {}
+declare  ::declare   (const std::vector<std::pair<std::string,const expression*>>*vars)                :vars(vars)                                 {}
 _if_else_::_if_else_ (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
 _while_  ::_while_   (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
 _for_    ::_for_     (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st){}

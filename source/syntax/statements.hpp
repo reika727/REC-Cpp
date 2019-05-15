@@ -1,5 +1,5 @@
 #pragma once
-#include"nodes.hpp"
+#include"expressions.hpp"
 #include"../semantics/analyzer.hpp"
 #include"../code/generator.hpp"
 #include<string>
@@ -10,15 +10,15 @@ namespace syntax{
 	public:
 	    virtual ~statement();
 	    virtual void check(semantics::analyzer&analy)const=0;
-	    virtual void eval(code::generator&gen)const=0;
+	    virtual void to_asm(code::generator&gen)const=0;
     };
     class single:public statement{
 	public:
-	    const node*const stat;
-	    single(const node*stat);
+	    const expression*const stat;
+	    single(const expression*stat);
 	    ~single()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void eval(code::generator&gen)const override;
+	    void to_asm(code::generator&gen)const override;
     };
     class compound:public statement{
 	public:
@@ -26,15 +26,15 @@ namespace syntax{
 	    compound(decltype(stats)stats);
 	    ~compound()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void eval(code::generator&gen)const override;
+	    void to_asm(code::generator&gen)const override;
     };
     class declare:public statement{
 	public:
-	    const std::vector<std::pair<std::string,const node*>>*vars;
+	    const std::vector<std::pair<std::string,const expression*>>*vars;
 	    declare(decltype(vars)vars);
 	    ~declare()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void eval(code::generator&gen)const override;
+	    void to_asm(code::generator&gen)const override;
     };
     class _if_else_:public statement{
 	public:
@@ -43,7 +43,7 @@ namespace syntax{
 	    _if_else_(const single*cond,const statement*st1,const statement*st2);
 	    ~_if_else_()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void eval(code::generator&gen)const override;
+	    void to_asm(code::generator&gen)const override;
     };
     class _while_:public statement{
 	public:
@@ -52,7 +52,7 @@ namespace syntax{
 	    _while_(const single*cond,const statement*st);
 	    ~_while_()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void eval(code::generator&gen)const override;
+	    void to_asm(code::generator&gen)const override;
     };
     class _for_:public statement{
 	public:
@@ -61,6 +61,6 @@ namespace syntax{
 	    _for_(const single*init,const single*cond,const single*reinit,const statement*st);
 	    ~_for_()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void eval(code::generator&gen)const override;
+	    void to_asm(code::generator&gen)const override;
     };
 }

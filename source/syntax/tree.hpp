@@ -1,5 +1,5 @@
 #pragma once
-#include"nodes.hpp"
+#include"expressions.hpp"
 #include"statements.hpp"
 #include"../lexicon/token_array.hpp"
 namespace syntax{
@@ -9,15 +9,15 @@ namespace syntax{
 	private:
 	    const statement*stat();
 	    const single*emptiable_single();
-	    const node*order15();
-	    const node*order14();
-	    const node*order07();
-	    const node*order06();
-	    const node*order04();
-	    const node*order03();
-	    const node*order02();
-	    const node*order01();
-	    const node*order00();
+	    const expression*order15();
+	    const expression*order14();
+	    const expression*order07();
+	    const expression*order06();
+	    const expression*order04();
+	    const expression*order03();
+	    const expression*order02();
+	    const expression*order01();
+	    const expression*order00();
 	public:
 	    tree(lexicon::token_array&ta);
 	    ~tree();
