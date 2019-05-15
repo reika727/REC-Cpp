@@ -1,6 +1,4 @@
 #include"syntax/expressions.hpp"
-#include"semantics/analyzer.hpp"
-#include"code/generator.hpp"
 #include"code/gcfuncs.hpp"
 #include<stdexcept>
 #include<typeinfo>
@@ -299,38 +297,38 @@ void biopr_l::check(semantics::analyzer&analy)const
     if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
     biopr::check(analy);
 }
-numeric::numeric(int value)                                         :value(value)          {}
-ident  ::ident  (const std::string&name)                            :name(name)            {}
-fcall  ::fcall  (const expression*func,const std::vector<const expression*>*vars):func(func),vars(vars){}
-unopr  ::unopr  (const expression*arg)                                    :arg(arg)              {}
-uplus  ::uplus  (const expression*arg)                                    :unopr(arg)            {}
-uminus ::uminus (const expression*arg)                                    :unopr(arg)            {}
-unopr_l::unopr_l(const expression*arg)                                    :unopr(arg)            {}
-preinc ::preinc (const expression*arg)                                    :unopr_l(arg)          {}
-predec ::predec (const expression*arg)                                    :unopr_l(arg)          {}
-postinc::postinc(const expression*arg)                                    :unopr_l(arg)          {}
-postdec::postdec(const expression*arg)                                    :unopr_l(arg)          {}
-biopr  ::biopr  (const expression*larg,const expression*rarg)                   :larg(larg),rarg(rarg) {}
-plus   ::plus   (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-minus  ::minus  (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-multi  ::multi  (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-divide ::divide (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-remain ::remain (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-equal  ::equal  (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-nequal ::nequal (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-less   ::less   (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-greater::greater(const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-leeq   ::leeq   (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-greq   ::greq   (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-comma  ::comma  (const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-biopr_l::biopr_l(const expression*larg,const expression*rarg)                   :biopr(larg,rarg)      {}
-assign ::assign (const expression*larg,const expression*rarg)                   :biopr_l(larg,rarg)    {}
-plasgn ::plasgn (const expression*larg,const expression*rarg)                   :biopr_l(larg,rarg)    {}
-miasgn ::miasgn (const expression*larg,const expression*rarg)                   :biopr_l(larg,rarg)    {}
-muasgn ::muasgn (const expression*larg,const expression*rarg)                   :biopr_l(larg,rarg)    {}
-diasgn ::diasgn (const expression*larg,const expression*rarg)                   :biopr_l(larg,rarg)    {}
-rmasgn ::rmasgn (const expression*larg,const expression*rarg)                   :biopr_l(larg,rarg)    {}
-expression   ::~expression  ()                                                                         {}
-fcall  ::~fcall ()                       {delete func;for(auto v:*vars)delete v;delete vars;}
-unopr  ::~unopr ()                                                              {delete arg;}
-biopr  ::~biopr ()                                                 {delete larg;delete rarg;}
+numeric   ::numeric    (int value)                                                      :value(value)         {}
+ident     ::ident      (const std::string&name)                                         :name(name)           {}
+fcall     ::fcall      (const expression*func,const std::vector<const expression*>*vars):func(func),vars(vars){}
+unopr     ::unopr      (const expression*arg)                                           :arg(arg)             {}
+uplus     ::uplus      (const expression*arg)                                           :unopr(arg)           {}
+uminus    ::uminus     (const expression*arg)                                           :unopr(arg)           {}
+unopr_l   ::unopr_l    (const expression*arg)                                           :unopr(arg)           {}
+preinc    ::preinc     (const expression*arg)                                           :unopr_l(arg)         {}
+predec    ::predec     (const expression*arg)                                           :unopr_l(arg)         {}
+postinc   ::postinc    (const expression*arg)                                           :unopr_l(arg)         {}
+postdec   ::postdec    (const expression*arg)                                           :unopr_l(arg)         {}
+biopr     ::biopr      (const expression*larg,const expression*rarg)                    :larg(larg),rarg(rarg){}
+plus      ::plus       (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+minus     ::minus      (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+multi     ::multi      (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+divide    ::divide     (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+remain    ::remain     (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+equal     ::equal      (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+nequal    ::nequal     (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+less      ::less       (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+greater   ::greater    (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+leeq      ::leeq       (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+greq      ::greq       (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+comma     ::comma      (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+biopr_l   ::biopr_l    (const expression*larg,const expression*rarg)                    :biopr(larg,rarg)     {}
+assign    ::assign     (const expression*larg,const expression*rarg)                    :biopr_l(larg,rarg)   {}
+plasgn    ::plasgn     (const expression*larg,const expression*rarg)                    :biopr_l(larg,rarg)   {}
+miasgn    ::miasgn     (const expression*larg,const expression*rarg)                    :biopr_l(larg,rarg)   {}
+muasgn    ::muasgn     (const expression*larg,const expression*rarg)                    :biopr_l(larg,rarg)   {}
+diasgn    ::diasgn     (const expression*larg,const expression*rarg)                    :biopr_l(larg,rarg)   {}
+rmasgn    ::rmasgn     (const expression*larg,const expression*rarg)                    :biopr_l(larg,rarg)   {}
+expression::~expression()                                                                                     {}
+fcall     ::~fcall     ()                                   {delete func;for(auto v:*vars)delete v;delete vars;}
+unopr     ::~unopr     ()                                                                          {delete arg;}
+biopr     ::~biopr     ()                                                             {delete larg;delete rarg;}

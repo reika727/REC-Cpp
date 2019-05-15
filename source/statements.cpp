@@ -1,6 +1,4 @@
 #include"syntax/statements.hpp"
-#include"semantics/analyzer.hpp"
-#include"code/generator.hpp"
 #include"code/gcfuncs.hpp"
 #include<stdexcept>
 using namespace syntax;
@@ -103,9 +101,9 @@ void _for_::check(semantics::analyzer&analy)const
     reinit->check(analy);
     st->check(analy);
 }
-single   ::single    (const expression*stat)                                                           :stat(stat)                                 {}
+single   ::single    (const expression*stat)                                                     :stat(stat)                                 {}
 compound ::compound  (const std::vector<const statement*>*stats)                                 :stats(stats)                               {}
-declare  ::declare   (const std::vector<std::pair<std::string,const expression*>>*vars)                :vars(vars)                                 {}
+declare  ::declare   (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                 {}
 _if_else_::_if_else_ (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
 _while_  ::_while_   (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
 _for_    ::_for_     (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st){}

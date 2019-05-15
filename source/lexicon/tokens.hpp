@@ -35,7 +35,7 @@ namespace lexicon{
     };
     class token{
 	public:
-	    virtual ~token();
+	    virtual ~token()=0;
     };
     class numeric:public token{
 	public:

@@ -1,14 +1,11 @@
 #pragma once
-#include"../semantics/analyzer.hpp"
-#include"../code/generator.hpp"
+#include"node.hpp"
 #include<string>
 #include<vector>
 namespace syntax{
-    class expression{
+    class expression:public node{
 	public:
-	    virtual ~expression();
-	    virtual void check(semantics::analyzer&analy)const=0;
-	    virtual void to_asm(code::generator&gen)const=0;
+	    virtual ~expression()=0;
     };
     class numeric:public expression{
 	public:

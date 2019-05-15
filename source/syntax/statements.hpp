@@ -1,16 +1,13 @@
 #pragma once
+#include"node.hpp"
 #include"expressions.hpp"
-#include"../semantics/analyzer.hpp"
-#include"../code/generator.hpp"
 #include<string>
 #include<vector>
 #include<utility>
 namespace syntax{
-    class statement{
+    class statement:public node{
 	public:
-	    virtual ~statement();
-	    virtual void check(semantics::analyzer&analy)const=0;
-	    virtual void to_asm(code::generator&gen)const=0;
+	    virtual ~statement()=0;
     };
     class single:public statement{
 	public:
