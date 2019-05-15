@@ -34,7 +34,7 @@ void fcall::to_asm(code::generator&gen)const
 	    case 5 :gen.write("pop","%r9"); break;
 	}
     }
-    gen.write("call",id->name);
+    gen.write("call",dynamic_cast<const ident*>(func)->name);
     gen.write("add",align,"%rsp");
     gen.write("push","%rax");
 }
@@ -262,7 +262,8 @@ void ident::check(semantics::analyzer&analy)const
 }
 void fcall::check(semantics::analyzer&analy)const
 {
-    id->check(analy);
+    if(typeid(*func)!=typeid(ident))throw std::runtime_error("無効な関数呼び出しです");
+    func->check(analy);
     for(auto v:*vars)v->check(analy);
 }
 void unopr::check(semantics::analyzer&analy)const
@@ -271,8 +272,8 @@ void unopr::check(semantics::analyzer&analy)const
 }
 void unopr_l::check(semantics::analyzer&analy)const
 {
-    unopr::check(analy);
     if(typeid(*arg)!=typeid(ident))throw std::runtime_error("右辺値への操作です");
+    unopr::check(analy);
 }
 void biopr::check(semantics::analyzer&analy)const
 {
@@ -281,39 +282,39 @@ void biopr::check(semantics::analyzer&analy)const
 }
 void biopr_l::check(semantics::analyzer&analy)const
 {
-    biopr::check(analy);
     if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
+    biopr::check(analy);
 }
-numeric::numeric(int value)                                         :value(value)         {}
-ident  ::ident  (const std::string&name)                            :name(name)           {}
-fcall  ::fcall  (const ident*id,const std::vector<const node*>*vars):id(id),vars(vars)    {}
-unopr  ::unopr  (const node*arg)                                    :arg(arg)             {}
-uplus  ::uplus  (const node*arg)                                    :unopr(arg)           {}
-uminus ::uminus (const node*arg)                                    :unopr(arg)           {}
-unopr_l::unopr_l(const node*arg)                                    :unopr(arg)           {}
-preinc ::preinc (const node*arg)                                    :unopr_l(arg)         {}
-predec ::predec (const node*arg)                                    :unopr_l(arg)         {}
-biopr  ::biopr  (const node*larg,const node*rarg)                   :larg(larg),rarg(rarg){}
-plus   ::plus   (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-minus  ::minus  (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-multi  ::multi  (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-divide ::divide (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-remain ::remain (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-equal  ::equal  (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-nequal ::nequal (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-less   ::less   (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-greater::greater(const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-leeq   ::leeq   (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-greq   ::greq   (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-comma  ::comma  (const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-biopr_l::biopr_l(const node*larg,const node*rarg)                   :biopr(larg,rarg)     {}
-assign ::assign (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)   {}
-plasgn ::plasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)   {}
-miasgn ::miasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)   {}
-muasgn ::muasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)   {}
-diasgn ::diasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)   {}
-rmasgn ::rmasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)   {}
-node   ::~node  ()                                                                        {}
-fcall  ::~fcall ()                        {delete id;for(auto v:*vars)delete v;delete vars;}
-unopr  ::~unopr ()                                                             {delete arg;}
-biopr  ::~biopr ()                                                {delete larg;delete rarg;}
+numeric::numeric(int value)                                         :value(value)          {}
+ident  ::ident  (const std::string&name)                            :name(name)            {}
+fcall  ::fcall  (const node*func,const std::vector<const node*>*vars):func(func),vars(vars){}
+unopr  ::unopr  (const node*arg)                                    :arg(arg)              {}
+uplus  ::uplus  (const node*arg)                                    :unopr(arg)            {}
+uminus ::uminus (const node*arg)                                    :unopr(arg)            {}
+unopr_l::unopr_l(const node*arg)                                    :unopr(arg)            {}
+preinc ::preinc (const node*arg)                                    :unopr_l(arg)          {}
+predec ::predec (const node*arg)                                    :unopr_l(arg)          {}
+biopr  ::biopr  (const node*larg,const node*rarg)                   :larg(larg),rarg(rarg) {}
+plus   ::plus   (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+minus  ::minus  (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+multi  ::multi  (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+divide ::divide (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+remain ::remain (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+equal  ::equal  (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+nequal ::nequal (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+less   ::less   (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+greater::greater(const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+leeq   ::leeq   (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+greq   ::greq   (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+comma  ::comma  (const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+biopr_l::biopr_l(const node*larg,const node*rarg)                   :biopr(larg,rarg)      {}
+assign ::assign (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)    {}
+plasgn ::plasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)    {}
+miasgn ::miasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)    {}
+muasgn ::muasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)    {}
+diasgn ::diasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)    {}
+rmasgn ::rmasgn (const node*larg,const node*rarg)                   :biopr_l(larg,rarg)    {}
+node   ::~node  ()                                                                         {}
+fcall  ::~fcall ()                       {delete func;for(auto v:*vars)delete v;delete vars;}
+unopr  ::~unopr ()                                                              {delete arg;}
+biopr  ::~biopr ()                                                 {delete larg;delete rarg;}

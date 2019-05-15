@@ -27,9 +27,9 @@ namespace syntax{
     };
     class fcall:public node{
 	public:
-	    const ident*const id;
+	    const node*const func;
 	    const std::vector<const node*>*const vars;
-	    fcall(const ident*id,decltype(vars)vars);
+	    fcall(const node*func,decltype(vars)vars);
 	    ~fcall()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::generator&gen)const override;

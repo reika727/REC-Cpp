@@ -17,6 +17,7 @@ namespace syntax{
 	    const node*order03();
 	    const node*order02();
 	    const node*order01();
+	    const node*order00();
 	public:
 	    tree(lexicon::token_array&ta);
 	    ~tree();

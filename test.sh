@@ -1,7 +1,7 @@
 #!/bin/bash
 try(){
-    echo -e -n 'result: \e[31m';./mycc.out 'test.reka' 'tmp.s';res="$?";echo -e -n '\e[m'
-    if [ $res = 0 ]; then
+    ./mycc.out 'test.reka' 'tmp.s'
+    if [ $? = 0 ]; then
 	gcc -o 'tmp.out' 'tmp.s' 'func.c'
 	./tmp.out
     fi

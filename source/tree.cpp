@@ -128,28 +128,31 @@ const node*tree::order02() // + - ++ -- right to left
 }
 const node*tree::order01() // () left to right
 {
+    auto ret=order00();
     if(ta.consume(TK::OPARENT)){
+	auto vars=new std::vector<const node*>;
+	if(!ta.consume(TK::CPARENT)){
+	    while(true){
+		vars->push_back(order14());
+		if(ta.consume(TK::CPARENT))break;
+		else if(ta.consume(TK::COMMA))continue;
+		else throw std::runtime_error("無効な関数呼び出しです");
+	    }
+	}
+	ret=new fcall(ret,vars);
+    }
+    return ret;
+}
+const node*tree::order00() // literal, identifier, enclosed expression
+{
+    if(auto nump=ta.consume_num()){
+	return new numeric(*nump);
+    }else if(auto namep=ta.consume_id()){
+	return new ident(*namep);
+    }else if(ta.consume(TK::OPARENT)){
 	auto ret=order15();
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
 	return ret;
-    }else if(auto nump=ta.consume_num()){
-	return new numeric(*nump);
-    }else if(auto namep=ta.consume_id()){
-	auto id=new ident(*namep);
-	if(ta.consume(TK::OPARENT)){
-	    auto vars=new std::vector<const node*>;
-	    if(!ta.consume(TK::CPARENT)){
-		while(true){
-		    vars->push_back(order14());
-		    if(ta.consume(TK::CPARENT))break;
-		    else if(ta.consume(TK::COMMA))continue;
-		    else throw std::runtime_error("無効な関数呼び出しです");
-		}
-	    }
-	    return new fcall(id,vars);
-	}else{
-	    return id;
-	}
     }else{
 	throw std::runtime_error("構文解析ができませんでした");
     }
