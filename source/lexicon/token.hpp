@@ -21,12 +21,12 @@ namespace lexicon{
 	GREATER, // >
 	LEEQ,    // <=
 	GREQ,    // >=
+	COMMA,   // ,
 	SCOLON,  // ;
 	OPARENT, // (
 	CPARENT, // )
 	OBRACE,  // {
 	CBRACE,  // }
-	COMMA,   // ,
 	CHAR,    // char
 	IF,      // if
 	ELSE,    // else

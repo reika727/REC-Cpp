@@ -6,100 +6,100 @@ token_array::token_array(const std::string&s)
 {
     for(int i=0;i<s.length();++i){
 	if(isspace(s[i]))continue;
-	else if(s[i]=='(')tv.emplace_back(new symbol(TK::OPARENT));
-	else if(s[i]==')')tv.emplace_back(new symbol(TK::CPARENT));
-	else if(s[i]=='{')tv.emplace_back(new symbol(TK::OBRACE));
-	else if(s[i]=='}')tv.emplace_back(new symbol(TK::CBRACE));
-	else if(s[i]==';')tv.emplace_back(new symbol(TK::SCOLON));
-	else if(s[i]==',')tv.emplace_back(new symbol(TK::COMMA));
+	else if(s[i]=='(')tv.push_back(new symbol(TK::OPARENT));
+	else if(s[i]==')')tv.push_back(new symbol(TK::CPARENT));
+	else if(s[i]=='{')tv.push_back(new symbol(TK::OBRACE));
+	else if(s[i]=='}')tv.push_back(new symbol(TK::CBRACE));
+	else if(s[i]==';')tv.push_back(new symbol(TK::SCOLON));
+	else if(s[i]==',')tv.push_back(new symbol(TK::COMMA));
 	else if(s[i]=='+'){
 	    if(i!=s.length()-1&&s[i+1]=='+'){
-		tv.emplace_back(new symbol(TK::PLPL));++i;
+		tv.push_back(new symbol(TK::PLPL));++i;
 	    }else if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::PLEQ));++i;
+		tv.push_back(new symbol(TK::PLEQ));++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::PLUS));
+		tv.push_back(new symbol(TK::PLUS));
 	    }
 	}else if(s[i]=='-'){
 	    if(i!=s.length()-1&&s[i+1]=='-'){
-		tv.emplace_back(new symbol(TK::MIMI));++i;
+		tv.push_back(new symbol(TK::MIMI));++i;
 	    }else if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::MIEQ));++i;
+		tv.push_back(new symbol(TK::MIEQ));++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::MINUS));
+		tv.push_back(new symbol(TK::MINUS));
 	    }
 	}else if(s[i]=='*'){
 	    if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::ASEQ));
+		tv.push_back(new symbol(TK::ASEQ));
 		++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::ASTER));
+		tv.push_back(new symbol(TK::ASTER));
 	    }
 	}else if(s[i]=='/'){
 	    if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::SLEQ));
+		tv.push_back(new symbol(TK::SLEQ));
 		++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::SLASH));
+		tv.push_back(new symbol(TK::SLASH));
 	    }
 	}else if(s[i]=='%'){
 	    if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::PEEQ));
+		tv.push_back(new symbol(TK::PEEQ));
 		++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::PERCENT));
+		tv.push_back(new symbol(TK::PERCENT));
 	    }
 	}else if(s[i]=='='){
 	    if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::EQEQ));
+		tv.push_back(new symbol(TK::EQEQ));
 		++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::EQUAL));
+		tv.push_back(new symbol(TK::EQUAL));
 	    }
 	}else if(s[i]=='!'){
 	    if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::EXEQ));
+		tv.push_back(new symbol(TK::EXEQ));
 		++i;
 	    }else{
 		throw std::runtime_error("認識できないトークンが含まれます");
 	    }
 	}else if(s[i]=='<'){
 	    if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::LEEQ));
+		tv.push_back(new symbol(TK::LEEQ));
 		++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::LESS));
+		tv.push_back(new symbol(TK::LESS));
 	    }
 	}else if(s[i]=='>'){
 	    if(i!=s.length()-1&&s[i+1]=='='){
-		tv.emplace_back(new symbol(TK::GREQ));
+		tv.push_back(new symbol(TK::GREQ));
 		++i;
 	    }else{
-		tv.emplace_back(new symbol(TK::GREATER));
+		tv.push_back(new symbol(TK::GREATER));
 	    }
 	}else if(s.substr(i,4)=="char"&&i+4<s.length()&&isspace(s[i+4])){
-	    tv.emplace_back(new symbol(TK::CHAR));
+	    tv.push_back(new symbol(TK::CHAR));
 	    i+=3;
 	}else if(s.substr(i,2)=="if"&&i+2<s.length()&&(s[i+2]=='('||isspace(s[i+2]))){
-	    tv.emplace_back(new symbol(TK::IF));
+	    tv.push_back(new symbol(TK::IF));
 	    ++i;
 	}else if(s.substr(i,4)=="else"&&i+4<s.length()&&(s[i+4]=='('||isspace(s[i+4]))){
-	    tv.emplace_back(new symbol(TK::ELSE));
+	    tv.push_back(new symbol(TK::ELSE));
 	    i+=3;
 	}else if(s.substr(i,5)=="while"&&i+5<s.length()&&(s[i+5]=='('||isspace(s[i+5]))){
-	    tv.emplace_back(new symbol(TK::WHILE));
+	    tv.push_back(new symbol(TK::WHILE));
 	    i+=4;
 	}else if(s.substr(i,3)=="for"&&i+3<s.length()&&(s[i+3]=='('||isspace(s[i+3]))){
-	    tv.emplace_back(new symbol(TK::FOR));
+	    tv.push_back(new symbol(TK::FOR));
 	    i+=2;
 	}else if(isdigit(s[i])){
 	    size_t sz;
-	    tv.emplace_back(new numeric(std::stoi(s.substr(i),&sz)));
+	    tv.push_back(new numeric(std::stoi(s.substr(i),&sz)));
 	    i+=sz-1;
 	}else if(isalpha(s[i])||s[i]=='_'){
 	    auto beg=s.begin()+i;
 	    auto len=find_if_not(beg,s.end(),[](char c){return isalpha(c)||isdigit(c)||c=='_';})-beg;
-	    tv.emplace_back(new ident(s.substr(i,len)));
+	    tv.push_back(new ident(s.substr(i,len)));
 	    i+=len-1;
 	}else{
 	    throw std::runtime_error("認識できないトークンが含まれます");
