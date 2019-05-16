@@ -1,6 +1,5 @@
 #pragma once
-#include"expressions.hpp"
-#include"statements.hpp"
+#include"node.hpp"
 #include"../lexicon/token_array.hpp"
 namespace syntax{
     class tree{

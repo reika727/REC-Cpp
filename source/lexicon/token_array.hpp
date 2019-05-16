@@ -1,5 +1,5 @@
 #pragma once
-#include"tokens.hpp"
+#include"token.hpp"
 #include<string>
 #include<vector>
 namespace lexicon{

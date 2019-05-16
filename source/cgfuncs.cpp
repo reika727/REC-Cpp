@@ -1,4 +1,4 @@
-#include"code/gcfuncs.hpp"
+#include"code/cgfuncs.hpp"
 #include<sstream>
 namespace code{
     std::string unique_label(const std::string&base)
