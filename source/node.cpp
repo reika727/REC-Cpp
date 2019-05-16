@@ -283,8 +283,7 @@ void declare::to_asm(code::generator&gen)const
 	gen.set_offset(v.first);
 	if(v.second){
 	    v.second->to_asm(gen);
-	    gen.write("pop","%rax");
-	    gen.write("mov","%rax",address("%rsp"));
+	    gen.write("pop",address("%rsp"));
 	}
     }
 }
