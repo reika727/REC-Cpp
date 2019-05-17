@@ -7,8 +7,8 @@ const statement*tree::stat()
     if(ta.consume(TK::CHAR)){
 	auto vars=new std::vector<std::pair<std::string,const expression*>>;
 	while(true){
-	    if(auto dep=ta.consume_id()){
-		vars->push_back(std::make_pair(*dep,ta.consume(TK::EQUAL)?order14():nullptr));
+	    if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
+		vars->push_back(std::make_pair(idp->name,ta.consume(TK::EQUAL)?order14():nullptr));
 		if(ta.consume(TK::COMMA))continue;
 		else if(ta.consume(TK::SCOLON))break;
 		else throw std::runtime_error("不正な区切り文字です");
@@ -52,7 +52,7 @@ const statement*tree::stat()
 }
 const single*tree::emptiable_single()
 {
-    if(auto syp=dynamic_cast<lexicon::symbol*>(*ta.pos());syp&&(syp->type==TK::SCOLON||syp->type==TK::CPARENT)){
+    if(ta.check(TK::SCOLON)||ta.check(TK::CPARENT)){
 	return new single(nullptr);
     }else{
 	return new single(order15());
@@ -149,10 +149,10 @@ const expression*tree::order01() // () left to right
 }
 const expression*tree::order00() // literal, identifier, enclosed expression
 {
-    if(auto nump=ta.consume_num()){
-	return new numeric(*nump);
-    }else if(auto namep=ta.consume_id()){
-	return new ident(*namep);
+    if(auto nump=dynamic_cast<const lexicon::numeric*>(ta.consume(TK::NUMERIC))){
+	return new numeric(nump->value);
+    }else if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
+	return new ident(idp->name);
     }else if(ta.consume(TK::OPARENT)){
 	auto ret=order15();
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");

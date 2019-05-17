@@ -1,6 +1,7 @@
 #include"lexicon/token.hpp"
 using namespace lexicon;
-numeric::numeric(int value)             :value(value){}
-ident  ::ident  (const std::string&name):name(name)  {}
-symbol ::symbol (TK type)               :type(type)  {}
-token  ::~token ()                                   {}
+token  ::token  (TK type)               :type(type)                     {}
+numeric::numeric(int value)             :token(TK::NUMERIC),value(value){}
+ident  ::ident  (const std::string&name):token(TK::IDENT),name(name)    {}
+symbol ::symbol (TK type)               :token(type)                    {}
+token  ::~token ()                                                      {}

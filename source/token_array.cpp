@@ -60,41 +60,13 @@ token_array::~token_array()
 {
     for(auto t:tv)delete t;
 }
-const std::vector<token*>::const_iterator&token_array::pos()
+bool token_array::check(TK type)
 {
-    return itr;
+    return itr!=tv.end()&&(*itr)->type==type;
 }
-bool token_array::consume(TK type)
+const token*token_array::consume(TK type)
 {
-    if(itr!=tv.end()){
-	if(auto symp=dynamic_cast<symbol*>(*itr)){
-	    if(symp->type==type){
-		++itr;
-		return true;
-	    }
-	}
-    }
-    return false;
-}
-const int*token_array::consume_num()
-{
-    if(itr!=tv.end()){
-	if(auto ptr=dynamic_cast<numeric*>(*itr)){
-	    ++itr;
-	    return &ptr->value;
-	}
-    }
-    return nullptr;
-}
-const std::string*token_array::consume_id()
-{
-    if(itr!=tv.end()){
-	if(auto ptr=dynamic_cast<ident*>(*itr)){
-	    ++itr;
-	    return &ptr->name;
-	}
-    }
-    return nullptr;
+    return check(type)?*(itr++):nullptr;
 }
 bool token_array::is_all_read()
 {

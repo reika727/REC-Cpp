@@ -32,9 +32,13 @@ namespace lexicon{
 	ELSE,    // else
 	WHILE,   // while
 	FOR,     // for
+	NUMERIC, // numeric
+	IDENT,   // ident
     };
     class token{
 	public:
+	    const TK type;
+	    token(TK type);
 	    virtual ~token()=0;
     };
     class numeric:public token{
@@ -49,7 +53,6 @@ namespace lexicon{
     };
     class symbol:public token{
 	public:
-	    const TK type;
 	    symbol(TK type);
     };
 }

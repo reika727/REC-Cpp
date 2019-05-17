@@ -9,7 +9,7 @@
  * a=2;{2+2;
  * char a;a+2=3;
  * char a=2;{char b=23;}a=b;
-*/
+ */
 char print_num,print_6num,print_12num,say_OK;
 if(((1+2)*3)!=9)               print_num(1);
 if(+((1+2)*3)!=9)              print_num(2);
