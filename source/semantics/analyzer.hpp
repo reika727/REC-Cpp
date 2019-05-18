@@ -1,8 +1,7 @@
 #pragma once
 #include<string>
-#include<set>
 #include<vector>
-#include<stack>
+#include<set>
 namespace semantics{	
     /* 
      * 検出すべき意味論的誤り

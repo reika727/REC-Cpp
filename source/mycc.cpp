@@ -1,7 +1,8 @@
 #include"lexicon/token_array.hpp"
 #include"syntax/tree.hpp"
 #include"semantics/analyzer.hpp"
-#include"code/generator.hpp"
+#include"code/variable_manager.hpp"
+#include"code/writer.hpp"
 #include<iostream>
 #include<stdexcept>
 int main(int argc,char**argv)
@@ -17,21 +18,21 @@ int main(int argc,char**argv)
 	    lexicon::token_array ta(src);
 	    syntax::tree tr(ta);
 	    semantics::analyzer analy;
-	    tr.get_root()->check(analy);code::generator gen(dest);
+	    tr.get_root()->check(analy);
+	    code::variable_manager vm;
+	    code::writer wr(dest);
 	    
 	    // TODO
-	        gen.enter_func();
-	        gen.write("main:");
-		gen.write("push","%rbp");
-		gen.write("mov","%rsp","%rbp");
+	        wr.write("main:");
+		wr.write("push","%rbp");
+		wr.write("mov","%rsp","%rbp");
 
-	    tr.get_root()->to_asm(gen);
+	    tr.get_root()->to_asm(vm,wr);
 
 	    //TODO
-		gen.write("mov","%rbp","%rsp");
-		gen.write("pop","%rbp");
-		gen.write("ret");
-		gen.leave_func();
+		wr.write("mov","%rbp","%rsp");
+		wr.write("pop","%rbp");
+		wr.write("ret");
 	}
     }catch(const std::exception&e){
 	std::cout<<e.what()<<std::endl;
