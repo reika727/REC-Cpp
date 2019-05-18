@@ -237,8 +237,7 @@ void muasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write("mov",address("%rax"),"%rax");
     wr.write("mul","%rdi");
     wr.write("mov","%rax",address("%rsi"));
-    wr.write("mov","%rsi","%rax");
-    wr.write("push",address("%rax"));
+    wr.write("push","%rax");
 }
 void diasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
@@ -251,8 +250,7 @@ void diasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write("mov",0,"%rdx");
     wr.write("div","%rdi");
     wr.write("mov","%rax",address("%rsi"));
-    wr.write("mov","%rsi","%rax");
-    wr.write("push",address("%rax"));
+    wr.write("push","%rax");
 }
 void rmasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
@@ -265,8 +263,7 @@ void rmasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write("mov",0,"%rdx");
     wr.write("div","%rdi");
     wr.write("mov","%rdx",address("%rsi"));
-    wr.write("mov","%rsi","%rax");
-    wr.write("push",address("%rax"));
+    wr.write("push","%rdx");
 }
 void single::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
