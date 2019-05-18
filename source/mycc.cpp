@@ -17,16 +17,7 @@ int main(int argc,char**argv)
 	    lexicon::token_array ta(src);
 	    syntax::tree tr(ta);
 	    semantics::analyzer analy;
-	    
-	    // TODO
-	        analy.enter_func();
-
-	    tr.get_root()->check(analy);
-
-	    // TODO
-	        analy.leave_func();
-	    
-	    code::generator gen(dest);
+	    tr.get_root()->check(analy);code::generator gen(dest);
 	    
 	    // TODO
 	        gen.enter_func();

@@ -11,11 +11,9 @@ namespace semantics{
      * 変数の二重定義
      */
     class analyzer{
-	    std::stack<std::vector<std::set<std::string>>>vars;
+	    std::vector<std::set<std::string>>vars;
 	public:
 	    analyzer();
-	    void enter_func();
-	    void leave_func();
 	    void enter_scope();
 	    void leave_scope();
 	    void declare(const std::string&name);
