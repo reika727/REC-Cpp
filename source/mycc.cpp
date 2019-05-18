@@ -16,11 +16,21 @@ int main(int argc,char**argv)
 	    
 	    lexicon::token_array ta(src);
 	    syntax::tree tr(ta);
-	    semantics::analyzer analy;tr.get_root()->check(analy);
+	    semantics::analyzer analy;
+	    
+	    // TODO
+	        analy.enter_func();
+
+	    tr.get_root()->check(analy);
+
+	    // TODO
+	        analy.leave_func();
+	    
 	    code::generator gen(dest);
 	    
 	    // TODO
-		gen.write("main:");
+	        gen.enter_func();
+	        gen.write("main:");
 		gen.write("push","%rbp");
 		gen.write("mov","%rsp","%rbp");
 
@@ -30,6 +40,7 @@ int main(int argc,char**argv)
 		gen.write("mov","%rbp","%rsp");
 		gen.write("pop","%rbp");
 		gen.write("ret");
+		gen.leave_func();
 	}
     }catch(const std::exception&e){
 	std::cout<<e.what()<<std::endl;

@@ -34,6 +34,9 @@ void fcall::to_asm(code::generator&gen)const
 	}
     }
     gen.write("call",dynamic_cast<const ident*>(func)->name);
+    for(int i=0;i<static_cast<signed>(vars->size())-6;++i){
+	gen.write("pop","%rax");
+    }
     gen.write("add",align,"%rsp");
     gen.write("push","%rax");
 }
@@ -274,7 +277,9 @@ void single::to_asm(code::generator&gen)const
 }
 void compound::to_asm(code::generator&gen)const
 {
+    gen.enter_scope();
     for(auto s:*stats)s->to_asm(gen);
+    gen.leave_scope();
 }
 void declare::to_asm(code::generator&gen)const
 {
@@ -289,6 +294,7 @@ void declare::to_asm(code::generator&gen)const
 }
 void _if_else_::to_asm(code::generator&gen)const
 {
+    gen.enter_scope();
     std::string el=unique_label(".Lelse");
     std::string end=unique_label(".Lend");
     cond->to_asm(gen);
@@ -299,9 +305,11 @@ void _if_else_::to_asm(code::generator&gen)const
     gen.write(el+':');
     st2->to_asm(gen);
     gen.write(end+':');
+    gen.leave_scope();
 }
 void _while_::to_asm(code::generator&gen)const
 {
+    gen.enter_scope();
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
     gen.write(beg+':');
@@ -311,9 +319,11 @@ void _while_::to_asm(code::generator&gen)const
     st->to_asm(gen);
     gen.write("jmp",beg);
     gen.write(end+':');
+    gen.leave_scope();
 }
 void _for_::to_asm(code::generator&gen)const
 {
+    gen.enter_scope();
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
     init->to_asm(gen);
@@ -326,6 +336,7 @@ void _for_::to_asm(code::generator&gen)const
     reinit->to_asm(gen);
     gen.write("jmp",beg);
     gen.write(end+':');
+    gen.leave_scope();
 }
 void numeric::check(semantics::analyzer&analy)const
 {
@@ -333,7 +344,7 @@ void numeric::check(semantics::analyzer&analy)const
 }
 void ident::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_declared(name))throw std::runtime_error("未定義の変数です: "+name);
+    if(!analy.is_available(name))throw std::runtime_error("未定義の変数です: "+name);
 }
 void fcall::check(semantics::analyzer&analy)const
 {
@@ -366,33 +377,41 @@ void single::check(semantics::analyzer&analy)const
 }
 void compound::check(semantics::analyzer&analy)const
 {
+    analy.enter_scope();
     for(auto s:*stats)s->check(analy);
+    analy.leave_scope();
 }
 void declare::check(semantics::analyzer&analy)const
 {
     for(auto v:*vars){
-	if(analy.is_declared(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+	if(!analy.is_declarable(v.first))throw std::runtime_error("二重定義されました: "+v.first);
 	analy.declare(v.first);
 	if(v.second)v.second->check(analy);
     }
 }
 void _if_else_::check(semantics::analyzer&analy)const
 {
+    analy.enter_scope();
     cond->check(analy);
     st1->check(analy);
     st2->check(analy);
+    analy.leave_scope();
 }
 void _while_::check(semantics::analyzer&analy)const
 {
+    analy.enter_scope();
     cond->check(analy);
     st->check(analy);
+    analy.leave_scope();
 }
 void _for_::check(semantics::analyzer&analy)const
 {
+    analy.enter_scope();
     init->check(analy);
     cond->check(analy);
     reinit->check(analy);
     st->check(analy);
+    analy.leave_scope();
 }
 numeric   ::numeric    (int value)                                                                 :value(value)                               {}
 ident     ::ident      (const std::string&name)                                                    :name(name)                                 {}

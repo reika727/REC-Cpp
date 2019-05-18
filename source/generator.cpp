@@ -1,6 +1,7 @@
 #include"code/generator.hpp"
+#include<algorithm>
 using namespace code;
-generator::generator(const std::string&filename):ofs(filename),var_size(0)
+generator::generator(const std::string&filename):ofs(filename)
 {
     write(".global main");
 }
@@ -24,15 +25,41 @@ void generator::write(const std::string&inst,int arg)
 {
     write(inst+" $"+std::to_string(arg));
 }
-int generator::get_offset(const std::string&name)
+void generator::enter_func()
 {
-    return offset[name];
+    offset.emplace();
+    var_size.push(0);
+}
+void generator::leave_func()
+{
+    offset.pop();
+    var_size.pop();
+}
+void generator::enter_scope()
+{
+    offset.top().emplace_back();
+}
+void generator::leave_scope()
+{
+    offset.top().pop_back();
 }
 void generator::set_offset(const std::string&name)
 {
-    offset[name]=var_size+=8;
+    offset.top().back()[name]=var_size.top()+=8;
+}
+int generator::get_offset(const std::string&name)
+{
+    return (*
+	std::find_if(
+	    offset.top().rbegin(),
+	    offset.top().rend(),
+	    [name](const std::map<std::string,int>&mp){
+		return mp.count(name)==1;
+	    }
+	)
+    )[name];
 }
 int generator::get_var_size()
 {
-    return var_size;
+    return var_size.top();
 }

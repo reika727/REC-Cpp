@@ -8,8 +8,9 @@
  * a=2;a+=(2+2
  * a=2;{2+2;
  * char a;a+2=3;
- * char a=2;{char b=23;}a=b;
+ * a=2;{b=23;}a=b;
  */
+
 char print_num,print_6num,print_12num,say_OK;
 if(((1+2)*3)!=9)               print_num(1);
 if(+((1+2)*3)!=9)              print_num(2);
@@ -154,4 +155,16 @@ char g=32,h=21;
 i=g+h;
 char j=21,k=a,l=0;
 print_12num(a,b,c,d,e,f,g,h,i,j,k,l);
+char aasa=33;
+{
+    char aasa=3;
+    if(aasa!=3)                print_num(43);
+    char b=3;
+    {
+	char aasa=43;
+	if(aasa!=43)           print_num(44);
+	if(b!=3)               print_num(45);
+    }
+}
+if(aasa!=33)                   print_num(46);
 say_OK();
