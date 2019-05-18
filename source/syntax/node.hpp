@@ -204,11 +204,11 @@ namespace syntax{
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm,code::writer&wr)const override;
     };
-    class declare:public statement{
+    class define:public statement{
 	public:
 	    const std::vector<std::pair<std::string,const expression*>>*vars;
-	    declare(decltype(vars)vars);
-	    ~declare()override;
+	    define(decltype(vars)vars);
+	    ~define()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm,code::writer&wr)const override;
     };

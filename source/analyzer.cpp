@@ -13,7 +13,7 @@ void analyzer::leave_scope()
 {
     vars.pop_back();
 }
-void analyzer::declare(const std::string&name)
+void analyzer::define(const std::string&name)
 {
     vars.back().insert(name);
 }
@@ -27,7 +27,7 @@ bool analyzer::is_available(const std::string&name)
 	}
     );
 }
-bool analyzer::is_declarable(const std::string&name)
+bool analyzer::is_definable(const std::string&name)
 {
     return vars.back().count(name)==0;
 }

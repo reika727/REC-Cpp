@@ -278,7 +278,7 @@ void compound::to_asm(code::variable_manager&vm,code::writer&wr)const
     for(auto s:*stats)s->to_asm(vm,wr);
     vm.leave_scope();
 }
-void declare::to_asm(code::variable_manager&vm,code::writer&wr)const
+void define::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
     for(auto v:*vars){
 	wr.write("sub",8,"%rsp");
@@ -346,7 +346,7 @@ void ident::check(semantics::analyzer&analy)const
 void fcall::check(semantics::analyzer&analy)const
 {
     if(typeid(*func)!=typeid(ident))throw std::runtime_error("無効な関数呼び出しです");
-    func->check(analy);
+    /*TODO*///func->check(analy);
     for(auto v:*vars)v->check(analy);
 }
 void unopr::check(semantics::analyzer&analy)const
@@ -378,11 +378,11 @@ void compound::check(semantics::analyzer&analy)const
     for(auto s:*stats)s->check(analy);
     analy.leave_scope();
 }
-void declare::check(semantics::analyzer&analy)const
+void define::check(semantics::analyzer&analy)const
 {
     for(auto v:*vars){
-	if(!analy.is_declarable(v.first))throw std::runtime_error("二重定義されました: "+v.first);
-	analy.declare(v.first);
+	if(!analy.is_definable(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+	analy.define(v.first);
 	if(v.second)v.second->check(analy);
     }
 }
@@ -443,7 +443,7 @@ diasgn    ::diasgn     (const expression*larg,const expression*rarg)            
 rmasgn    ::rmasgn     (const expression*larg,const expression*rarg)                               :biopr_l(larg,rarg)                         {}
 single    ::single     (const expression*stat)                                                     :stat(stat)                                 {}
 compound  ::compound   (const std::vector<const statement*>*stats)                                 :stats(stats)                               {}
-declare   ::declare    (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                 {}
+define    ::define     (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                 {}
 _if_else_ ::_if_else_  (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
 _while_   ::_while_    (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
 _for_     ::_for_      (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st){}
@@ -452,7 +452,7 @@ unopr     ::~unopr     ()                                                       
 biopr     ::~biopr     ()                                                                                              {delete larg;delete rarg;}
 single    ::~single    ()                                                                                                          {delete stat;}
 compound  ::~compound  ()                                                                              {for(auto s:*stats)delete s;delete stats;}
-declare   ::~declare   ()                                                                         {for(auto v:*vars)delete v.second;delete vars;}
+define    ::~define    ()                                                                         {for(auto v:*vars)delete v.second;delete vars;}
 _if_else_ ::~_if_else_ ()                                                                                    {delete cond;delete st1;delete st2;}
 _while_   ::~_while_   ()                                                                                                {delete cond;delete st;}
 _for_     ::~_for_     ()                                                                      {delete init;delete cond;delete reinit;delete st;}

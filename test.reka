@@ -11,7 +11,6 @@
  * a=2;{b=23;}a=b;
  */
 
-char print_num,print_6num,print_12num,say_OK;
 if(((1+2)*3)!=9)               print_num(1);
 if(+((1+2)*3)!=9)              print_num(2);
 if(+(2)!=2)                    print_num(3);

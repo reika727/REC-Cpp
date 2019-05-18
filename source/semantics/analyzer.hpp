@@ -15,8 +15,8 @@ namespace semantics{
 	    analyzer();
 	    void enter_scope();
 	    void leave_scope();
-	    void declare(const std::string&name);
+	    void define(const std::string&name);
 	    bool is_available(const std::string&name);
-	    bool is_declarable(const std::string&name);
+	    bool is_definable(const std::string&name);
     };
 }

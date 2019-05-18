@@ -16,7 +16,7 @@ const statement*tree::stat()
 		throw std::runtime_error("無効な宣言です");
 	    }
 	}
-	return new declare(vars);
+	return new define(vars);
     }else if(ta.consume(TK::IF)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	auto cond=new single(order15());
