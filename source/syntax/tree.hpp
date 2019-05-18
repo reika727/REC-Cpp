@@ -4,8 +4,9 @@
 namespace syntax{
     class tree{
 	    lexicon::token_array&ta;
-	    compound*root;
+	    std::vector<const function*>*root;
 	private:
+	    const function*func();
 	    const statement*stat();
 	    const single*emptiable_single();
 	    const expression*order15();
@@ -20,6 +21,6 @@ namespace syntax{
 	public:
 	    tree(lexicon::token_array&ta);
 	    ~tree();
-	    const compound*get_root();
+	    const std::vector<const function*>&get_root();
     };
 }

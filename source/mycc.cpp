@@ -13,26 +13,18 @@ int main(int argc,char**argv)
 	}else{
 	    std::ifstream ifs(argv[1]);
 	    std::string src((std::istreambuf_iterator<char>(ifs)),std::istreambuf_iterator<char>());
-	    std::string dest(argc==2?"tmp.s":argv[2]);
-	    
+	    std::string dest(argc==2?"tmp.s":argv[2]);    
 	    lexicon::token_array ta(src);
 	    syntax::tree tr(ta);
-	    semantics::analyzer analy;
-	    tr.get_root()->check(analy);
-	    code::variable_manager vm;
+	    for(auto f:tr.get_root()){
+		semantics::analyzer analy;
+		f->check(analy);
+	    }
 	    code::writer wr(dest);
-	    
-	    // TODO
-	        wr.write("main:");
-		wr.write("push","%rbp");
-		wr.write("mov","%rsp","%rbp");
-
-	    tr.get_root()->to_asm(vm,wr);
-
-	    //TODO
-		wr.write("mov","%rbp","%rsp");
-		wr.write("pop","%rbp");
-		wr.write("ret");
+	    for(auto f:tr.get_root()){
+		code::variable_manager vm;
+		f->to_asm(vm,wr);
+	    }
 	}
     }catch(const std::exception&e){
 	std::cout<<e.what()<<std::endl;

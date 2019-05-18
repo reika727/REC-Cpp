@@ -239,4 +239,23 @@ namespace syntax{
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm,code::writer&wr)const override;
     };
+    class _return_:public statement{
+	public:
+	    const single*const val;
+	    _return_(const single*val);
+	    ~_return_();
+	    void check(semantics::analyzer&analy)const override;
+	    void to_asm(code::variable_manager&vm,code::writer&wr)const override;
+    };
+
+    class function:public node{
+	public:
+	    const std::string name;
+	    const compound*const com;
+	    const std::vector<std::string>*const args;
+	    function(std::string name,decltype(args)args,const compound*com);
+	    ~function()override;
+	    void check(semantics::analyzer&analy)const override;
+	    void to_asm(code::variable_manager&vm,code::writer&wr)const override;
+    };
 }

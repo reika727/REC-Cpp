@@ -32,6 +32,7 @@ namespace lexicon{
 	ELSE,    // else
 	WHILE,   // while
 	FOR,     // for
+	RETURN,  // return
 	NUMERIC, // numeric
 	IDENT,   // ident
     };

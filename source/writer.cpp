@@ -2,7 +2,7 @@
 using namespace code;
 writer::writer(const std::string&filename):ofs(filename)
 {
-    write(".global main");
+
 }
 void writer::write(const std::string&str)
 {

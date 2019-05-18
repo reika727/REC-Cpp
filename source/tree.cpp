@@ -2,6 +2,43 @@
 #include<stdexcept>
 using namespace syntax;
 using TK=lexicon::TK;
+const function*tree::func()
+{
+    if(ta.consume(TK::CHAR)){
+	if(auto fidp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
+	    if(ta.consume(TK::OPARENT)){
+		auto vars=new std::vector<std::string>;
+		if(!ta.consume(TK::CPARENT)){
+		    while(true){
+			if(ta.consume(TK::CHAR)){
+			    if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
+				vars->push_back(idp->name);
+				if(ta.consume(TK::COMMA))continue;
+				else if(ta.consume(TK::CPARENT))break;
+				else throw std::runtime_error("不正な区切り文字です");
+			    }else{
+				throw std::runtime_error("引数名が見つかりませんでした");
+			    }
+			}else{
+			    throw std::runtime_error("引数の型が見つかりませんでした");
+			}
+		    }
+		}
+		if(auto comp=dynamic_cast<const compound*>(stat())){
+		    return new function(fidp->name,vars,comp);
+		}else{
+		    throw std::runtime_error("関数の本体が見つかりませんでした");
+		}
+	    }else{
+		throw std::runtime_error("引数リストが見つかりませんでした");
+	    }
+	}else{
+	    throw std::runtime_error("関数名が見つかりませんでした");
+	}
+    }else{
+	throw std::runtime_error("関数の型が見つかりませんでした");
+    }
+}
 const statement*tree::stat()
 {
     if(ta.consume(TK::CHAR)){
@@ -40,6 +77,8 @@ const statement*tree::stat()
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("forの後ろに括弧がありません");
 	auto st=stat();
 	return new _for_(init,cond,reinit,st);
+    }else if(ta.consume(TK::RETURN)){
+	return new _return_(new single(order15()));
     }else if(ta.consume(TK::OBRACE)){
 	auto stats=new std::vector<const statement*>;
 	while(!ta.consume(TK::CBRACE))stats->push_back(stat());
@@ -163,17 +202,16 @@ const expression*tree::order00() // literal, identifier, enclosed expression
 }
 tree::tree(lexicon::token_array&ta):ta(ta)
 {
-    auto stats=new std::vector<const statement*>;
+    root=new std::vector<const function*>;
     while(!ta.is_all_read()){
-	stats->push_back(stat());
+	root->push_back(func());
     }
-    root=new compound(stats);
 }
 tree::~tree()
 {
     delete root;
 }
-const compound*tree::get_root()
+const std::vector<const function*>&tree::get_root()
 {
-    return root;
+    return *root;
 }

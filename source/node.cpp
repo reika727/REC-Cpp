@@ -34,8 +34,8 @@ void fcall::to_asm(code::variable_manager&vm,code::writer&wr)const
 	}
     }
     wr.write("call",dynamic_cast<const ident*>(func)->name);
-    for(int i=0;i<static_cast<signed>(vars->size())-6;++i){
-	wr.write("pop","%rax");
+    if(vars->size()>6){
+	wr.write("sub",8*(vars->size()-6),"%rsp");
     }
     wr.write("add",align,"%rsp");
     wr.write("push","%rax");
@@ -335,6 +335,43 @@ void _for_::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write(end+':');
     vm.leave_scope();
 }
+void _return_::to_asm(code::variable_manager&vm,code::writer&wr)const
+{
+    val->to_asm(vm,wr);
+    wr.write("mov","%rbp","%rsp");
+    wr.write("pop","%rbp");
+    wr.write("ret");
+}
+void function::to_asm(code::variable_manager&vm,code::writer&wr)const
+{
+    vm.enter_scope();
+    wr.write(".globl "+name);
+    wr.write(name+':');
+    wr.write("push","%rbp");
+    wr.write("mov","%rsp","%rbp");
+    for(int i;i<args->size();++i){
+	wr.write("sub",8,"%rsp");
+	vm.set_offset((*args)[i]);
+	switch(i){
+	    case 0 :wr.write("mov","%rdi",address("%rsp"));              break;
+	    case 1 :wr.write("mov","%rsi",address("%rsp"));              break;
+	    case 2 :wr.write("mov","%rdx",address("%rsp"));              break;
+	    case 3 :wr.write("mov","%rcx",address("%rsp"));              break;
+	    case 4 :wr.write("mov","%r8" ,address("%rsp"));              break;
+	    case 5 :wr.write("mov","%r9" ,address("%rsp"));              break;
+	    default:
+		    wr.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
+		    wr.write("mov","%rax",address("%rsp"));
+		    break;
+	}
+    }
+    for(auto s:*(com->stats))s->to_asm(vm,wr);
+    //強制return
+    wr.write("mov","%rbp","%rsp");
+    wr.write("pop","%rbp");
+    wr.write("ret");
+    vm.leave_scope();
+}
 void numeric::check(semantics::analyzer&analy)const
 {
     return;
@@ -346,7 +383,6 @@ void ident::check(semantics::analyzer&analy)const
 void fcall::check(semantics::analyzer&analy)const
 {
     if(typeid(*func)!=typeid(ident))throw std::runtime_error("無効な関数呼び出しです");
-    /*TODO*///func->check(analy);
     for(auto v:*vars)v->check(analy);
 }
 void unopr::check(semantics::analyzer&analy)const
@@ -410,6 +446,17 @@ void _for_::check(semantics::analyzer&analy)const
     st->check(analy);
     analy.leave_scope();
 }
+void _return_::check(semantics::analyzer&analy)const
+{
+    val->check(analy);
+}
+void function::check(semantics::analyzer&analy)const
+{
+    analy.enter_scope();
+    for(auto a:*args)analy.define(a);
+    for(auto s:*(com->stats))s->check(analy);
+    analy.leave_scope();
+}
 numeric   ::numeric    (int value)                                                                 :value(value)                               {}
 ident     ::ident      (const std::string&name)                                                    :name(name)                                 {}
 fcall     ::fcall      (const expression*func,const std::vector<const expression*>*vars)           :func(func),vars(vars)                      {}
@@ -447,6 +494,8 @@ define    ::define     (const std::vector<std::pair<std::string,const expression
 _if_else_ ::_if_else_  (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
 _while_   ::_while_    (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
 _for_     ::_for_      (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st){}
+_return_  ::_return_   (const single*val)                                                          :val(val)                                   {}
+function  ::function   (std::string name,const std::vector<std::string>*args,const compound*com)   :name(name),args(args),com(com)             {}
 fcall     ::~fcall     ()                                                                    {delete func;for(auto v:*vars)delete v;delete vars;}
 unopr     ::~unopr     ()                                                                                                           {delete arg;}
 biopr     ::~biopr     ()                                                                                              {delete larg;delete rarg;}
@@ -456,6 +505,8 @@ define    ::~define    ()                                                       
 _if_else_ ::~_if_else_ ()                                                                                    {delete cond;delete st1;delete st2;}
 _while_   ::~_while_   ()                                                                                                {delete cond;delete st;}
 _for_     ::~_for_     ()                                                                      {delete init;delete cond;delete reinit;delete st;}
+_return_  ::~_return_  ()                                                                                                           {delete val;}
+function  ::~function  ()                                                                                               {delete com;delete args;}
 node      ::~node      ()                                                                                                                      {}
 expression::~expression()                                                                                                                      {}
 statement ::~statement ()                                                                                                                      {}
