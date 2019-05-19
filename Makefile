@@ -17,4 +17,10 @@ clean:
 	rm -f *.out *~ tmp* .*.swp source/*.o source/*.d
 
 test: $(PROG)
-	./test.sh
+	./test.sh test2.reka
+
+test1: $(PROG)
+	./test.sh test1.reka
+
+test2: $(PROG)
+	./test.sh test2.reka
