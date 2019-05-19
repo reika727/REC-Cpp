@@ -9,8 +9,11 @@ void variable_manager::enter_scope()
 {
     offset.emplace_back();
 }
-void variable_manager::leave_scope()
+void variable_manager::leave_scope(writer&wr)
 {
+    int dec=offset.back().size()*8;
+    var_size-=dec;
+    wr.write("add",dec,"%rsp");
     offset.pop_back();
 }
 void variable_manager::set_offset(const std::string&name)

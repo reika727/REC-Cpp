@@ -35,7 +35,7 @@ void fcall::to_asm(code::variable_manager&vm,code::writer&wr)const
     }
     wr.write("call",dynamic_cast<const ident*>(func)->name);
     if(vars->size()>6){
-	wr.write("sub",8*(vars->size()-6),"%rsp");
+	wr.write("add",8*(vars->size()-6),"%rsp");
     }
     wr.write("add",align,"%rsp");
     wr.write("push","%rax");
@@ -197,7 +197,7 @@ void greq::to_asm(code::variable_manager&vm,code::writer&wr)const
 void comma::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
     larg->to_asm(vm,wr);
-    wr.write("sub",8,"%rsp");
+    wr.write("add",8,"%rsp");
     rarg->to_asm(vm,wr);
 }
 void assign::to_asm(code::variable_manager&vm,code::writer&wr)const
@@ -276,7 +276,7 @@ void compound::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
     vm.enter_scope();
     for(auto s:*stats)s->to_asm(vm,wr);
-    vm.leave_scope();
+    vm.leave_scope(wr);
 }
 void define::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
@@ -302,7 +302,7 @@ void _if_else_::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write(el+':');
     st2->to_asm(vm,wr);
     wr.write(end+':');
-    vm.leave_scope();
+    vm.leave_scope(wr);
 }
 void _while_::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
@@ -316,7 +316,7 @@ void _while_::to_asm(code::variable_manager&vm,code::writer&wr)const
     st->to_asm(vm,wr);
     wr.write("jmp",beg);
     wr.write(end+':');
-    vm.leave_scope();
+    vm.leave_scope(wr);
 }
 void _for_::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
@@ -333,7 +333,7 @@ void _for_::to_asm(code::variable_manager&vm,code::writer&wr)const
     reinit->to_asm(vm,wr);
     wr.write("jmp",beg);
     wr.write(end+':');
-    vm.leave_scope();
+    vm.leave_scope(wr);
 }
 void _return_::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
@@ -370,7 +370,7 @@ void function::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write("mov","%rbp","%rsp");
     wr.write("pop","%rbp");
     wr.write("ret");
-    vm.leave_scope();
+    vm.leave_scope(wr);
 }
 void numeric::check(semantics::analyzer&analy)const
 {
