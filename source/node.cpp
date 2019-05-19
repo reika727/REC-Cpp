@@ -197,7 +197,7 @@ void greq::to_asm(code::variable_manager&vm,code::writer&wr)const
 void comma::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
     larg->to_asm(vm,wr);
-    wr.write("pop","%rax");
+    wr.write("sub",8,"%rsp");
     rarg->to_asm(vm,wr);
 }
 void assign::to_asm(code::variable_manager&vm,code::writer&wr)const
@@ -353,12 +353,12 @@ void function::to_asm(code::variable_manager&vm,code::writer&wr)const
 	wr.write("sub",8,"%rsp");
 	vm.set_offset((*args)[i]);
 	switch(i){
-	    case 0 :wr.write("mov","%rdi",address("%rsp"));              break;
-	    case 1 :wr.write("mov","%rsi",address("%rsp"));              break;
-	    case 2 :wr.write("mov","%rdx",address("%rsp"));              break;
-	    case 3 :wr.write("mov","%rcx",address("%rsp"));              break;
-	    case 4 :wr.write("mov","%r8" ,address("%rsp"));              break;
-	    case 5 :wr.write("mov","%r9" ,address("%rsp"));              break;
+	    case 0 :wr.write("mov","%rdi",address("%rsp"));break;
+	    case 1 :wr.write("mov","%rsi",address("%rsp"));break;
+	    case 2 :wr.write("mov","%rdx",address("%rsp"));break;
+	    case 3 :wr.write("mov","%rcx",address("%rsp"));break;
+	    case 4 :wr.write("mov","%r8" ,address("%rsp"));break;
+	    case 5 :wr.write("mov","%r9" ,address("%rsp"));break;
 	    default:
 		    wr.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
 		    wr.write("mov","%rax",address("%rsp"));

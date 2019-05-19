@@ -1,6 +1,6 @@
 #include"lexicon/token_array.hpp"
-#include<stdexcept>
 #include<algorithm>
+#include<stdexcept>
 using namespace lexicon;
 token_array::token_array(const std::string&s)
 {
@@ -26,31 +26,31 @@ token_array::token_array(const std::string&s)
 		else if(s.substr(i,2)=="*/"&&++i)break;
 	    }
 	}
-	else if(s.substr(i,2)=="++"&&++i)                                                      tv.push_back(new symbol(TK::PLPL));
-	else if(s.substr(i,2)=="--"&&++i)                                                      tv.push_back(new symbol(TK::MIMI));
-	else if(s.substr(i,2)=="+="&&++i)                                                      tv.push_back(new symbol(TK::PLEQ));
-	else if(s.substr(i,2)=="-="&&++i)                                                      tv.push_back(new symbol(TK::MIEQ));
-	else if(s.substr(i,2)=="*="&&++i)                                                      tv.push_back(new symbol(TK::ASEQ));
-	else if(s.substr(i,2)=="/="&&++i)                                                      tv.push_back(new symbol(TK::SLEQ));
-	else if(s.substr(i,2)=="%="&&++i)                                                      tv.push_back(new symbol(TK::PEEQ));
-	else if(s.substr(i,2)=="=="&&++i)                                                      tv.push_back(new symbol(TK::EQEQ));
-	else if(s.substr(i,2)=="!="&&++i)                                                      tv.push_back(new symbol(TK::EXEQ));
-	else if(s.substr(i,2)=="<="&&++i)                                                      tv.push_back(new symbol(TK::LEEQ));
-	else if(s.substr(i,2)==">="&&++i)                                                      tv.push_back(new symbol(TK::GREQ));
-	else if(s[i]=='+')                                                                     tv.push_back(new symbol(TK::PLUS));
-	else if(s[i]=='-')                                                                     tv.push_back(new symbol(TK::MINUS));
-	else if(s[i]=='*')                                                                     tv.push_back(new symbol(TK::ASTER));
-	else if(s[i]=='/')                                                                     tv.push_back(new symbol(TK::SLASH));
-	else if(s[i]=='%')                                                                     tv.push_back(new symbol(TK::PERCENT));
-	else if(s[i]=='=')                                                                     tv.push_back(new symbol(TK::EQUAL));
-	else if(s[i]=='<')                                                                     tv.push_back(new symbol(TK::LESS));
-	else if(s[i]=='>')                                                                     tv.push_back(new symbol(TK::GREATER));
-	else if(s[i]=='(')                                                                     tv.push_back(new symbol(TK::OPARENT));
-	else if(s[i]==')')                                                                     tv.push_back(new symbol(TK::CPARENT));
-	else if(s[i]=='{')                                                                     tv.push_back(new symbol(TK::OBRACE));
-	else if(s[i]=='}')                                                                     tv.push_back(new symbol(TK::CBRACE));
-	else if(s[i]==';')                                                                     tv.push_back(new symbol(TK::SCOLON));
-	else if(s[i]==',')                                                                     tv.push_back(new symbol(TK::COMMA));
+	else if(s.substr(i,2)=="++"&&++i)tv.push_back(new symbol(TK::PLPL));
+	else if(s.substr(i,2)=="--"&&++i)tv.push_back(new symbol(TK::MIMI));
+	else if(s.substr(i,2)=="+="&&++i)tv.push_back(new symbol(TK::PLEQ));
+	else if(s.substr(i,2)=="-="&&++i)tv.push_back(new symbol(TK::MIEQ));
+	else if(s.substr(i,2)=="*="&&++i)tv.push_back(new symbol(TK::ASEQ));
+	else if(s.substr(i,2)=="/="&&++i)tv.push_back(new symbol(TK::SLEQ));
+	else if(s.substr(i,2)=="%="&&++i)tv.push_back(new symbol(TK::PEEQ));
+	else if(s.substr(i,2)=="=="&&++i)tv.push_back(new symbol(TK::EQEQ));
+	else if(s.substr(i,2)=="!="&&++i)tv.push_back(new symbol(TK::EXEQ));
+	else if(s.substr(i,2)=="<="&&++i)tv.push_back(new symbol(TK::LEEQ));
+	else if(s.substr(i,2)==">="&&++i)tv.push_back(new symbol(TK::GREQ));
+	else if(s[i]=='+')               tv.push_back(new symbol(TK::PLUS));
+	else if(s[i]=='-')               tv.push_back(new symbol(TK::MINUS));
+	else if(s[i]=='*')               tv.push_back(new symbol(TK::ASTER));
+	else if(s[i]=='/')               tv.push_back(new symbol(TK::SLASH));
+	else if(s[i]=='%')               tv.push_back(new symbol(TK::PERCENT));
+	else if(s[i]=='=')               tv.push_back(new symbol(TK::EQUAL));
+	else if(s[i]=='<')               tv.push_back(new symbol(TK::LESS));
+	else if(s[i]=='>')               tv.push_back(new symbol(TK::GREATER));
+	else if(s[i]=='(')               tv.push_back(new symbol(TK::OPARENT));
+	else if(s[i]==')')               tv.push_back(new symbol(TK::CPARENT));
+	else if(s[i]=='{')               tv.push_back(new symbol(TK::OBRACE));
+	else if(s[i]=='}')               tv.push_back(new symbol(TK::CBRACE));
+	else if(s[i]==';')               tv.push_back(new symbol(TK::SCOLON));
+	else if(s[i]==',')               tv.push_back(new symbol(TK::COMMA));
 	else if(!isspace(s[i])){
 	    throw std::runtime_error("認識できないトークンが含まれます");
 	}
