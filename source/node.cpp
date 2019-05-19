@@ -291,9 +291,9 @@ void define::to_asm(code::variable_manager&vm,code::writer&wr)const
 }
 void _if_else_::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
-    vm.enter_scope();
     std::string el=unique_label(".Lelse");
     std::string end=unique_label(".Lend");
+    vm.enter_scope();
     cond->to_asm(vm,wr);
     wr.write("cmp",0,"%rax");
     wr.write("je",el);
@@ -301,28 +301,28 @@ void _if_else_::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write("jmp",end);
     wr.write(el+':');
     st2->to_asm(vm,wr);
-    wr.write(end+':');
     vm.leave_scope(wr);
+    wr.write(end+':');
 }
 void _while_::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
-    vm.enter_scope();
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
     wr.write(beg+':');
+    vm.enter_scope();
     cond->to_asm(vm,wr);
     wr.write("cmp",0,"%rax");
     wr.write("je",end);
     st->to_asm(vm,wr);
+    vm.leave_scope(wr);
     wr.write("jmp",beg);
     wr.write(end+':');
-    vm.leave_scope(wr);
 }
 void _for_::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
-    vm.enter_scope();
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
+    vm.enter_scope();
     init->to_asm(vm,wr);
     wr.write(beg+':');
     wr.write("mov",1,"%rax");
@@ -331,9 +331,9 @@ void _for_::to_asm(code::variable_manager&vm,code::writer&wr)const
     wr.write("je",end);
     st->to_asm(vm,wr);
     reinit->to_asm(vm,wr);
+    vm.leave_scope(wr);
     wr.write("jmp",beg);
     wr.write(end+':');
-    vm.leave_scope(wr);
 }
 void _return_::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
@@ -344,11 +344,11 @@ void _return_::to_asm(code::variable_manager&vm,code::writer&wr)const
 }
 void function::to_asm(code::variable_manager&vm,code::writer&wr)const
 {
-    vm.enter_scope();
     wr.write(".globl "+name);
     wr.write(name+':');
     wr.write("push","%rbp");
     wr.write("mov","%rsp","%rbp");
+    vm.enter_scope();
     for(int i;i<args->size();++i){
 	wr.write("sub",8,"%rsp");
 	vm.set_offset((*args)[i]);
@@ -366,11 +366,11 @@ void function::to_asm(code::variable_manager&vm,code::writer&wr)const
 	}
     }
     for(auto s:*(com->stats))s->to_asm(vm,wr);
+    vm.leave_scope(wr);
     //強制return
     wr.write("mov","%rbp","%rsp");
     wr.write("pop","%rbp");
     wr.write("ret");
-    vm.leave_scope(wr);
 }
 void numeric::check(semantics::analyzer&analy)const
 {
