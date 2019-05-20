@@ -57,10 +57,6 @@ token_array::token_array(const std::string&s)
     }
     itr=tv.begin();
 }
-token_array::~token_array()
-{
-    for(auto t:tv)delete t;
-}
 bool token_array::check(TK type)
 {
     return itr!=tv.end()&&(*itr)->type==type;
@@ -72,4 +68,8 @@ const token*token_array::consume(TK type)
 bool token_array::is_all_read()
 {
     return itr==tv.end();
+}
+token_array::~token_array()
+{
+    for(auto t:tv)delete t;
 }

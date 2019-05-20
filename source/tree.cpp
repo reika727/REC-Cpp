@@ -200,6 +200,10 @@ const expression*tree::order00() // literal, identifier, enclosed expression
 	throw std::runtime_error("構文解析ができませんでした");
     }
 }
+const std::vector<const function*>&tree::get_root()
+{
+    return *root;
+}
 tree::tree(lexicon::token_array&ta):ta(ta)
 {
     root=new std::vector<const function*>;
@@ -210,8 +214,4 @@ tree::tree(lexicon::token_array&ta):ta(ta)
 tree::~tree()
 {
     delete root;
-}
-const std::vector<const function*>&tree::get_root()
-{
-    return *root;
 }

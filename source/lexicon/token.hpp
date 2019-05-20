@@ -40,7 +40,7 @@ namespace lexicon{
 	public:
 	    const TK type;
 	    token(TK type);
-	    virtual ~token()=0;
+	    virtual ~token()=default;
     };
     class numeric:public token{
 	public:

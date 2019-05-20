@@ -8,9 +8,10 @@ namespace code{
 	    std::vector<std::map<std::string,int>>offset;
 	    int var_size;
 	public:
-	    variable_manager();
+	    writer&write;
+	    variable_manager(writer&write);
 	    void enter_scope();
-	    void leave_scope(writer&wr);
+	    void leave_scope();
 	    void set_offset(const std::string&name);
 	    int get_offset(const std::string&name);
 	    int get_var_size();

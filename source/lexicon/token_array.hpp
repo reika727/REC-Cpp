@@ -12,5 +12,6 @@ namespace lexicon{
 	    bool check(TK type);
 	    const token*consume(TK type);
 	    bool is_all_read();
+	    token_array&operator=(const token_array&)=delete;
     };
 }

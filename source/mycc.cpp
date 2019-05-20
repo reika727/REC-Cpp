@@ -1,8 +1,8 @@
 #include"lexicon/token_array.hpp"
 #include"syntax/tree.hpp"
 #include"semantics/analyzer.hpp"
-#include"code/variable_manager.hpp"
 #include"code/writer.hpp"
+#include"code/variable_manager.hpp"
 #include<iostream>
 #include<stdexcept>
 int main(int argc,char**argv)
@@ -22,8 +22,8 @@ int main(int argc,char**argv)
 	    }
 	    code::writer wr(dest);
 	    for(auto f:tr.get_root()){
-		code::variable_manager vm;
-		f->to_asm(vm,wr);
+		code::variable_manager vm(wr);
+		f->to_asm(vm);
 	    }
 	}
     }catch(const std::exception&e){

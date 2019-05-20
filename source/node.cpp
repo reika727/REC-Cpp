@@ -5,372 +5,372 @@
 using namespace syntax;
 using code::address;
 using code::unique_label;
-void numeric::to_asm(code::variable_manager&vm,code::writer&wr)const
+void numeric::to_asm(code::variable_manager&vm)const
 {
-    wr.write("push",value);
+    vm.write("push",value);
 }
-void ident::to_asm(code::variable_manager&vm,code::writer&wr)const
+void ident::to_asm(code::variable_manager&vm)const
 {
-    wr.write("push",address(-vm.get_offset(name),"%rbp"));
+    vm.write("push",address(-vm.get_offset(name),"%rbp"));
 }
-void ident::refer(code::variable_manager&vm,code::writer&wr)const
+void ident::refer(code::variable_manager&vm)const
 {
-    wr.write("lea",address(-vm.get_offset(name),"%rbp"),"%rax");
-    wr.write("push","%rax");
+    vm.write("lea",address(-vm.get_offset(name),"%rbp"),"%rax");
+    vm.write("push","%rax");
 }
-void fcall::to_asm(code::variable_manager&vm,code::writer&wr)const
+void fcall::to_asm(code::variable_manager&vm)const
 {
     int align=(16-vm.get_var_size()%16)%16;
-    wr.write("sub",align,"%rsp");
+    vm.write("sub",align,"%rsp");
     for(int i=vars->size()-1;i>=0;--i){
-	(*vars)[i]->to_asm(vm,wr);
+	(*vars)[i]->to_asm(vm);
 	switch(i){
-	    case 0 :wr.write("pop","%rdi");break;
-	    case 1 :wr.write("pop","%rsi");break;
-	    case 2 :wr.write("pop","%rdx");break;
-	    case 3 :wr.write("pop","%rcx");break;
-	    case 4 :wr.write("pop","%r8"); break;
-	    case 5 :wr.write("pop","%r9"); break;
+	    case 0 :vm.write("pop","%rdi");break;
+	    case 1 :vm.write("pop","%rsi");break;
+	    case 2 :vm.write("pop","%rdx");break;
+	    case 3 :vm.write("pop","%rcx");break;
+	    case 4 :vm.write("pop","%r8"); break;
+	    case 5 :vm.write("pop","%r9"); break;
 	}
     }
-    wr.write("call",dynamic_cast<const ident*>(func)->name);
+    vm.write("call",dynamic_cast<const ident*>(func)->name);
     if(vars->size()>6){
-	wr.write("add",8*(vars->size()-6),"%rsp");
+	vm.write("add",8*(vars->size()-6),"%rsp");
     }
-    wr.write("add",align,"%rsp");
-    wr.write("push","%rax");
+    vm.write("add",align,"%rsp");
+    vm.write("push","%rax");
 }
-void uplus::to_asm(code::variable_manager&vm,code::writer&wr)const
+void uplus::to_asm(code::variable_manager&vm)const
 {
-    arg->to_asm(vm,wr);
+    arg->to_asm(vm);
 }
-void uminus::to_asm(code::variable_manager&vm,code::writer&wr)const
+void uminus::to_asm(code::variable_manager&vm)const
 {
-    arg->to_asm(vm,wr);
-    wr.write("pop","%rax");
-    wr.write("mov","%rax","%rdi");
-    wr.write("mov",2,"%rsi");wr.write("mul","%rsi");
-    wr.write("sub","%rax","%rdi");
-    wr.write("push","%rdi");
+    arg->to_asm(vm);
+    vm.write("pop","%rax");
+    vm.write("mov","%rax","%rdi");
+    vm.write("mov",2,"%rsi");vm.write("mul","%rsi");
+    vm.write("sub","%rax","%rdi");
+    vm.write("push","%rdi");
 }
-void preinc::to_asm(code::variable_manager&vm,code::writer&wr)const
+void preinc::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(arg)->refer(vm,wr);
-    wr.write("pop","%rax");
-    wr.write("add",1,address("%rax"));
-    wr.write("push",address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(vm);
+    vm.write("pop","%rax");
+    vm.write("add",1,address("%rax"));
+    vm.write("push",address("%rax"));
 }
-void predec::to_asm(code::variable_manager&vm,code::writer&wr)const
+void predec::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(arg)->refer(vm,wr);
-    wr.write("pop","%rax");
-    wr.write("sub",1,address("%rax"));
-    wr.write("push",address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(vm);
+    vm.write("pop","%rax");
+    vm.write("sub",1,address("%rax"));
+    vm.write("push",address("%rax"));
 }
-void postinc::to_asm(code::variable_manager&vm,code::writer&wr)const
+void postinc::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(arg)->refer(vm,wr);
-    wr.write("pop","%rax");
-    wr.write("push",address("%rax"));
-    wr.write("add",1,address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(vm);
+    vm.write("pop","%rax");
+    vm.write("push",address("%rax"));
+    vm.write("add",1,address("%rax"));
 }
-void postdec::to_asm(code::variable_manager&vm,code::writer&wr)const
+void postdec::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(arg)->refer(vm,wr);
-    wr.write("pop","%rax");
-    wr.write("push",address("%rax"));
-    wr.write("sub",1,address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(vm);
+    vm.write("pop","%rax");
+    vm.write("push",address("%rax"));
+    vm.write("sub",1,address("%rax"));
 }
-void plus::to_asm(code::variable_manager&vm,code::writer&wr)const
+void plus::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("add","%rdi","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("add","%rdi","%rax");
+    vm.write("push","%rax");
 }
-void minus::to_asm(code::variable_manager&vm,code::writer&wr)const
+void minus::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("sub","%rdi","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("sub","%rdi","%rax");
+    vm.write("push","%rax");
 }
-void multi::to_asm(code::variable_manager&vm,code::writer&wr)const
+void multi::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("mul","%rdi");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("mul","%rdi");
+    vm.write("push","%rax");
 }
-void divide::to_asm(code::variable_manager&vm,code::writer&wr)const
+void divide::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("mov",0,"%rdx");
-    wr.write("div","%rdi");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("mov",0,"%rdx");
+    vm.write("div","%rdi");
+    vm.write("push","%rax");
 }
-void remain::to_asm(code::variable_manager&vm,code::writer&wr)const
+void remain::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("mov",0,"%rdx");
-    wr.write("div","%rdi");
-    wr.write("push","%rdx");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("mov",0,"%rdx");
+    vm.write("div","%rdi");
+    vm.write("push","%rdx");
 }
-void equal::to_asm(code::variable_manager&vm,code::writer&wr)const
+void equal::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("cmp","%rdi","%rax");
-    wr.write("sete","%al");
-    wr.write("movzb","%al","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("cmp","%rdi","%rax");
+    vm.write("sete","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
 }
-void nequal::to_asm(code::variable_manager&vm,code::writer&wr)const
+void nequal::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("cmp","%rdi","%rax");
-    wr.write("setne","%al");
-    wr.write("movzb","%al","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("cmp","%rdi","%rax");
+    vm.write("setne","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
 }
-void less::to_asm(code::variable_manager&vm,code::writer&wr)const
+void less::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("cmp","%rdi","%rax");
-    wr.write("setl","%al");
-    wr.write("movzb","%al","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("cmp","%rdi","%rax");
+    vm.write("setl","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
 }
-void greater::to_asm(code::variable_manager&vm,code::writer&wr)const
+void greater::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("cmp","%rdi","%rax");
-    wr.write("setg","%al");
-    wr.write("movzb","%al","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("cmp","%rdi","%rax");
+    vm.write("setg","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
 }
-void leeq::to_asm(code::variable_manager&vm,code::writer&wr)const
+void leeq::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("cmp","%rdi","%rax");
-    wr.write("setle","%al");
-    wr.write("movzb","%al","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("cmp","%rdi","%rax");
+    vm.write("setle","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
 }
-void greq::to_asm(code::variable_manager&vm,code::writer&wr)const
+void greq::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("cmp","%rdi","%rax");
-    wr.write("setge","%al");
-    wr.write("movzb","%al","%rax");
-    wr.write("push","%rax");
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("cmp","%rdi","%rax");
+    vm.write("setge","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
 }
-void comma::to_asm(code::variable_manager&vm,code::writer&wr)const
+void comma::to_asm(code::variable_manager&vm)const
 {
-    larg->to_asm(vm,wr);
-    wr.write("add",8,"%rsp");
-    rarg->to_asm(vm,wr);
+    larg->to_asm(vm);
+    vm.write("add",8,"%rsp");
+    rarg->to_asm(vm);
 }
-void assign::to_asm(code::variable_manager&vm,code::writer&wr)const
+void assign::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(larg)->refer(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("mov","%rdi",address("%rax"));
-    wr.write("push",address("%rax"));
+    dynamic_cast<const ident*>(larg)->refer(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("mov","%rdi",address("%rax"));
+    vm.write("push",address("%rax"));
 }
-void plasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
+void plasgn::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(larg)->refer(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("add","%rdi",address("%rax"));
-    wr.write("push",address("%rax"));
+    dynamic_cast<const ident*>(larg)->refer(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("add","%rdi",address("%rax"));
+    vm.write("push",address("%rax"));
 }
-void miasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
+void miasgn::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(larg)->refer(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("sub","%rdi",address("%rax"));
-    wr.write("push",address("%rax"));
+    dynamic_cast<const ident*>(larg)->refer(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("sub","%rdi",address("%rax"));
+    vm.write("push",address("%rax"));
 }
-void muasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
+void muasgn::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(larg)->refer(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("mov","%rax","%rsi");
-    wr.write("mov",address("%rax"),"%rax");
-    wr.write("mul","%rdi");
-    wr.write("mov","%rax",address("%rsi"));
-    wr.write("push","%rax");
+    dynamic_cast<const ident*>(larg)->refer(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("mov","%rax","%rsi");
+    vm.write("mov",address("%rax"),"%rax");
+    vm.write("mul","%rdi");
+    vm.write("mov","%rax",address("%rsi"));
+    vm.write("push","%rax");
 }
-void diasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
+void diasgn::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(larg)->refer(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("mov","%rax","%rsi");
-    wr.write("mov",address("%rax"),"%rax");
-    wr.write("mov",0,"%rdx");
-    wr.write("div","%rdi");
-    wr.write("mov","%rax",address("%rsi"));
-    wr.write("push","%rax");
+    dynamic_cast<const ident*>(larg)->refer(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("mov","%rax","%rsi");
+    vm.write("mov",address("%rax"),"%rax");
+    vm.write("mov",0,"%rdx");
+    vm.write("div","%rdi");
+    vm.write("mov","%rax",address("%rsi"));
+    vm.write("push","%rax");
 }
-void rmasgn::to_asm(code::variable_manager&vm,code::writer&wr)const
+void rmasgn::to_asm(code::variable_manager&vm)const
 {
-    dynamic_cast<const ident*>(larg)->refer(vm,wr);
-    rarg->to_asm(vm,wr);
-    wr.write("pop","%rdi");
-    wr.write("pop","%rax");
-    wr.write("mov","%rax","%rsi");
-    wr.write("mov",address("%rax"),"%rax");
-    wr.write("mov",0,"%rdx");
-    wr.write("div","%rdi");
-    wr.write("mov","%rdx",address("%rsi"));
-    wr.write("push","%rdx");
+    dynamic_cast<const ident*>(larg)->refer(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("mov","%rax","%rsi");
+    vm.write("mov",address("%rax"),"%rax");
+    vm.write("mov",0,"%rdx");
+    vm.write("div","%rdi");
+    vm.write("mov","%rdx",address("%rsi"));
+    vm.write("push","%rdx");
 }
-void single::to_asm(code::variable_manager&vm,code::writer&wr)const
+void single::to_asm(code::variable_manager&vm)const
 {
     if(stat){
-	stat->to_asm(vm,wr);
-	wr.write("pop","%rax");
+	stat->to_asm(vm);
+	vm.write("pop","%rax");
     }
 }
-void compound::to_asm(code::variable_manager&vm,code::writer&wr)const
+void compound::to_asm(code::variable_manager&vm)const
 {
     vm.enter_scope();
-    for(auto s:*stats)s->to_asm(vm,wr);
-    vm.leave_scope(wr);
+    for(auto s:*stats)s->to_asm(vm);
+    vm.leave_scope();
 }
-void define::to_asm(code::variable_manager&vm,code::writer&wr)const
+void define::to_asm(code::variable_manager&vm)const
 {
     for(auto v:*vars){
-	wr.write("sub",8,"%rsp");
+	vm.write("sub",8,"%rsp");
 	vm.set_offset(v.first);
 	if(v.second){
-	    v.second->to_asm(vm,wr);
-	    wr.write("pop",address("%rsp"));
+	    v.second->to_asm(vm);
+	    vm.write("pop",address("%rsp"));
 	}
     }
 }
-void _if_else_::to_asm(code::variable_manager&vm,code::writer&wr)const
+void _if_else_::to_asm(code::variable_manager&vm)const
 {
     std::string el=unique_label(".Lelse");
     std::string end=unique_label(".Lend");
     vm.enter_scope();
-    cond->to_asm(vm,wr);
-    wr.write("cmp",0,"%rax");
-    wr.write("je",el);
-    st1->to_asm(vm,wr);
-    wr.write("jmp",end);
-    wr.write(el+':');
-    st2->to_asm(vm,wr);
-    vm.leave_scope(wr);
-    wr.write(end+':');
+    cond->to_asm(vm);
+    vm.write("cmp",0,"%rax");
+    vm.write("je",el);
+    st1->to_asm(vm);
+    vm.write("jmp",end);
+    vm.write(el+':');
+    st2->to_asm(vm);
+    vm.leave_scope();
+    vm.write(end+':');
 }
-void _while_::to_asm(code::variable_manager&vm,code::writer&wr)const
+void _while_::to_asm(code::variable_manager&vm)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
-    wr.write(beg+':');
+    vm.write(beg+':');
     vm.enter_scope();
-    cond->to_asm(vm,wr);
-    wr.write("cmp",0,"%rax");
-    wr.write("je",end);
-    st->to_asm(vm,wr);
-    vm.leave_scope(wr);
-    wr.write("jmp",beg);
-    wr.write(end+':');
+    cond->to_asm(vm);
+    vm.write("cmp",0,"%rax");
+    vm.write("je",end);
+    st->to_asm(vm);
+    vm.leave_scope();
+    vm.write("jmp",beg);
+    vm.write(end+':');
 }
-void _for_::to_asm(code::variable_manager&vm,code::writer&wr)const
+void _for_::to_asm(code::variable_manager&vm)const
 {
     std::string beg=unique_label(".Lbegin");
     std::string end=unique_label(".Lend");
     vm.enter_scope();
-    init->to_asm(vm,wr);
-    wr.write(beg+':');
-    wr.write("mov",1,"%rax");
-    cond->to_asm(vm,wr);
-    wr.write("cmp",0,"%rax");
-    wr.write("je",end);
-    st->to_asm(vm,wr);
-    reinit->to_asm(vm,wr);
-    vm.leave_scope(wr);
-    wr.write("jmp",beg);
-    wr.write(end+':');
+    init->to_asm(vm);
+    vm.write(beg+':');
+    vm.write("mov",1,"%rax");
+    cond->to_asm(vm);
+    vm.write("cmp",0,"%rax");
+    vm.write("je",end);
+    st->to_asm(vm);
+    reinit->to_asm(vm);
+    vm.leave_scope();
+    vm.write("jmp",beg);
+    vm.write(end+':');
 }
-void _return_::to_asm(code::variable_manager&vm,code::writer&wr)const
+void _return_::to_asm(code::variable_manager&vm)const
 {
-    val->to_asm(vm,wr);
-    wr.write("mov","%rbp","%rsp");
-    wr.write("pop","%rbp");
-    wr.write("ret");
+    val->to_asm(vm);
+    vm.write("mov","%rbp","%rsp");
+    vm.write("pop","%rbp");
+    vm.write("ret");
 }
-void function::to_asm(code::variable_manager&vm,code::writer&wr)const
+void function::to_asm(code::variable_manager&vm)const
 {
-    wr.write(".globl "+name);
-    wr.write(name+':');
-    wr.write("push","%rbp");
-    wr.write("mov","%rsp","%rbp");
+    vm.write(".globl "+name);
+    vm.write(name+':');
+    vm.write("push","%rbp");
+    vm.write("mov","%rsp","%rbp");
     vm.enter_scope();
     for(int i;i<args->size();++i){
-	wr.write("sub",8,"%rsp");
+	vm.write("sub",8,"%rsp");
 	vm.set_offset((*args)[i]);
 	switch(i){
-	    case 0 :wr.write("mov","%rdi",address("%rsp"));break;
-	    case 1 :wr.write("mov","%rsi",address("%rsp"));break;
-	    case 2 :wr.write("mov","%rdx",address("%rsp"));break;
-	    case 3 :wr.write("mov","%rcx",address("%rsp"));break;
-	    case 4 :wr.write("mov","%r8" ,address("%rsp"));break;
-	    case 5 :wr.write("mov","%r9" ,address("%rsp"));break;
+	    case 0 :vm.write("mov","%rdi",address("%rsp"));break;
+	    case 1 :vm.write("mov","%rsi",address("%rsp"));break;
+	    case 2 :vm.write("mov","%rdx",address("%rsp"));break;
+	    case 3 :vm.write("mov","%rcx",address("%rsp"));break;
+	    case 4 :vm.write("mov","%r8" ,address("%rsp"));break;
+	    case 5 :vm.write("mov","%r9" ,address("%rsp"));break;
 	    default:
-		    wr.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
-		    wr.write("mov","%rax",address("%rsp"));
+		    vm.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
+		    vm.write("mov","%rax",address("%rsp"));
 		    break;
 	}
     }
-    for(auto s:*(com->stats))s->to_asm(vm,wr);
-    vm.leave_scope(wr);
+    for(auto s:*(com->stats))s->to_asm(vm);
+    vm.leave_scope();
     //強制return
-    wr.write("mov","%rbp","%rsp");
-    wr.write("pop","%rbp");
-    wr.write("ret");
+    vm.write("mov","%rbp","%rsp");
+    vm.write("pop","%rbp");
+    vm.write("ret");
 }
 void numeric::check(semantics::analyzer&analy)const
 {
@@ -507,6 +507,3 @@ _while_   ::~_while_   ()                                                       
 _for_     ::~_for_     ()                                                                      {delete init;delete cond;delete reinit;delete st;}
 _return_  ::~_return_  ()                                                                                                           {delete val;}
 function  ::~function  ()                                                                                               {delete com;delete args;}
-node      ::~node      ()                                                                                                                      {}
-expression::~expression()                                                                                                                      {}
-statement ::~statement ()                                                                                                                      {}

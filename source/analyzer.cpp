@@ -1,10 +1,6 @@
 #include"semantics/analyzer.hpp"
 #include<algorithm>
 using namespace semantics;
-analyzer::analyzer()
-{
-
-}
 void analyzer::enter_scope()
 {
     vars.emplace_back();

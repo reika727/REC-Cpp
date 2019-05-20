@@ -12,11 +12,11 @@ namespace semantics{
     class analyzer{
 	    std::vector<std::set<std::string>>vars;
 	public:
-	    analyzer();
 	    void enter_scope();
 	    void leave_scope();
 	    void define(const std::string&name);
 	    bool is_available(const std::string&name);
 	    bool is_definable(const std::string&name);
+	    analyzer&operator=(const analyzer&)=delete;
     };
 }
