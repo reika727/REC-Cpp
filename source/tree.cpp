@@ -4,13 +4,13 @@ using namespace syntax;
 using TK=lexicon::TK;
 const function*tree::func()
 {
-    if(ta.consume(TK::CHAR)){
+    if(ta.consume(TK::INT)){
 	if(auto fidp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
 	    if(ta.consume(TK::OPARENT)){
 		auto vars=new std::vector<std::string>;
 		if(!ta.consume(TK::CPARENT)){
 		    while(true){
-			if(ta.consume(TK::CHAR)){
+			if(ta.consume(TK::INT)){
 			    if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
 				vars->push_back(idp->name);
 				if(ta.consume(TK::COMMA))continue;
@@ -41,7 +41,7 @@ const function*tree::func()
 }
 const statement*tree::stat()
 {
-    if(ta.consume(TK::CHAR)){
+    if(ta.consume(TK::INT)){
 	auto vars=new std::vector<std::pair<std::string,const expression*>>;
 	while(true){
 	    if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){

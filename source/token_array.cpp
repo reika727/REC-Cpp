@@ -5,7 +5,7 @@ using namespace lexicon;
 token_array::token_array(const std::string&s)
 {
     for(int i=0;i<s.length();++i){
-	     if(s.substr(i,4)=="char"  &&i+4<s.length()&&                           isspace(s[i+4]) &&(i+=3))tv.push_back(new symbol(TK::CHAR));
+	     if(s.substr(i,3)=="int"   &&i+3<s.length()&&                           isspace(s[i+3]) &&(i+=2))tv.push_back(new symbol(TK::INT));
 	else if(s.substr(i,2)=="if"    &&i+2<s.length()&&(s[i+2]=='('||             isspace(s[i+2]))&&(i+=1))tv.push_back(new symbol(TK::IF));
 	else if(s.substr(i,4)=="else"  &&i+4<s.length()&&(s[i+4]=='{'||s[i+4]==';'||isspace(s[i+4]))&&(i+=3))tv.push_back(new symbol(TK::ELSE));
 	else if(s.substr(i,5)=="while" &&i+5<s.length()&&(s[i+5]=='('||             isspace(s[i+5]))&&(i+=4))tv.push_back(new symbol(TK::WHILE));

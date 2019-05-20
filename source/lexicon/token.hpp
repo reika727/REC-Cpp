@@ -27,7 +27,7 @@ namespace lexicon{
 	CPARENT, // )
 	OBRACE,  // {
 	CBRACE,  // }
-	CHAR,    // char
+	INT,     // int
 	IF,      // if
 	ELSE,    // else
 	WHILE,   // while
