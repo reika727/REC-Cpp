@@ -349,19 +349,20 @@ void function::to_asm(code::variable_manager&vm)const
     vm.write("push","%rbp");
     vm.write("mov","%rsp","%rbp");
     vm.enter_scope();
+    vm.write("sub",8*args->size(),"%rsp");
     for(int i;i<args->size();++i){
-	vm.write("sub",8,"%rsp");
+	std::string dest=address(i+1-args->size(),"%rsp");
 	vm.set_offset((*args)[i]);
 	switch(i){
-	    case 0 :vm.write("mov","%rdi",address("%rsp"));break;
-	    case 1 :vm.write("mov","%rsi",address("%rsp"));break;
-	    case 2 :vm.write("mov","%rdx",address("%rsp"));break;
-	    case 3 :vm.write("mov","%rcx",address("%rsp"));break;
-	    case 4 :vm.write("mov","%r8" ,address("%rsp"));break;
-	    case 5 :vm.write("mov","%r9" ,address("%rsp"));break;
+	    case 0 :vm.write("mov","%rdi",dest);break;
+	    case 1 :vm.write("mov","%rsi",dest);break;
+	    case 2 :vm.write("mov","%rdx",dest);break;
+	    case 3 :vm.write("mov","%rcx",dest);break;
+	    case 4 :vm.write("mov","%r8" ,dest);break;
+	    case 5 :vm.write("mov","%r9" ,dest);break;
 	    default:
 		    vm.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
-		    vm.write("mov","%rax",address("%rsp"));
+		    vm.write("mov","%rax",dest);
 		    break;
 	}
     }
