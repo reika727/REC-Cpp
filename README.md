@@ -1,4 +1,4 @@
-# mycc
+# REC
 作者オリジナル言語の"reka"~~C言語のパクリ~~をアセンブリ言語に翻訳します。
 
 ## Overview
@@ -100,4 +100,4 @@
 🔵行コメント<br />
 
 ## 謝辞
-ぶっちゃけほぼ[ここ](https://www.sigbus.info/compilerbook)に書いてあることをやってるだけです。マジ感謝。
+ほぼ[ここ](https://www.sigbus.info/compilerbook)に書いてあることをやってるだけです。マジ感謝。
