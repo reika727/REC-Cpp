@@ -53,7 +53,7 @@ const statement*tree::stat()
 		throw std::runtime_error("無効な宣言です");
 	    }
 	}
-	return new define(vars);
+	return new define_var(vars);
     }else if(ta.consume(TK::IF)){
 	if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
 	auto cond=new single(order15());
@@ -200,16 +200,17 @@ const expression*tree::order00() // literal, identifier, enclosed expression
 	throw std::runtime_error("構文解析ができませんでした");
     }
 }
-const std::vector<const function*>&tree::get_root()
+const prog&tree::get_root()
 {
     return *root;
 }
 tree::tree(lexicon::token_array&ta):ta(ta)
 {
-    root=new std::vector<const function*>;
+    auto fv=new std::vector<const function*>;
     while(!ta.is_all_read()){
-	root->push_back(func());
+	fv->push_back(func());
     }
+    root=new prog(fv);
 }
 tree::~tree()
 {

@@ -278,7 +278,7 @@ void compound::to_asm(code::variable_manager&vm)const
     for(auto s:*stats)s->to_asm(vm);
     vm.leave_scope();
 }
-void define::to_asm(code::variable_manager&vm)const
+void define_var::to_asm(code::variable_manager&vm)const
 {
     for(auto v:*vars){
 	vm.write("sub",8,"%rsp");
@@ -350,7 +350,7 @@ void function::to_asm(code::variable_manager&vm)const
     vm.write("mov","%rsp","%rbp");
     vm.enter_scope();
     vm.write("sub",8*args->size(),"%rsp");
-    for(int i;i<args->size();++i){
+    for(int i=0;i<args->size();++i){
 	std::string dest=address(i+1-args->size(),"%rsp");
 	vm.set_offset((*args)[i]);
 	switch(i){
@@ -373,18 +373,26 @@ void function::to_asm(code::variable_manager&vm)const
     vm.write("pop","%rbp");
     vm.write("ret");
 }
+void prog::to_asm(code::variable_manager&vm)const
+{
+    for(auto f:*funcs)f->to_asm(vm);
+}
 void numeric::check(semantics::analyzer&analy)const
 {
     return;
 }
 void ident::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_available(name))throw std::runtime_error("未定義の変数です: "+name);
+    if(!analy.is_available_var(name))throw std::runtime_error("未定義の変数です: "+name);
 }
 void fcall::check(semantics::analyzer&analy)const
 {
-    if(typeid(*func)!=typeid(ident))throw std::runtime_error("無効な関数呼び出しです");
-    for(auto v:*vars)v->check(analy);
+    if(auto fp=dynamic_cast<const ident*>(func)){
+	if(!analy.is_available_func(fp->name,vars->size()))throw std::runtime_error("未定義の関数です: "+fp->name);
+	for(auto v:*vars)v->check(analy);
+    }else{
+	throw std::runtime_error("無効な関数呼び出しです");
+    }
 }
 void unopr::check(semantics::analyzer&analy)const
 {
@@ -415,11 +423,11 @@ void compound::check(semantics::analyzer&analy)const
     for(auto s:*stats)s->check(analy);
     analy.leave_scope();
 }
-void define::check(semantics::analyzer&analy)const
+void define_var::check(semantics::analyzer&analy)const
 {
     for(auto v:*vars){
-	if(!analy.is_definable(v.first))throw std::runtime_error("二重定義されました: "+v.first);
-	analy.define(v.first);
+	if(!analy.is_definable_var(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+	analy.define_var(v.first);
 	if(v.second)v.second->check(analy);
     }
 }
@@ -453,10 +461,16 @@ void _return_::check(semantics::analyzer&analy)const
 }
 void function::check(semantics::analyzer&analy)const
 {
+    if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
+    analy.define_func(name,args->size());
     analy.enter_scope();
-    for(auto a:*args)analy.define(a);
+    for(auto a:*args)analy.define_var(a);
     for(auto s:*(com->stats))s->check(analy);
     analy.leave_scope();
+}
+void prog::check(semantics::analyzer&analy)const
+{
+    for(auto f:*funcs)f->check(analy);
 }
 numeric   ::numeric    (int value)                                                                 :value(value)                               {}
 ident     ::ident      (const std::string&name)                                                    :name(name)                                 {}
@@ -491,20 +505,22 @@ diasgn    ::diasgn     (const expression*larg,const expression*rarg)            
 rmasgn    ::rmasgn     (const expression*larg,const expression*rarg)                               :biopr_l(larg,rarg)                         {}
 single    ::single     (const expression*stat)                                                     :stat(stat)                                 {}
 compound  ::compound   (const std::vector<const statement*>*stats)                                 :stats(stats)                               {}
-define    ::define     (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                 {}
+define_var::define_var (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                 {}
 _if_else_ ::_if_else_  (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
 _while_   ::_while_    (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
 _for_     ::_for_      (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st){}
 _return_  ::_return_   (const single*val)                                                          :val(val)                                   {}
 function  ::function   (std::string name,const std::vector<std::string>*args,const compound*com)   :name(name),args(args),com(com)             {}
+prog      ::prog       (const std::vector<const function*>*funcs)                                  :funcs(funcs)                               {}
 fcall     ::~fcall     ()                                                                    {delete func;for(auto v:*vars)delete v;delete vars;}
 unopr     ::~unopr     ()                                                                                                           {delete arg;}
 biopr     ::~biopr     ()                                                                                              {delete larg;delete rarg;}
 single    ::~single    ()                                                                                                          {delete stat;}
 compound  ::~compound  ()                                                                              {for(auto s:*stats)delete s;delete stats;}
-define    ::~define    ()                                                                         {for(auto v:*vars)delete v.second;delete vars;}
+define_var::~define_var()                                                                         {for(auto v:*vars)delete v.second;delete vars;}
 _if_else_ ::~_if_else_ ()                                                                                    {delete cond;delete st1;delete st2;}
 _while_   ::~_while_   ()                                                                                                {delete cond;delete st;}
 _for_     ::~_for_     ()                                                                      {delete init;delete cond;delete reinit;delete st;}
 _return_  ::~_return_  ()                                                                                                           {delete val;}
 function  ::~function  ()                                                                                               {delete com;delete args;}
+prog      ::~prog      ()                                                                                           {for(auto f:*funcs)delete f;}

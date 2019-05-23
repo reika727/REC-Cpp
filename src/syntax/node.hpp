@@ -204,11 +204,11 @@ namespace syntax{
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm)const override;
     };
-    class define:public statement{
+    class define_var:public statement{
 	public:
 	    const std::vector<std::pair<std::string,const expression*>>*vars;
-	    define(decltype(vars)vars);
-	    ~define()override;
+	    define_var(decltype(vars)vars);
+	    ~define_var()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm)const override;
     };
@@ -247,7 +247,6 @@ namespace syntax{
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm)const override;
     };
-
     class function:public node{
 	public:
 	    const std::string name;
@@ -255,6 +254,14 @@ namespace syntax{
 	    const std::vector<std::string>*const args;
 	    function(std::string name,decltype(args)args,const compound*com);
 	    ~function()override;
+	    void check(semantics::analyzer&analy)const override;
+	    void to_asm(code::variable_manager&vm)const override;
+    };
+    class prog:public node{
+	public:
+	    const std::vector<const function*>*const funcs;
+	    prog(decltype(funcs)funcs);
+	    ~prog();
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm)const override;
     };

@@ -4,7 +4,7 @@
 namespace syntax{
     class tree{
 	    lexicon::token_array&ta;
-	    std::vector<const function*>*root;
+	    prog*root;
 	private:
 	    const function*func();
 	    const statement*stat();
@@ -21,6 +21,6 @@ namespace syntax{
 	public:
 	    tree(lexicon::token_array&ta);
 	    ~tree();
-	    const std::vector<const function*>&get_root();
+	    const prog&get_root();
     };
 }
