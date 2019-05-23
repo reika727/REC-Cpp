@@ -1,5 +1,5 @@
-# REC
-作者オリジナル言語の"reka"~~C言語のパクリ~~をアセンブリ言語に翻訳します。
+# REC -reka compiler-
+~~C言語のパクリ~~作者オリジナル言語の"reka"をアセンブリ言語に翻訳します。未完成です。
 
 ## Overview
 大体コンパイラのセオリーに則っていると思います。
@@ -8,9 +8,86 @@
 1. 意味解析。右辺値への代入など意味的な不正を検出する。
 1. コード生成。アセンブリを出力する。
 
+## Example
+<details>
+  <summary>長いので折り畳み</summary>
+    こんな感じのソースファイルexample.rekaがあるとします。フィボナッチ数列の20項目を計算します。
+    <pre>
+      <code>
+        int fibo(int n)
+        {
+            if(n==1){
+                return 1;
+            }else if(n==2){
+                return 1;
+            }else{
+                return fibo(n-1)+fibo(n-2);
+            }
+        }
+        int main()
+        {
+            fibo(20);
+            return 0;
+        }
+      </code>
+    </pre>
+    これをこうします。結局実行ファイルの生成でgccに頼っているため、このソフトウェアの存在意義は謎です。
+    <pre>
+      <code>
+        $ ./rec.out example.reka example.s
+        $ gcc -o example.out example.s
+      </code>
+    </pre>
+    現在rekaには入出力の機能が一切ありません。仕方ないのでgdbで正しく計算できてるか確かめます。<br />
+    式を評価した値はraxレジスタに格納されるので、fibo(20)をcallした直後のraxを確かめます。<br />
+    ついでにRECにはコード最適化機能も未実装です。0を足したり引いたりpushの直後にpopしてたり到達不能コードがあったりしますがご愛嬌です。
+    <pre>
+      <code>
+        $ gdb example.out
+        (gdb) disass main
+        Dump of assembler code for function main:
+           0x0000000000400531 <+0>:     push   %rbp
+           0x0000000000400532 <+1>:     mov    %rsp,%rbp
+           0x0000000000400535 <+4>:     sub    $0x0,%rsp
+           0x0000000000400539 <+8>:     sub    $0x0,%rsp
+           0x000000000040053d <+12>:    pushq  $0x14
+           0x000000000040053f <+14>:    pop    %rdi
+           0x0000000000400540 <+15>:    callq  0x400482 &lt;fibo&gt;
+           0x0000000000400545 <+20>:    add    $0x0,%rsp
+           0x0000000000400549 <+24>:    push   %rax
+           0x000000000040054a <+25>:    pop    %rax
+           0x000000000040054b <+26>:    pushq  $0x0
+           0x000000000040054d <+28>:    pop    %rax
+           0x000000000040054e <+29>:    mov    %rbp,%rsp
+           0x0000000000400551 <+32>:    pop    %rbp
+           0x0000000000400552 <+33>:    retq
+           0x0000000000400553 <+34>:    add    $0x0,%rsp
+           0x0000000000400557 <+38>:    mov    %rbp,%rsp
+           0x000000000040055a <+41>:    pop    %rbp
+           0x000000000040055b <+42>:    retq
+           0x000000000040055c <+43>:    nopl   0x0(%rax)
+        End of assembler dump.
+        (gdb) start
+        Temporary breakpoint 1 at 0x400535
+        Starting program: example.out
+        <br />
+        Temporary breakpoint 1, 0x0000000000400535 in main ()
+        (gdb) break *0x400545
+        Breakpoint 2 at 0x400545
+        (gdb) continue
+        Continuing.
+        <br />
+        Breakpoint 2, 0x0000000000400545 in main ()
+        (gdb) print $rax
+        $1 = 6765
+      </code>
+    </pre>
+    計算できてました。
+</details>
+
 ## rekaの機能
 <details>
-  <summary>長いので省略</summary>
+  <summary>こっちも長いので折り畳み</summary>
   ✅は実装済み、🔵はそのうち実装予定。
   
   ### データ
@@ -29,12 +106,13 @@
   🔵do-while文<br />
   ✅for文<br />
   🔵break文<br />
+  🔵continue文<br />
   🔵goto文<br />
   ✅return文<br />
   
   ### 関数
   ✅定義<br />
-  🔵戻り値及び引数の型チェック<br />
+  ✅シグネチャのチェック<br />
   🔵プロトタイプ宣言<br />
   
   ### 演算子
