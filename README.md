@@ -16,9 +16,7 @@
       <code>
         int fibo(int n)
         {
-            if(n==1){
-                return 1;
-            }else if(n==2){
+            if(n==1||n==2){
                 return 1;
             }else{
                 return fibo(n-1)+fibo(n-2);
@@ -31,7 +29,7 @@
         }
       </code>
     </pre>
-    これをこうします。結局実行ファイルの生成でgccに頼っているため、このソフトウェアの存在意義は謎です。
+    これをこうします。rec.outはソースを適当にコンパイルしてすでに作成済みであるとします。example.rekaを入力として受け取り、アセンブリに翻訳したものをexample.sに出力します。それをexample.outという実行ファイルにするのですが、結局実行ファイルの生成でgccに頼っているため、このソフトウェアの存在意義は謎です。
     <pre>
       <code>
         $ ./rec.out example.reka example.s
@@ -46,38 +44,39 @@
         $ gdb example.out
         (gdb) disass main
         Dump of assembler code for function main:
-           0x0000000000400531 <+0>:     push   %rbp
-           0x0000000000400532 <+1>:     mov    %rsp,%rbp
-           0x0000000000400535 <+4>:     sub    $0x0,%rsp
-           0x0000000000400539 <+8>:     sub    $0x0,%rsp
-           0x000000000040053d <+12>:    pushq  $0x14
-           0x000000000040053f <+14>:    pop    %rdi
-           0x0000000000400540 <+15>:    callq  0x400482 &lt;fibo&gt;
-           0x0000000000400545 <+20>:    add    $0x0,%rsp
-           0x0000000000400549 <+24>:    push   %rax
-           0x000000000040054a <+25>:    pop    %rax
-           0x000000000040054b <+26>:    pushq  $0x0
-           0x000000000040054d <+28>:    pop    %rax
-           0x000000000040054e <+29>:    mov    %rbp,%rsp
-           0x0000000000400551 <+32>:    pop    %rbp
-           0x0000000000400552 <+33>:    retq
-           0x0000000000400553 <+34>:    add    $0x0,%rsp
-           0x0000000000400557 <+38>:    mov    %rbp,%rsp
-           0x000000000040055a <+41>:    pop    %rbp
-           0x000000000040055b <+42>:    retq
-           0x000000000040055c <+43>:    nopl   0x0(%rax)
+           0x0000000000400529 <+0>:     push   %rbp
+           0x000000000040052a <+1>:     mov    %rsp,%rbp
+           0x000000000040052d <+4>:     sub    $0x0,%rsp
+           0x0000000000400531 <+8>:     sub    $0x0,%rsp
+           0x0000000000400535 <+12>:    pushq  $0x14
+           0x0000000000400537 <+14>:    pop    %rdi
+           0x0000000000400538 <+15>:    callq  0x400482 &lt;fibo&gt;
+           0x000000000040053d <+20>:    add    $0x0,%rsp
+           0x0000000000400541 <+24>:    push   %rax
+           0x0000000000400542 <+25>:    pop    %rax
+           0x0000000000400543 <+26>:    pushq  $0x0
+           0x0000000000400545 <+28>:    pop    %rax
+           0x0000000000400546 <+29>:    mov    %rbp,%rsp
+           0x0000000000400549 <+32>:    pop    %rbp
+           0x000000000040054a <+33>:    retq
+           0x000000000040054b <+34>:    add    $0x0,%rsp
+           0x000000000040054f <+38>:    mov    %rbp,%rsp
+           0x0000000000400552 <+41>:    pop    %rbp
+           0x0000000000400553 <+42>:    retq
+           0x0000000000400554 <+43>:    nopw   %cs:0x0(%rax,%rax,1)
+           0x000000000040055e <+53>:    xchg   %ax,%ax
         End of assembler dump.
         (gdb) start
-        Temporary breakpoint 1 at 0x400535
+        Temporary breakpoint 1 at 0x40052d
         Starting program: example.out
         <br />
-        Temporary breakpoint 1, 0x0000000000400535 in main ()
-        (gdb) break *0x400545
-        Breakpoint 2 at 0x400545
+        Temporary breakpoint 1, 0x000000000040052d in main ()
+        (gdb) break *0x40053d
+        Breakpoint 2 at 0x40053d
         (gdb) continue
         Continuing.
         <br />
-        Breakpoint 2, 0x0000000000400545 in main ()
+        Breakpoint 2, 0x000000000040053d in main ()
         (gdb) print $rax
         $1 = 6765
       </code>
