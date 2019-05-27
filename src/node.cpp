@@ -203,18 +203,6 @@ void greq::to_asm(code::variable_manager&vm)const
     vm.write("movzb","%al","%rax");
     vm.write("push","%rax");
 }
-void logor::to_asm(code::variable_manager&vm)const
-{
-    larg->to_asm(vm);
-    rarg->to_asm(vm);
-    vm.write("pop","%rdi");
-    vm.write("pop","%rax");
-    vm.write("or","%rdi","%rax");
-    vm.write("cmp",0,"%rax");
-    vm.write("setne","%al");
-    vm.write("movzb","%al","%rax");
-    vm.write("push","%rax");
-}
 void logand::to_asm(code::variable_manager&vm)const
 {
     larg->to_asm(vm);
@@ -222,6 +210,18 @@ void logand::to_asm(code::variable_manager&vm)const
     vm.write("pop","%rdi");
     vm.write("pop","%rax");
     vm.write("and","%rdi","%rax");
+    vm.write("cmp",0,"%rax");
+    vm.write("setne","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
+}
+void logor::to_asm(code::variable_manager&vm)const
+{
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("or","%rdi","%rax");
     vm.write("cmp",0,"%rax");
     vm.write("setne","%al");
     vm.write("movzb","%al","%rax");

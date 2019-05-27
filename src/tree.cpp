@@ -122,16 +122,16 @@ const expression*tree::order12() // || left to right
 {
     auto ret=order11();
     while(true){
-	if(ta.consume(TK::VBVB))ret=new logor(ret,order11());
-	else                    return ret;
+	     if(ta.consume(TK::VBVB))ret=new logor(ret,order11());
+	else                         return ret;
     }
 }
 const expression*tree::order11() // && left to right
 {
     auto ret=order07();
     while(true){
-	if(ta.consume(TK::APAP))ret=new logand(ret,order07());
-	else                    return ret;
+	     if(ta.consume(TK::APAP))ret=new logand(ret,order07());
+	else                         return ret;
     }
 }
 const expression*tree::order07() // == != left to right

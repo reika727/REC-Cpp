@@ -26,6 +26,8 @@ token_array::token_array(const std::string&s)
 		else if(s.substr(i,2)=="*/"&&(i+=2))break;
 	    }
 	}
+	else if(s.substr(i,2)=="&&"&&(i+=2))tv.push_back(new symbol(TK::APAP));
+	else if(s.substr(i,2)=="||"&&(i+=2))tv.push_back(new symbol(TK::VBVB));
 	else if(s.substr(i,2)=="++"&&(i+=2))tv.push_back(new symbol(TK::PLPL));
 	else if(s.substr(i,2)=="--"&&(i+=2))tv.push_back(new symbol(TK::MIMI));
 	else if(s.substr(i,2)=="+="&&(i+=2))tv.push_back(new symbol(TK::PLEQ));
@@ -37,17 +39,15 @@ token_array::token_array(const std::string&s)
 	else if(s.substr(i,2)=="!="&&(i+=2))tv.push_back(new symbol(TK::EXEQ));
 	else if(s.substr(i,2)=="<="&&(i+=2))tv.push_back(new symbol(TK::LEEQ));
 	else if(s.substr(i,2)==">="&&(i+=2))tv.push_back(new symbol(TK::GREQ));
-	else if(s.substr(i,2)=="&&"&&(i+=2))tv.push_back(new symbol(TK::APAP));
-	else if(s.substr(i,2)=="||"&&(i+=2))tv.push_back(new symbol(TK::VBVB));
 	else if(s[i]         =='+' &&++i)   tv.push_back(new symbol(TK::PLUS));
 	else if(s[i]         =='-' &&++i)   tv.push_back(new symbol(TK::MINUS));
 	else if(s[i]         =='*' &&++i)   tv.push_back(new symbol(TK::ASTER));
 	else if(s[i]         =='/' &&++i)   tv.push_back(new symbol(TK::SLASH));
 	else if(s[i]         =='%' &&++i)   tv.push_back(new symbol(TK::PERCENT));
-	else if(s[i]         =='=' &&++i)   tv.push_back(new symbol(TK::EQUAL));
 	else if(s[i]         =='<' &&++i)   tv.push_back(new symbol(TK::LESS));
 	else if(s[i]         =='>' &&++i)   tv.push_back(new symbol(TK::GREATER));
 	else if(s[i]         =='!' &&++i)   tv.push_back(new symbol(TK::EXCLAM));
+	else if(s[i]         =='=' &&++i)   tv.push_back(new symbol(TK::EQUAL));
 	else if(s[i]         ==',' &&++i)   tv.push_back(new symbol(TK::COMMA));
 	else if(s[i]         ==';' &&++i)   tv.push_back(new symbol(TK::SCOLON));
 	else if(s[i]         =='(' &&++i)   tv.push_back(new symbol(TK::OPARENT));

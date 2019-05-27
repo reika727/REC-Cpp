@@ -149,14 +149,14 @@ namespace syntax{
 	    greq(const expression*larg,const expression*rarg);
 	    void to_asm(code::variable_manager&vm)const override;
     };
-    class logor:public biopr{
-	public:
-	    logor(const expression*larg,const expression*rarg);
-	    void to_asm(code::variable_manager&vm)const override;
-    };
     class logand:public biopr{
 	public:
 	    logand(const expression*larg,const expression*rarg);
+	    void to_asm(code::variable_manager&vm)const override;
+    };
+    class logor:public biopr{
+	public:
+	    logor(const expression*larg,const expression*rarg);
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class comma:public biopr{
