@@ -11,6 +11,8 @@ namespace syntax{
 	    const single*emptiable_single();
 	    const expression*order15();
 	    const expression*order14();
+	    const expression*order12();
+	    const expression*order11();
 	    const expression*order07();
 	    const expression*order06();
 	    const expression*order04();

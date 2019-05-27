@@ -57,6 +57,11 @@ namespace syntax{
 	    uminus(const expression*arg);
 	    void to_asm(code::variable_manager&vm)const override;
     };
+    class lognot:public unopr{
+	public:
+	    lognot(const expression*arg);
+	    void to_asm(code::variable_manager&vm)const override;
+    };
     class unopr_l:public unopr{
 	public:
 	    unopr_l(const expression*arg);
@@ -142,6 +147,16 @@ namespace syntax{
     class greq:public biopr{
 	public:
 	    greq(const expression*larg,const expression*rarg);
+	    void to_asm(code::variable_manager&vm)const override;
+    };
+    class logor:public biopr{
+	public:
+	    logor(const expression*larg,const expression*rarg);
+	    void to_asm(code::variable_manager&vm)const override;
+    };
+    class logand:public biopr{
+	public:
+	    logand(const expression*larg,const expression*rarg);
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class comma:public biopr{

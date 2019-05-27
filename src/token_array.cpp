@@ -37,6 +37,8 @@ token_array::token_array(const std::string&s)
 	else if(s.substr(i,2)=="!="&&(i+=2))tv.push_back(new symbol(TK::EXEQ));
 	else if(s.substr(i,2)=="<="&&(i+=2))tv.push_back(new symbol(TK::LEEQ));
 	else if(s.substr(i,2)==">="&&(i+=2))tv.push_back(new symbol(TK::GREQ));
+	else if(s.substr(i,2)=="&&"&&(i+=2))tv.push_back(new symbol(TK::APAP));
+	else if(s.substr(i,2)=="||"&&(i+=2))tv.push_back(new symbol(TK::VBVB));
 	else if(s[i]         =='+' &&++i)   tv.push_back(new symbol(TK::PLUS));
 	else if(s[i]         =='-' &&++i)   tv.push_back(new symbol(TK::MINUS));
 	else if(s[i]         =='*' &&++i)   tv.push_back(new symbol(TK::ASTER));
@@ -45,12 +47,13 @@ token_array::token_array(const std::string&s)
 	else if(s[i]         =='=' &&++i)   tv.push_back(new symbol(TK::EQUAL));
 	else if(s[i]         =='<' &&++i)   tv.push_back(new symbol(TK::LESS));
 	else if(s[i]         =='>' &&++i)   tv.push_back(new symbol(TK::GREATER));
+	else if(s[i]         =='!' &&++i)   tv.push_back(new symbol(TK::EXCLAM));
+	else if(s[i]         ==',' &&++i)   tv.push_back(new symbol(TK::COMMA));
+	else if(s[i]         ==';' &&++i)   tv.push_back(new symbol(TK::SCOLON));
 	else if(s[i]         =='(' &&++i)   tv.push_back(new symbol(TK::OPARENT));
 	else if(s[i]         ==')' &&++i)   tv.push_back(new symbol(TK::CPARENT));
 	else if(s[i]         =='{' &&++i)   tv.push_back(new symbol(TK::OBRACE));
 	else if(s[i]         =='}' &&++i)   tv.push_back(new symbol(TK::CBRACE));
-	else if(s[i]         ==';' &&++i)   tv.push_back(new symbol(TK::SCOLON));
-	else if(s[i]         ==',' &&++i)   tv.push_back(new symbol(TK::COMMA));
 	else if(isspace(s[i])      &&++i)   continue;
 	else                                throw std::runtime_error("認識できないトークンが含まれます");
     }

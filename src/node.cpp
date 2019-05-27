@@ -53,6 +53,15 @@ void uminus::to_asm(code::variable_manager&vm)const
     vm.write("sub","%rax","%rdi");
     vm.write("push","%rdi");
 }
+void lognot::to_asm(code::variable_manager&vm)const
+{
+    arg->to_asm(vm);
+    vm.write("pop","%rax");
+    vm.write("cmp",0,"%rax");
+    vm.write("sete","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
+}
 void preinc::to_asm(code::variable_manager&vm)const
 {
     dynamic_cast<const ident*>(arg)->refer(vm);
@@ -191,6 +200,30 @@ void greq::to_asm(code::variable_manager&vm)const
     vm.write("pop","%rax");
     vm.write("cmp","%rdi","%rax");
     vm.write("setge","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
+}
+void logor::to_asm(code::variable_manager&vm)const
+{
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("or","%rdi","%rax");
+    vm.write("cmp",0,"%rax");
+    vm.write("setne","%al");
+    vm.write("movzb","%al","%rax");
+    vm.write("push","%rax");
+}
+void logand::to_asm(code::variable_manager&vm)const
+{
+    larg->to_asm(vm);
+    rarg->to_asm(vm);
+    vm.write("pop","%rdi");
+    vm.write("pop","%rax");
+    vm.write("and","%rdi","%rax");
+    vm.write("cmp",0,"%rax");
+    vm.write("setne","%al");
     vm.write("movzb","%al","%rax");
     vm.write("push","%rax");
 }
@@ -478,6 +511,7 @@ fcall     ::fcall      (const expression*func,const std::vector<const expression
 unopr     ::unopr      (const expression*arg)                                                      :arg(arg)                                   {}
 uplus     ::uplus      (const expression*arg)                                                      :unopr(arg)                                 {}
 uminus    ::uminus     (const expression*arg)                                                      :unopr(arg)                                 {}
+lognot    ::lognot     (const expression*arg)                                                      :unopr(arg)                                 {}
 unopr_l   ::unopr_l    (const expression*arg)                                                      :unopr(arg)                                 {}
 preinc    ::preinc     (const expression*arg)                                                      :unopr_l(arg)                               {}
 predec    ::predec     (const expression*arg)                                                      :unopr_l(arg)                               {}
@@ -495,6 +529,8 @@ less      ::less       (const expression*larg,const expression*rarg)            
 greater   ::greater    (const expression*larg,const expression*rarg)                               :biopr(larg,rarg)                           {}
 leeq      ::leeq       (const expression*larg,const expression*rarg)                               :biopr(larg,rarg)                           {}
 greq      ::greq       (const expression*larg,const expression*rarg)                               :biopr(larg,rarg)                           {}
+logor     ::logor      (const expression*larg,const expression*rarg)                               :biopr(larg,rarg)                           {}
+logand    ::logand     (const expression*larg,const expression*rarg)                               :biopr(larg,rarg)                           {}
 comma     ::comma      (const expression*larg,const expression*rarg)                               :biopr(larg,rarg)                           {}
 biopr_l   ::biopr_l    (const expression*larg,const expression*rarg)                               :biopr(larg,rarg)                           {}
 assign    ::assign     (const expression*larg,const expression*rarg)                               :biopr_l(larg,rarg)                         {}

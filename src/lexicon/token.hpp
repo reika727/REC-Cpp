@@ -7,9 +7,18 @@ namespace lexicon{
 	ASTER,   // *
 	SLASH,   // /
 	PERCENT, // %
+	EQUAL,   // =
+	LESS,    // <
+	GREATER, // >
+	EXCLAM,  // !
+	COMMA,   // ,
+	SCOLON,  // ;
+	OPARENT, // (
+	CPARENT, // )
+	OBRACE,  // {
+	CBRACE,  // }
 	PLPL,    // ++
 	MIMI,    // --
-	EQUAL,   // =
 	PLEQ,    // +=
 	MIEQ,    // -=
 	ASEQ,    // *=
@@ -17,16 +26,10 @@ namespace lexicon{
 	PEEQ,    // %=
 	EQEQ,    // ==
 	EXEQ,    // !=
-	LESS,    // <
-	GREATER, // >
 	LEEQ,    // <=
 	GREQ,    // >=
-	COMMA,   // ,
-	SCOLON,  // ;
-	OPARENT, // (
-	CPARENT, // )
-	OBRACE,  // {
-	CBRACE,  // }
+	APAP,    // &&
+	VBVB,    // ||
 	INT,     // int
 	IF,      // if
 	ELSE,    // else

@@ -107,7 +107,7 @@ const expression*tree::order15() // , left to right
 }
 const expression*tree::order14() // = += -= *= /= right to left
 {
-    auto ret=order07();
+    auto ret=order12();
     while(true){
  	     if(ta.consume(TK::EQUAL))ret=new assign(ret,order14());
 	else if(ta.consume(TK::PLEQ)) ret=new plasgn(ret,order14());
@@ -116,6 +116,22 @@ const expression*tree::order14() // = += -= *= /= right to left
 	else if(ta.consume(TK::SLEQ)) ret=new diasgn(ret,order14());
 	else if(ta.consume(TK::PEEQ)) ret=new rmasgn(ret,order14());
 	else                          return ret;
+    }
+}
+const expression*tree::order12() // || left to right
+{
+    auto ret=order11();
+    while(true){
+	if(ta.consume(TK::VBVB))ret=new logor(ret,order11());
+	else                    return ret;
+    }
+}
+const expression*tree::order11() // && left to right
+{
+    auto ret=order07();
+    while(true){
+	if(ta.consume(TK::APAP))ret=new logand(ret,order07());
+	else                    return ret;
     }
 }
 const expression*tree::order07() // == != left to right
@@ -157,13 +173,14 @@ const expression*tree::order03() // * / % left to right
 	else                            return ret;
     }
 }
-const expression*tree::order02() // + - ++ -- right to left
+const expression*tree::order02() // + - ++ -- ! right to left
 {
-         if(ta.consume(TK::PLUS)) return new uplus(order02());
-    else if(ta.consume(TK::MINUS))return new uminus(order02());
-    else if(ta.consume(TK::PLPL)) return new preinc(order02());
-    else if(ta.consume(TK::MIMI)) return new predec(order02());
-    else                          return order01();
+         if(ta.consume(TK::PLUS))  return new uplus(order02());
+    else if(ta.consume(TK::MINUS)) return new uminus(order02());
+    else if(ta.consume(TK::PLPL))  return new preinc(order02());
+    else if(ta.consume(TK::MIMI))  return new predec(order02());
+    else if(ta.consume(TK::EXCLAM))return new lognot(order02());
+    else                           return order01();
 }
 const expression*tree::order01() // () left to right
 {
