@@ -24,7 +24,9 @@ const function*tree::func()
 			}
 		    }
 		}
-		if(auto comp=dynamic_cast<const compound*>(stat())){
+		if(ta.consume(TK::SCOLON)){
+		    return new function(fidp->name,vars,nullptr);
+		}else if(auto comp=dynamic_cast<const compound*>(stat())){
 		    return new function(fidp->name,vars,comp);
 		}else{
 		    throw std::runtime_error("関数の本体が見つかりませんでした");

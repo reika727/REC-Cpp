@@ -274,8 +274,8 @@ namespace syntax{
     class function:public node{
 	public:
 	    const std::string name;
-	    const compound*const com;
 	    const std::vector<std::string>*const args;
+	    const compound*const com;
 	    function(std::string name,decltype(args)args,const compound*com);
 	    ~function()override;
 	    void check(semantics::analyzer&analy)const override;

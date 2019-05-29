@@ -374,34 +374,36 @@ void _return_::to_asm(code::variable_manager&vm)const
 }
 void function::to_asm(code::variable_manager&vm)const
 {
-    vm.write(".globl "+name);
-    vm.write(name+':');
-    vm.write("push","%rbp");
-    vm.write("mov","%rsp","%rbp");
-    vm.enter_scope();
-    vm.write("sub",8*args->size(),"%rsp");
-    for(int i=0;i<args->size();++i){
-	std::string dest=address(i+1-args->size(),"%rsp");
-	vm.set_offset((*args)[i]);
-	switch(i){
-	    case 0 :vm.write("mov","%rdi",dest);break;
-	    case 1 :vm.write("mov","%rsi",dest);break;
-	    case 2 :vm.write("mov","%rdx",dest);break;
-	    case 3 :vm.write("mov","%rcx",dest);break;
-	    case 4 :vm.write("mov","%r8" ,dest);break;
-	    case 5 :vm.write("mov","%r9" ,dest);break;
-	    default:
-		    vm.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
-		    vm.write("mov","%rax",dest);
-		    break;
+    if(com){
+	vm.write(".globl "+name);
+	vm.write(name+':');
+	vm.write("push","%rbp");
+	vm.write("mov","%rsp","%rbp");
+	vm.enter_scope();
+	vm.write("sub",8*args->size(),"%rsp");
+	for(int i=0;i<args->size();++i){
+	    std::string dest=address(i+1-args->size(),"%rsp");
+	    vm.set_offset((*args)[i]);
+	    switch(i){
+		case 0 :vm.write("mov","%rdi",dest);break;
+		case 1 :vm.write("mov","%rsi",dest);break;
+		case 2 :vm.write("mov","%rdx",dest);break;
+		case 3 :vm.write("mov","%rcx",dest);break;
+		case 4 :vm.write("mov","%r8" ,dest);break;
+		case 5 :vm.write("mov","%r9" ,dest);break;
+		default:
+			vm.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
+			vm.write("mov","%rax",dest);
+			break;
+	    }
 	}
+	for(auto s:*(com->stats))s->to_asm(vm);
+	vm.leave_scope();
+	//強制return
+	vm.write("mov","%rbp","%rsp");
+	vm.write("pop","%rbp");
+	vm.write("ret");
     }
-    for(auto s:*(com->stats))s->to_asm(vm);
-    vm.leave_scope();
-    //強制return
-    vm.write("mov","%rbp","%rsp");
-    vm.write("pop","%rbp");
-    vm.write("ret");
 }
 void prog::to_asm(code::variable_manager&vm)const
 {
@@ -493,10 +495,12 @@ void function::check(semantics::analyzer&analy)const
 {
     if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
     analy.define_func(name,args->size());
-    analy.enter_scope();
-    for(auto a:*args)analy.define_var(a);
-    for(auto s:*(com->stats))s->check(analy);
-    analy.leave_scope();
+    if(com){
+	analy.enter_scope();
+	for(auto a:*args)analy.define_var(a);
+	for(auto s:*(com->stats))s->check(analy);
+	analy.leave_scope();
+    }
 }
 void prog::check(semantics::analyzer&analy)const
 {
