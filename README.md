@@ -14,6 +14,7 @@
     こんな感じのソースファイルexample.rekaがあるとします。フィボナッチ数列の20項目を計算します。
     <pre>
       <code>
+        int print_num(int num);
         int fibo(int n)
         {
             if(n==1||n==2){
@@ -24,61 +25,32 @@
         }
         int main()
         {
-            fibo(20);
+            print_num(fibo(20));
             return 0;
         }
       </code>
     </pre>
-    これをこうします。rec.outはソースを適当にコンパイルしてすでに作成済みであるとします。example.rekaを入力として受け取り、アセンブリに翻訳したものをexample.sに出力します。それをexample.outという実行ファイルにするのですが、結局実行ファイルの生成でgccに頼っているため、このソフトウェアの存在意義は謎です。
+    この1行目にあるのはprint_numのプロトタイプ宣言です。rekaには入出力の機能が未実装なので、そこはC言語で書いて後でリンクします。<br />
+    このファイルをfunc.cとします。
+    <pre>
+      <code>
+        #include&lt;stdio.h&gt;
+        int print_num(int num)
+        {
+            printf("%d\n",num);
+            return 0;
+        }
+      </code>
+    </pre>
+    これをこうします(rec.outはソースを適当にコンパイルしてすでに作成済みであるとします)。<br />
+    example.rekaを入力として受け取り、アセンブリに翻訳したものをexample.sに出力します。<br />
+    それをexample.outという実行ファイルにするのですが、結局実行ファイルの生成でgccに頼っているため、このソフトウェアの存在意義は謎です。
     <pre>
       <code>
         $ ./rec.out example.reka example.s
-        $ gcc -o example.out example.s
-      </code>
-    </pre>
-    現在rekaには入出力の機能が一切ありません。仕方ないのでgdbで正しく計算できてるか確かめます。<br />
-    式を評価した値はraxレジスタに格納されるので、fibo(20)をcallした直後のraxを確かめます。<br />
-    ついでにRECにはコード最適化機能も未実装です。0を足したり引いたりpushの直後にpopしてたり到達不能コードがあったりしますがご愛嬌です。
-    <pre>
-      <code>
-        $ gdb example.out
-        (gdb) disass main
-        Dump of assembler code for function main:
-           0x0000000000400529 <+0>:     push   %rbp
-           0x000000000040052a <+1>:     mov    %rsp,%rbp
-           0x000000000040052d <+4>:     sub    $0x0,%rsp
-           0x0000000000400531 <+8>:     sub    $0x0,%rsp
-           0x0000000000400535 <+12>:    pushq  $0x14
-           0x0000000000400537 <+14>:    pop    %rdi
-           0x0000000000400538 <+15>:    callq  0x400482 &lt;fibo&gt;
-           0x000000000040053d <+20>:    add    $0x0,%rsp
-           0x0000000000400541 <+24>:    push   %rax
-           0x0000000000400542 <+25>:    pop    %rax
-           0x0000000000400543 <+26>:    pushq  $0x0
-           0x0000000000400545 <+28>:    pop    %rax
-           0x0000000000400546 <+29>:    mov    %rbp,%rsp
-           0x0000000000400549 <+32>:    pop    %rbp
-           0x000000000040054a <+33>:    retq
-           0x000000000040054b <+34>:    add    $0x0,%rsp
-           0x000000000040054f <+38>:    mov    %rbp,%rsp
-           0x0000000000400552 <+41>:    pop    %rbp
-           0x0000000000400553 <+42>:    retq
-           0x0000000000400554 <+43>:    nopw   %cs:0x0(%rax,%rax,1)
-           0x000000000040055e <+53>:    xchg   %ax,%ax
-        End of assembler dump.
-        (gdb) start
-        Temporary breakpoint 1 at 0x40052d
-        Starting program: example.out
-        <br />
-        Temporary breakpoint 1, 0x000000000040052d in main ()
-        (gdb) break *0x40053d
-        Breakpoint 2 at 0x40053d
-        (gdb) continue
-        Continuing.
-        <br />
-        Breakpoint 2, 0x000000000040053d in main ()
-        (gdb) print $rax
-        $1 = 6765
+        $ gcc -o example.out example.s func.c
+        $ ./example.out
+        6765
       </code>
     </pre>
     計算できてました。
