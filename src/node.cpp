@@ -5,6 +5,9 @@
 using namespace syntax;
 using code::address;
 using code::unique_label;
+unsigned int _if_else_::label_num=0;
+unsigned int _for_    ::label_num=0;
+unsigned int _while_  ::label_num=0;
 void numeric::to_asm(code::variable_manager&vm)const
 {
     vm.write("push",value);
@@ -324,49 +327,43 @@ void define_var::to_asm(code::variable_manager&vm)const
 }
 void _if_else_::to_asm(code::variable_manager&vm)const
 {
-    std::string el=unique_label(".Lelse");
-    std::string end=unique_label(".Lend");
     vm.enter_scope();
     cond->to_asm(vm);
     vm.write("cmp",0,"%rax");
-    vm.write("je",el);
+    vm.write("je",lelse);
     st1->to_asm(vm);
-    vm.write("jmp",end);
-    vm.write(el+':');
+    vm.write("jmp",lend);
+    vm.write(lelse+':');
     st2->to_asm(vm);
     vm.leave_scope();
-    vm.write(end+':');
+    vm.write(lend+':');
 }
 void _while_::to_asm(code::variable_manager&vm)const
 {
-    std::string beg=unique_label(".Lbegin");
-    std::string end=unique_label(".Lend");
-    vm.write(beg+':');
+    vm.write(lbegin+':');
     vm.enter_scope();
     cond->to_asm(vm);
     vm.write("cmp",0,"%rax");
-    vm.write("je",end);
+    vm.write("je",lend);
     st->to_asm(vm);
     vm.leave_scope();
-    vm.write("jmp",beg);
-    vm.write(end+':');
+    vm.write("jmp",lbegin);
+    vm.write(lend+':');
 }
 void _for_::to_asm(code::variable_manager&vm)const
 {
-    std::string beg=unique_label(".Lbegin");
-    std::string end=unique_label(".Lend");
     vm.enter_scope();
     init->to_asm(vm);
-    vm.write(beg+':');
+    vm.write(lbegin+':');
     vm.write("mov",1,"%rax");
     cond->to_asm(vm);
     vm.write("cmp",0,"%rax");
-    vm.write("je",end);
+    vm.write("je",lend);
     st->to_asm(vm);
     reinit->to_asm(vm);
     vm.leave_scope();
-    vm.write("jmp",beg);
-    vm.write(end+':');
+    vm.write("jmp",lbegin);
+    vm.write(lend+':');
 }
 void _return_::to_asm(code::variable_manager&vm)const
 {
@@ -542,9 +539,15 @@ rmasgn    ::rmasgn     (const expression*larg,const expression*rarg)            
 single    ::single     (const expression*stat)                                                     :stat(stat)                                 {}
 compound  ::compound   (const std::vector<const statement*>*stats)                                 :stats(stats)                               {}
 define_var::define_var (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                 {}
-_if_else_ ::_if_else_  (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2)               {}
-_while_   ::_while_    (const single*cond,const statement*st)                                      :cond(cond),st(st)                          {}
-_for_     ::_for_      (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st){}
+_if_else_ ::_if_else_  (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2),
+                                                                                                    lelse("ieelse"+std::to_string(label_num)),
+                                                                                                    lend("ieend"+std::to_string(label_num++))  {}
+_while_   ::_while_    (const single*cond,const statement*st)                                      :cond(cond),st(st),
+                                                                                                    lbegin("wbegin"+std::to_string(label_num)),
+                                                                                                    lend("wend"+std::to_string(label_num++))   {}
+_for_     ::_for_      (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st),
+                                                                                                    lbegin("fbegin"+std::to_string(label_num)),
+                                                                                                    lend("fend"+std::to_string(label_num++))   {}
 _return_  ::_return_   (const single*val)                                                          :val(val)                                   {}
 function  ::function   (std::string name,const std::vector<std::string>*args,const compound*com)   :name(name),args(args),com(com)             {}
 prog      ::prog       (const std::vector<const function*>*funcs)                                  :funcs(funcs)                               {}

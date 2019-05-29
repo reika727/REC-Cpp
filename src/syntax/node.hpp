@@ -228,27 +228,36 @@ namespace syntax{
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class _if_else_:public statement{
+	private:
+	    static unsigned int label_num;
 	public:
 	    const single*const cond;
 	    const statement*const st1,*const st2;
+	    const std::string lelse,lend;
 	    _if_else_(const single*cond,const statement*st1,const statement*st2);
 	    ~_if_else_()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class _while_:public statement{
+	private:
+	    static unsigned int label_num;
 	public:
 	    const single*const cond;
 	    const statement*const st;
+	    const std::string lbegin,lend;
 	    _while_(const single*cond,const statement*st);
 	    ~_while_()override;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class _for_:public statement{
+	private:
+	    static unsigned int label_num;
 	public:
 	    const single*const init,*const cond,*const reinit;
 	    const statement*const st;
+	    const std::string lbegin,lend;
 	    _for_(const single*init,const single*cond,const single*reinit,const statement*st);
 	    ~_for_()override;
 	    void check(semantics::analyzer&analy)const override;
