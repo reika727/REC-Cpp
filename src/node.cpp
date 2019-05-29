@@ -544,14 +544,14 @@ single    ::single     (const expression*stat)                                  
 compound  ::compound   (const std::vector<const statement*>*stats)                                 :stats(stats)                               {}
 define_var::define_var (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                 {}
 _if_else_ ::_if_else_  (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2),
-                                                                                                    lelse("ieelse"+std::to_string(label_num)),
-                                                                                                    lend("ieend"+std::to_string(label_num++))  {}
+                                                                                                    lelse(".Lieelse"+std::to_string(label_num)),
+                                                                                                    lend(".Lieend"+std::to_string(label_num++)){}
 _while_   ::_while_    (const single*cond,const statement*st)                                      :cond(cond),st(st),
-                                                                                                    lbegin("wbegin"+std::to_string(label_num)),
-                                                                                                    lend("wend"+std::to_string(label_num++))   {}
+                                                                                                    lbegin(".Lwbegin"+std::to_string(label_num)),
+                                                                                                    lend(".Lwend"+std::to_string(label_num++)) {}
 _for_     ::_for_      (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st),
-                                                                                                    lbegin("fbegin"+std::to_string(label_num)),
-                                                                                                    lend("fend"+std::to_string(label_num++))   {}
+                                                                                                    lbegin(".Lfbegin"+std::to_string(label_num)),
+                                                                                                    lend(".Lfend"+std::to_string(label_num++)) {}
 _return_  ::_return_   (const single*val)                                                          :val(val)                                   {}
 function  ::function   (std::string name,const std::vector<std::string>*args,const compound*com)   :name(name),args(args),com(com)             {}
 prog      ::prog       (const std::vector<const function*>*funcs)                                  :funcs(funcs)                               {}
