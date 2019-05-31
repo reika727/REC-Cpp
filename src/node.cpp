@@ -506,35 +506,46 @@ void prog::check(semantics::analyzer&analy)const
 {
     for(auto f:*funcs)f->check(analy);
 }
-numeric   ::numeric    (int value)                                                                 :value(value)                                 {}
-ident     ::ident      (const std::string&name)                                                    :name(name)                                   {}
-fcall     ::fcall      (const expression*func,const std::vector<const expression*>*vars)           :func(func),vars(vars)                        {}
-unopr     ::unopr      (const expression*arg)                                                      :arg(arg)                                     {}
-biopr     ::biopr      (const expression*larg,const expression*rarg)                               :larg(larg),rarg(rarg)                        {}
-single    ::single     (const expression*stat)                                                     :stat(stat)                                   {}
-compound  ::compound   (const std::vector<const statement*>*stats)                                 :stats(stats)                                 {}
-define_var::define_var (const std::vector<std::pair<std::string,const expression*>>*vars)          :vars(vars)                                   {}
-_if_else_ ::_if_else_  (const single*cond,const statement*st1,const statement*st2)                 :cond(cond),st1(st1),st2(st2),
-                                                                                                    lelse(".Lieelse"+std::to_string(label_num)),
-                                                                                                    lend(".Lieend"+std::to_string(label_num++))  {}
-_while_   ::_while_    (const single*cond,const statement*st)                                      :cond(cond),st(st),
-                                                                                                    lbegin(".Lwbegin"+std::to_string(label_num)),
-                                                                                                    lend(".Lwend"+std::to_string(label_num++))   {}
-_for_     ::_for_      (const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st),
-                                                                                                    lbegin(".Lfbegin"+std::to_string(label_num)),
-                                                                                                    lend(".Lfend"+std::to_string(label_num++))   {}
-_return_  ::_return_   (const single*val)                                                          :val(val)                                     {}
-function  ::function   (std::string name,const std::vector<std::string>*args,const compound*com)   :name(name),args(args),com(com)               {}
-prog      ::prog       (const std::vector<const function*>*funcs)                                  :funcs(funcs)                                 {}
-fcall     ::~fcall     ()                                                                      {delete func;for(auto v:*vars)delete v;delete vars;}
-unopr     ::~unopr     ()                                                                                                             {delete arg;}
-biopr     ::~biopr     ()                                                                                                {delete larg;delete rarg;}
-single    ::~single    ()                                                                                                            {delete stat;}
-compound  ::~compound  ()                                                                                {for(auto s:*stats)delete s;delete stats;}
-define_var::~define_var()                                                                           {for(auto v:*vars)delete v.second;delete vars;}
-_if_else_ ::~_if_else_ ()                                                                                      {delete cond;delete st1;delete st2;}
-_while_   ::~_while_   ()                                                                                                  {delete cond;delete st;}
-_for_     ::~_for_     ()                                                                        {delete init;delete cond;delete reinit;delete st;}
-_return_  ::~_return_  ()                                                                                                             {delete val;}
-function  ::~function  ()                                                                                                 {delete com;delete args;}
-prog      ::~prog      ()                                                                                             {for(auto f:*funcs)delete f;}
+numeric::numeric(int value)
+    :value(value){}
+ident::ident(const std::string&name)
+    :name(name){}
+fcall::fcall(const expression*func,const std::vector<const expression*>*vars)
+    :func(func),vars(vars){}
+unopr::unopr(const expression*arg)
+    :arg(arg){}
+biopr::biopr(const expression*larg,const expression*rarg)
+    :larg(larg),rarg(rarg){}
+single::single(const expression*stat)
+    :stat(stat){}
+compound::compound(const std::vector<const statement*>*stats)
+    :stats(stats){}
+define_var::define_var(const std::vector<std::pair<std::string,const expression*>>*vars)
+    :vars(vars){}
+_if_else_::_if_else_(const single*cond,const statement*st1,const statement*st2)
+    :cond(cond),st1(st1),st2(st2),
+    lelse(".Lieelse"+std::to_string(label_num)),lend(".Lieend"+std::to_string(label_num++)){}
+_while_::_while_(const single*cond,const statement*st)
+    :cond(cond),st(st),
+    lbegin(".Lwbegin"+std::to_string(label_num)),lend(".Lwend"+std::to_string(label_num++)){}
+_for_::_for_(const single*init,const single*cond,const single*reinit,const statement*st):
+    init(init),cond(cond),reinit(reinit),st(st),
+    lbegin(".Lfbegin"+std::to_string(label_num)),lend(".Lfend"+std::to_string(label_num++)){}
+_return_::_return_(const single*val)
+    :val(val){}
+function::function(std::string name,const std::vector<std::string>*args,const compound*com)
+    :name(name),args(args),com(com){}
+prog::prog(const std::vector<const function*>*funcs)
+    :funcs(funcs){}
+fcall     ::~fcall     (){delete func;for(auto v:*vars)delete v;delete vars;}
+unopr     ::~unopr     ()                                       {delete arg;}
+biopr     ::~biopr     ()                          {delete larg;delete rarg;}
+single    ::~single    ()                                      {delete stat;}
+compound  ::~compound  ()          {for(auto s:*stats)delete s;delete stats;}
+define_var::~define_var()     {for(auto v:*vars)delete v.second;delete vars;}
+_if_else_ ::~_if_else_ ()                {delete cond;delete st1;delete st2;}
+_while_   ::~_while_   ()                            {delete cond;delete st;}
+_for_     ::~_for_     ()  {delete init;delete cond;delete reinit;delete st;}
+_return_  ::~_return_  ()                                       {delete val;}
+function  ::~function  ()                           {delete args;delete com;}
+prog      ::~prog      ()                       {for(auto f:*funcs)delete f;}
