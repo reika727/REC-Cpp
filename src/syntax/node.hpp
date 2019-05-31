@@ -229,7 +229,7 @@ namespace syntax{
     };
     class _if_else_:public statement{
 	private:
-	    static unsigned int label_num;
+	    static inline unsigned int label_num=0;
 	public:
 	    const single*const cond;
 	    const statement*const st1,*const st2;
@@ -241,7 +241,7 @@ namespace syntax{
     };
     class _while_:public statement{
 	private:
-	    static unsigned int label_num;
+	    static inline unsigned int label_num=0;
 	public:
 	    const single*const cond;
 	    const statement*const st;
@@ -253,7 +253,7 @@ namespace syntax{
     };
     class _for_:public statement{
 	private:
-	    static unsigned int label_num;
+	    static inline unsigned int label_num=0;
 	public:
 	    const single*const init,*const cond,*const reinit;
 	    const statement*const st;

@@ -5,9 +5,6 @@
 using namespace syntax;
 using code::address;
 using code::unique_label;
-unsigned int _if_else_::label_num=0;
-unsigned int _for_    ::label_num=0;
-unsigned int _while_  ::label_num=0;
 void numeric::to_asm(code::variable_manager&vm)const
 {
     vm.write("push",value);
