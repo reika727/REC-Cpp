@@ -49,42 +49,42 @@ namespace syntax{
     };
     class uplus:public unopr{
 	public:
-	    uplus(const expression*arg);
+	    using unopr::unopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class uminus:public unopr{
 	public:
-	    uminus(const expression*arg);
+	    using unopr::unopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class lognot:public unopr{
 	public:
-	    lognot(const expression*arg);
+	    using unopr::unopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class unopr_l:public unopr{
 	public:
-	    unopr_l(const expression*arg);
+	    using unopr::unopr;
 	    void check(semantics::analyzer&analy)const override;
     };
     class preinc:public unopr_l{
 	public:
-	    preinc(const expression*arg);
+	    using unopr_l::unopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class predec:public unopr_l{
 	public:
-	    predec(const expression*arg);
+	    using unopr_l::unopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class postinc:public unopr_l{
 	public:
-	    postinc(const expression*arg);
+	    using unopr_l::unopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class postdec:public unopr_l{
 	public:
-	    postdec(const expression*arg);
+	    using unopr_l::unopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class biopr:public expression{
@@ -96,107 +96,107 @@ namespace syntax{
     };
     class plus:public biopr{
 	public:
-	    plus(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class minus:public biopr{
 	public:
-	    minus(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class multi:public biopr{
 	public:
-	    multi(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class divide:public biopr{
 	public:
-	    divide(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class remain:public biopr{
 	public:
-	    remain(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class equal:public biopr{
 	public:
-	    equal(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class nequal:public biopr{
 	public:
-	    nequal(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class less:public biopr{
 	public:
-	    less(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class greater:public biopr{
 	public:
-	    greater(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class leeq:public biopr{
 	public:
-	    leeq(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class greq:public biopr{
 	public:
-	    greq(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class logand:public biopr{
 	public:
-	    logand(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class logor:public biopr{
 	public:
-	    logor(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class comma:public biopr{
 	public:
-	    comma(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class biopr_l:public biopr{
 	public:
-	    biopr_l(const expression*larg,const expression*rarg);
+	    using biopr::biopr;
 	    void check(semantics::analyzer&analy)const override;
     };
     class assign:public biopr_l{
 	public:
-	    assign(const expression*larg,const expression*rarg);
+	    using biopr_l::biopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class plasgn:public biopr_l{
 	public:
-	    plasgn(const expression*larg,const expression*rarg);
+	    using biopr_l::biopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class miasgn:public biopr_l{
 	public:
-	    miasgn(const expression*larg,const expression*rarg);
+	    using biopr_l::biopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class muasgn:public biopr_l{
 	public:
-	    muasgn(const expression*larg,const expression*rarg);
+	    using biopr_l::biopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class diasgn:public biopr_l{
 	public:
-	    diasgn(const expression*larg,const expression*rarg);
+	    using biopr_l::biopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class rmasgn:public biopr_l{
 	public:
-	    rmasgn(const expression*larg,const expression*rarg);
+	    using biopr_l::biopr_l;
 	    void to_asm(code::variable_manager&vm)const override;
     };
     class statement:public node{
