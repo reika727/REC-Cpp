@@ -256,13 +256,11 @@ namespace syntax{
     };
     class _break_:public statement{
 	public:
-	    _break_()=default;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::cgmanager&cm)const override;
     };
     class _continue_:public statement{
 	public:
-	    _continue_()=default;
 	    void check(semantics::analyzer&analy)const override;
 	    void to_asm(code::cgmanager&cm)const override;
     };
