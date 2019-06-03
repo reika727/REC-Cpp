@@ -4,56 +4,36 @@ using namespace syntax;
 using TK=lexicon::TK;
 const function*tree::func()
 {
-    if(ta.consume(TK::INT)){
-	if(auto fidp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
-	    if(ta.consume(TK::OPARENT)){
-		auto vars=new std::vector<std::string>;
-		if(!ta.consume(TK::CPARENT)){
-		    while(true){
-			if(ta.consume(TK::INT)){
-			    if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
-				vars->push_back(idp->name);
-				if(ta.consume(TK::COMMA))continue;
-				else if(ta.consume(TK::CPARENT))break;
-				else throw std::runtime_error("不正な区切り文字です");
-			    }else{
-				throw std::runtime_error("引数名が見つかりませんでした");
-			    }
-			}else{
-			    throw std::runtime_error("引数の型が見つかりませんでした");
-			}
-		    }
-		}
-		if(ta.consume(TK::SCOLON)){
-		    return new function(fidp->name,vars,nullptr);
-		}else if(auto comp=dynamic_cast<const compound*>(stat())){
-		    return new function(fidp->name,vars,comp);
-		}else{
-		    throw std::runtime_error("関数の本体が見つかりませんでした");
-		}
-	    }else{
-		throw std::runtime_error("引数リストが見つかりませんでした");
-	    }
-	}else{
-	    throw std::runtime_error("関数名が見つかりませんでした");
+    if(!ta.consume(TK::INT))throw std::runtime_error("関数の型が見つかりませんでした");
+    auto fidp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT));
+    if(!fidp)throw std::runtime_error("関数名が見つかりませんでした");
+    if(!ta.consume(TK::OPARENT))throw std::runtime_error("引数リストが見つかりませんでした");
+    auto vars=new std::vector<std::string>;
+    if(!ta.consume(TK::CPARENT)){
+	while(true){
+	    if(!ta.consume(TK::INT))throw std::runtime_error("引数の型が見つかりませんでした");
+	    auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT));
+	    if(!idp)throw std::runtime_error("引数名が見つかりませんでした");
+	    vars->push_back(idp->name);
+	    if(ta.consume(TK::COMMA))continue;
+	    else if(ta.consume(TK::CPARENT))break;
+	    else throw std::runtime_error("不正な区切り文字です");
 	}
-    }else{
-	throw std::runtime_error("関数の型が見つかりませんでした");
     }
+    if(ta.consume(TK::SCOLON))return new function(fidp->name,vars,nullptr);
+    else if(auto comp=dynamic_cast<const compound*>(stat()))return new function(fidp->name,vars,comp);
+    else throw std::runtime_error("関数の本体が見つかりませんでした");
 }
 const statement*tree::stat()
 {
     if(ta.consume(TK::INT)){
 	auto vars=new std::vector<std::pair<std::string,const expression*>>;
 	while(true){
-	    if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT))){
-		vars->push_back(std::make_pair(idp->name,ta.consume(TK::EQUAL)?order14():nullptr));
-		if(ta.consume(TK::COMMA))continue;
-		else if(ta.consume(TK::SCOLON))break;
-		else throw std::runtime_error("不正な区切り文字です");
-	    }else{
-		throw std::runtime_error("無効な宣言です");
-	    }
+	    auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT));
+	    if(!idp)throw std::runtime_error("無効な宣言です");
+	    vars->push_back(std::make_pair(idp->name,ta.consume(TK::EQUAL)?order14():nullptr));
+	    if(ta.consume(TK::SCOLON))break;
+	    else if(!ta.consume(TK::COMMA))throw std::runtime_error("不正な区切り文字です");
 	}
 	return new define_var(vars);
     }else if(ta.consume(TK::IF)){
@@ -79,6 +59,12 @@ const statement*tree::stat()
 	if(!ta.consume(TK::CPARENT))throw std::runtime_error("forの後ろに括弧がありません");
 	auto st=stat();
 	return new _for_(init,cond,reinit,st);
+    }else if(ta.consume(TK::BREAK)){
+	if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正なbreak文です");
+	return new _break_;
+    }else if(ta.consume(TK::CONTINUE)){
+	if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正なcontinue文です");
+	return new _continue_;
     }else if(ta.consume(TK::RETURN)){
 	return new _return_(new single(order15()));
     }else if(ta.consume(TK::OBRACE)){
@@ -93,18 +79,15 @@ const statement*tree::stat()
 }
 const single*tree::emptiable_single()
 {
-    if(ta.check(TK::SCOLON)||ta.check(TK::CPARENT)){
-	return new single(nullptr);
-    }else{
-	return new single(order15());
-    }
+    if(ta.check(TK::SCOLON)||ta.check(TK::CPARENT))return new single(nullptr);
+    else                                           return new single(order15());
 }
 const expression*tree::order15() // , left to right
 {
     auto ret=order14();
     while(true){
-	     if(ta.consume(TK::COMMA))ret=new comma(ret,order14());
-	else                          return ret;
+	if(ta.consume(TK::COMMA))ret=new comma(ret,order14());
+	else                     return ret;
     }
 }
 const expression*tree::order14() // = += -= *= /= right to left
@@ -124,16 +107,16 @@ const expression*tree::order12() // || left to right
 {
     auto ret=order11();
     while(true){
-	     if(ta.consume(TK::VBVB))ret=new logor(ret,order11());
-	else                         return ret;
+	if(ta.consume(TK::VBVB))ret=new logor(ret,order11());
+	else                    return ret;
     }
 }
 const expression*tree::order11() // && left to right
 {
     auto ret=order07();
     while(true){
-	     if(ta.consume(TK::APAP))ret=new logand(ret,order07());
-	else                         return ret;
+	if(ta.consume(TK::APAP))ret=new logand(ret,order07());
+	else                    return ret;
     }
 }
 const expression*tree::order07() // == != left to right
@@ -197,8 +180,7 @@ const expression*tree::order01() // () left to right
 	    while(true){
 		vars->push_back(order14());
 		if(ta.consume(TK::CPARENT))break;
-		else if(ta.consume(TK::COMMA))continue;
-		else throw std::runtime_error("無効な関数呼び出しです");
+		else if(!ta.consume(TK::COMMA))throw std::runtime_error("無効な関数呼び出しです");
 	    }
 	}
 	ret=new fcall(ret,vars);

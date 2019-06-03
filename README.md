@@ -76,8 +76,8 @@
   ✅while文<br />
   🔵do-while文<br />
   ✅for文<br />
-  🔵break文<br />
-  🔵continue文<br />
+  ✅break文<br />
+  ✅continue文<br />
   🔵goto文<br />
   ✅return文<br />
   

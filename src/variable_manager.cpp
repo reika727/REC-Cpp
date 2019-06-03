@@ -12,6 +12,22 @@ void variable_manager::leave_scope()
     write("add",dec,"%rsp");
     offset.pop_back();
 }
+void variable_manager::enter_break(const std::string&label)
+{
+    break_labels.push(label);
+}
+void variable_manager::leave_break()
+{
+    break_labels.pop();
+}
+void variable_manager::enter_continue(const std::string&label)
+{
+    continue_labels.push(label);
+}
+void variable_manager::leave_continue()
+{
+    continue_labels.pop();
+}
 void variable_manager::set_offset(const std::string&name)
 {
     offset.back()[name]=var_size+=8;
@@ -32,7 +48,15 @@ int variable_manager::get_var_size()
 {
     return var_size;
 }
-variable_manager::variable_manager(writer&write):write(write),var_size(0)
+const std::string&variable_manager::get_break_label()
+{
+    return break_labels.top();
+}
+const std::string&variable_manager::get_continue_label()
+{
+    return continue_labels.top();
+}
+variable_manager::variable_manager(writer&write):write(write)
 {
 
 }

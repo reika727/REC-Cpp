@@ -324,6 +324,8 @@ void define_var::to_asm(code::variable_manager&vm)const
 }
 void _if_else_::to_asm(code::variable_manager&vm)const
 {
+    static unsigned int serial=0;
+    std::string lelse=unique_label(".Lieelse",serial),lend=unique_label(".Lieend",serial++);
     vm.enter_scope();
     cond->to_asm(vm);
     vm.write("cmp",0,"%rax");
@@ -332,24 +334,34 @@ void _if_else_::to_asm(code::variable_manager&vm)const
     vm.write("jmp",lend);
     vm.write(lelse+':');
     st2->to_asm(vm);
-    vm.leave_scope();
     vm.write(lend+':');
+    vm.leave_scope();
 }
 void _while_::to_asm(code::variable_manager&vm)const
 {
-    vm.write(lbegin+':');
+    static unsigned int serial=0;
+    std::string lbegin=unique_label(".Lwbegin",serial++),lend=unique_label(".Lwend",serial);
     vm.enter_scope();
+    vm.enter_break(lend);
+    vm.enter_continue(lbegin);
+    vm.write(lbegin+':');
     cond->to_asm(vm);
     vm.write("cmp",0,"%rax");
     vm.write("je",lend);
     st->to_asm(vm);
-    vm.leave_scope();
     vm.write("jmp",lbegin);
     vm.write(lend+':');
+    vm.leave_continue();
+    vm.leave_break();
+    vm.leave_scope();
 }
 void _for_::to_asm(code::variable_manager&vm)const
 {
+    static unsigned int serial=0;
+    std::string lbegin=unique_label(".Lfbegin",serial++),lreini=unique_label(".Lfreini",serial),lend=unique_label(".Lfend",serial);
     vm.enter_scope();
+    vm.enter_break(lend);
+    vm.enter_continue(lreini);
     init->to_asm(vm);
     vm.write(lbegin+':');
     vm.write("mov",1,"%rax");
@@ -357,10 +369,21 @@ void _for_::to_asm(code::variable_manager&vm)const
     vm.write("cmp",0,"%rax");
     vm.write("je",lend);
     st->to_asm(vm);
+    vm.write(lreini+':');
     reinit->to_asm(vm);
-    vm.leave_scope();
     vm.write("jmp",lbegin);
     vm.write(lend+':');
+    vm.leave_continue();
+    vm.leave_break();
+    vm.leave_scope();
+}
+void _break_::to_asm(code::variable_manager&vm)const
+{
+    vm.write("jmp",vm.get_break_label());
+}
+void _continue_::to_asm(code::variable_manager&vm)const
+{
+    vm.write("jmp",vm.get_continue_label());
 }
 void _return_::to_asm(code::variable_manager&vm)const
 {
@@ -471,18 +494,38 @@ void _if_else_::check(semantics::analyzer&analy)const
 void _while_::check(semantics::analyzer&analy)const
 {
     analy.enter_scope();
+    analy.enter_break();
+    analy.enter_continue();
     cond->check(analy);
     st->check(analy);
+    analy.leave_continue();
+    analy.leave_break();
     analy.leave_scope();
 }
 void _for_::check(semantics::analyzer&analy)const
 {
     analy.enter_scope();
+    analy.enter_break();
+    analy.enter_continue();
     init->check(analy);
     cond->check(analy);
     reinit->check(analy);
     st->check(analy);
+    analy.leave_continue();
+    analy.leave_break();
     analy.leave_scope();
+}
+void _break_::check(semantics::analyzer&analy)const
+{
+    if(!analy.is_breakable()){
+	throw std::runtime_error("不適切なbreak文です");
+    }
+}
+void _continue_::check(semantics::analyzer&analy)const
+{
+    if(!analy.is_continuable()){
+	throw std::runtime_error("不適切なcontinue文です");
+    }
 }
 void _return_::check(semantics::analyzer&analy)const
 {
@@ -535,21 +578,15 @@ define_var::define_var(const std::vector<std::pair<std::string,const expression*
 {
 
 }
-_if_else_::_if_else_(const single*cond,const statement*st1,const statement*st2)
-    :cond(cond),st1(st1),st2(st2),
-    lelse(".Lieelse"+std::to_string(label_num)),lend(".Lieend"+std::to_string(label_num++))
+_if_else_::_if_else_(const single*cond,const statement*st1,const statement*st2):cond(cond),st1(st1),st2(st2)
 {
 
 }
-_while_::_while_(const single*cond,const statement*st)
-    :cond(cond),st(st),
-    lbegin(".Lwbegin"+std::to_string(label_num)),lend(".Lwend"+std::to_string(label_num++))
+_while_::_while_(const single*cond,const statement*st):cond(cond),st(st)
 {
 
 }
-_for_::_for_(const single*init,const single*cond,const single*reinit,const statement*st):
-    init(init),cond(cond),reinit(reinit),st(st),
-    lbegin(".Lfbegin"+std::to_string(label_num)),lend(".Lfend"+std::to_string(label_num++))
+_for_::_for_(const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st)
 {
 
 }

@@ -5,12 +5,14 @@ using namespace lexicon;
 token_array::token_array(const std::string&s)
 {
     for(int i=0;i<s.length();){
-	     if(s.substr(i,3)=="int"   &&i+3<s.length()&&                           isspace(s[i+3]) &&(i+=3))tv.push_back(new symbol(TK::INT));
-	else if(s.substr(i,2)=="if"    &&i+2<s.length()&&(s[i+2]=='('||             isspace(s[i+2]))&&(i+=2))tv.push_back(new symbol(TK::IF));
-	else if(s.substr(i,4)=="else"  &&i+4<s.length()&&(s[i+4]=='{'||s[i+4]==';'||isspace(s[i+4]))&&(i+=4))tv.push_back(new symbol(TK::ELSE));
-	else if(s.substr(i,5)=="while" &&i+5<s.length()&&(s[i+5]=='('||             isspace(s[i+5]))&&(i+=5))tv.push_back(new symbol(TK::WHILE));
-	else if(s.substr(i,3)=="for"   &&i+3<s.length()&&(s[i+3]=='('||             isspace(s[i+3]))&&(i+=3))tv.push_back(new symbol(TK::FOR));
-	else if(s.substr(i,6)=="return"&&i+6<s.length()&&                           isspace(s[i+6]) &&(i+=6))tv.push_back(new symbol(TK::RETURN));
+	     if(s.substr(i,3)=="int"     &&i+3<s.length()&&                           isspace(s[i+3]) &&(i+=3))tv.push_back(new symbol(TK::INT));
+	else if(s.substr(i,2)=="if"      &&i+2<s.length()&&(s[i+2]=='('||             isspace(s[i+2]))&&(i+=2))tv.push_back(new symbol(TK::IF));
+	else if(s.substr(i,4)=="else"    &&i+4<s.length()&&(s[i+4]=='{'||s[i+4]==';'||isspace(s[i+4]))&&(i+=4))tv.push_back(new symbol(TK::ELSE));
+	else if(s.substr(i,5)=="while"   &&i+5<s.length()&&(s[i+5]=='('||             isspace(s[i+5]))&&(i+=5))tv.push_back(new symbol(TK::WHILE));
+	else if(s.substr(i,3)=="for"     &&i+3<s.length()&&(s[i+3]=='('||             isspace(s[i+3]))&&(i+=3))tv.push_back(new symbol(TK::FOR));
+	else if(s.substr(i,5)=="break"   &&i+5<s.length()&&(             s[i+5]==';'||isspace(s[i+5]))&&(i+=5))tv.push_back(new symbol(TK::BREAK));
+	else if(s.substr(i,8)=="continue"&&i+8<s.length()&&(             s[i+8]==';'||isspace(s[i+8]))&&(i+=8))tv.push_back(new symbol(TK::CONTINUE));
+	else if(s.substr(i,6)=="return"  &&i+6<s.length()&&                           isspace(s[i+6]) &&(i+=6))tv.push_back(new symbol(TK::RETURN));
 	else if(isdigit(s[i])){
 	    size_t sz;
 	    tv.push_back(new numeric(std::stoi(s.substr(i),&sz)));

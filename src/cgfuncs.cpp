@@ -1,9 +1,8 @@
 #include"code/cgfuncs.hpp"
 #include<sstream>
 namespace code{
-    std::string unique_label(const std::string&base)
+    std::string unique_label(const std::string&base,unsigned int serial)
     {
-	static unsigned int serial=0;
 	return base+std::to_string(serial++);
     } 
     std::string address(int dis,const std::string&base,const std::string&ofs,int scl)
