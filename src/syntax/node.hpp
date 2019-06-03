@@ -1,6 +1,6 @@
 #pragma once
 #include"../semantics/analyzer.hpp"
-#include"../code/variable_manager.hpp"
+#include"../code/cgmanager.hpp"
 #include"../code/writer.hpp"
 #include<string>
 #include<vector>
@@ -10,7 +10,7 @@ namespace syntax{
 	public:
 	    virtual ~node()=default;
 	    virtual void check(semantics::analyzer&analy)const=0;
-	    virtual void to_asm(code::variable_manager&vm)const=0;
+	    virtual void to_asm(code::cgmanager&cm)const=0;
     };
     class expression:public node{
 	public:
@@ -21,15 +21,15 @@ namespace syntax{
 	    const int value;
 	    numeric(int value);
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class ident:public expression{
 	public:
 	    const std::string name;
 	    ident(const std::string&name);
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
-	    void refer(code::variable_manager&vm)const;
+	    void to_asm(code::cgmanager&cm)const override;
+	    void refer(code::cgmanager&cm)const;
     };
     class fcall:public expression{
 	public:
@@ -38,7 +38,7 @@ namespace syntax{
 	    fcall(const expression*func,decltype(vars)vars);
 	    ~fcall()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class unopr:public expression{
 	public:
@@ -50,17 +50,17 @@ namespace syntax{
     class uplus:public unopr{
 	public:
 	    using unopr::unopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class uminus:public unopr{
 	public:
 	    using unopr::unopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class lognot:public unopr{
 	public:
 	    using unopr::unopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class unopr_l:public unopr{
 	public:
@@ -70,22 +70,22 @@ namespace syntax{
     class preinc:public unopr_l{
 	public:
 	    using unopr_l::unopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class predec:public unopr_l{
 	public:
 	    using unopr_l::unopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class postinc:public unopr_l{
 	public:
 	    using unopr_l::unopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class postdec:public unopr_l{
 	public:
 	    using unopr_l::unopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class biopr:public expression{
 	public:
@@ -97,72 +97,72 @@ namespace syntax{
     class plus:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class minus:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class multi:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class divide:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class remain:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class equal:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class nequal:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class less:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class greater:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class leeq:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class greq:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class logand:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class logor:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class comma:public biopr{
 	public:
 	    using biopr::biopr;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class biopr_l:public biopr{
 	public:
@@ -172,32 +172,32 @@ namespace syntax{
     class assign:public biopr_l{
 	public:
 	    using biopr_l::biopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class plasgn:public biopr_l{
 	public:
 	    using biopr_l::biopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class miasgn:public biopr_l{
 	public:
 	    using biopr_l::biopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class muasgn:public biopr_l{
 	public:
 	    using biopr_l::biopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class diasgn:public biopr_l{
 	public:
 	    using biopr_l::biopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class rmasgn:public biopr_l{
 	public:
 	    using biopr_l::biopr_l;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class statement:public node{
 	public:
@@ -209,7 +209,7 @@ namespace syntax{
 	    single(const expression*stat);
 	    ~single()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class compound:public statement{
 	public:
@@ -217,7 +217,7 @@ namespace syntax{
 	    compound(decltype(stats)stats);
 	    ~compound()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class define_var:public statement{
 	public:
@@ -225,7 +225,7 @@ namespace syntax{
 	    define_var(decltype(vars)vars);
 	    ~define_var()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class _if_else_:public statement{
 	public:
@@ -234,7 +234,7 @@ namespace syntax{
 	    _if_else_(const single*cond,const statement*st1,const statement*st2);
 	    ~_if_else_()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class _while_:public statement{
 	public:
@@ -243,7 +243,7 @@ namespace syntax{
 	    _while_(const single*cond,const statement*st);
 	    ~_while_()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class _for_:public statement{
 	public:
@@ -252,19 +252,19 @@ namespace syntax{
 	    _for_(const single*init,const single*cond,const single*reinit,const statement*st);
 	    ~_for_()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class _break_:public statement{
 	public:
 	    _break_()=default;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class _continue_:public statement{
 	public:
 	    _continue_()=default;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class _return_:public statement{
 	public:
@@ -272,7 +272,7 @@ namespace syntax{
 	    _return_(const single*val);
 	    ~_return_();
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class function:public node{
 	public:
@@ -282,7 +282,7 @@ namespace syntax{
 	    function(std::string name,decltype(args)args,const compound*com);
 	    ~function()override;
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
     class prog:public node{
 	public:
@@ -290,6 +290,6 @@ namespace syntax{
 	    prog(decltype(funcs)funcs);
 	    ~prog();
 	    void check(semantics::analyzer&analy)const override;
-	    void to_asm(code::variable_manager&vm)const override;
+	    void to_asm(code::cgmanager&cm)const override;
     };
 }

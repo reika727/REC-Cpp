@@ -5,13 +5,13 @@
 #include<map>
 #include<stack>
 namespace code{
-    class variable_manager{
+    class cgmanager{
 	    std::vector<std::map<std::string,int>>offset;
 	    int var_size=0;
 	    std::stack<std::string>break_labels,continue_labels;
 	public:
 	    writer&write;
-	    variable_manager(writer&write);
+	    cgmanager(writer&write);
 	    void enter_scope();
 	    void leave_scope();
 	    void enter_break(const std::string&label);

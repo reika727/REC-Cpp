@@ -2,7 +2,7 @@
 #include"syntax/tree.hpp"
 #include"semantics/analyzer.hpp"
 #include"code/writer.hpp"
-#include"code/variable_manager.hpp"
+#include"code/cgmanager.hpp"
 #include<iostream>
 #include<stdexcept>
 int main(int argc,char**argv)
@@ -19,8 +19,8 @@ int main(int argc,char**argv)
 	    semantics::analyzer analy;
 	    tr.get_root().check(analy);
 	    code::writer wr(dest);
-	    code::variable_manager vm(wr);
-	    tr.get_root().to_asm(vm);
+	    code::cgmanager cm(wr);
+	    tr.get_root().to_asm(cm);
 	}
     }catch(const std::exception&e){
 	std::cout<<e.what()<<std::endl;
