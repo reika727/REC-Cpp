@@ -35,13 +35,13 @@ void cgmanager::set_offset(const std::string&name)
 int cgmanager::get_offset(const std::string&name)
 {
     return (*
-	std::find_if(
-	    offset.rbegin(),
-	    offset.rend(),
-	    [name](const std::map<std::string,int>&mp){
-		return mp.count(name)==1;
-	    }
-	)
+        std::find_if(
+            offset.rbegin(),
+            offset.rend(),
+            [name](const std::map<std::string,int>&mp){
+                return mp.count(name)==1;
+            }
+        )
     )[name];
 }
 int cgmanager::get_var_size()

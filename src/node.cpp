@@ -23,19 +23,19 @@ void fcall::to_asm(code::cgmanager&cm)const
     int align=(16-cm.get_var_size()%16)%16;
     cm.write("sub",align,"%rsp");
     for(int i=vars->size()-1;i>=0;--i){
-	(*vars)[i]->to_asm(cm);
-	switch(i){
-	    case 0 :cm.write("pop","%rdi");break;
-	    case 1 :cm.write("pop","%rsi");break;
-	    case 2 :cm.write("pop","%rdx");break;
-	    case 3 :cm.write("pop","%rcx");break;
-	    case 4 :cm.write("pop","%r8"); break;
-	    case 5 :cm.write("pop","%r9"); break;
-	}
+        (*vars)[i]->to_asm(cm);
+        switch(i){
+            case 0 :cm.write("pop","%rdi");break;
+            case 1 :cm.write("pop","%rsi");break;
+            case 2 :cm.write("pop","%rdx");break;
+            case 3 :cm.write("pop","%rcx");break;
+            case 4 :cm.write("pop","%r8"); break;
+            case 5 :cm.write("pop","%r9"); break;
+        }
     }
     cm.write("call",dynamic_cast<const ident*>(func)->name);
     if(vars->size()>6){
-	cm.write("add",8*(vars->size()-6),"%rsp");
+        cm.write("add",8*(vars->size()-6),"%rsp");
     }
     cm.write("add",align,"%rsp");
     cm.write("push","%rax");
@@ -301,8 +301,8 @@ void rmasgn::to_asm(code::cgmanager&cm)const
 void single::to_asm(code::cgmanager&cm)const
 {
     if(stat){
-	stat->to_asm(cm);
-	cm.write("pop","%rax");
+        stat->to_asm(cm);
+        cm.write("pop","%rax");
     }
 }
 void compound::to_asm(code::cgmanager&cm)const
@@ -314,12 +314,12 @@ void compound::to_asm(code::cgmanager&cm)const
 void define_var::to_asm(code::cgmanager&cm)const
 {
     for(auto v:*vars){
-	cm.write("sub",8,"%rsp");
-	cm.set_offset(v.first);
-	if(v.second){
-	    v.second->to_asm(cm);
-	    cm.write("pop",address("%rsp"));
-	}
+        cm.write("sub",8,"%rsp");
+        cm.set_offset(v.first);
+        if(v.second){
+            v.second->to_asm(cm);
+            cm.write("pop",address("%rsp"));
+        }
     }
 }
 void _if_else_::to_asm(code::cgmanager&cm)const
@@ -395,34 +395,34 @@ void _return_::to_asm(code::cgmanager&cm)const
 void function::to_asm(code::cgmanager&cm)const
 {
     if(com){
-	cm.write(".globl "+name);
-	cm.write(name+':');
-	cm.write("push","%rbp");
-	cm.write("mov","%rsp","%rbp");
-	cm.enter_scope();
-	cm.write("sub",8*args->size(),"%rsp");
-	for(int i=0;i<args->size();++i){
-	    std::string dest=address(i+1-args->size(),"%rsp");
-	    cm.set_offset((*args)[i]);
-	    switch(i){
-		case 0 :cm.write("mov","%rdi",dest);break;
-		case 1 :cm.write("mov","%rsi",dest);break;
-		case 2 :cm.write("mov","%rdx",dest);break;
-		case 3 :cm.write("mov","%rcx",dest);break;
-		case 4 :cm.write("mov","%r8" ,dest);break;
-		case 5 :cm.write("mov","%r9" ,dest);break;
-		default:
-			cm.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
-			cm.write("mov","%rax",dest);
-			break;
-	    }
-	}
-	for(auto s:*(com->stats))s->to_asm(cm);
-	cm.leave_scope();
-	//強制return
-	cm.write("mov","%rbp","%rsp");
-	cm.write("pop","%rbp");
-	cm.write("ret");
+        cm.write(".globl "+name);
+        cm.write(name+':');
+        cm.write("push","%rbp");
+        cm.write("mov","%rsp","%rbp");
+        cm.enter_scope();
+        cm.write("sub",8*args->size(),"%rsp");
+        for(int i=0;i<args->size();++i){
+            std::string dest=address(i+1-args->size(),"%rsp");
+            cm.set_offset((*args)[i]);
+            switch(i){
+                case 0 :cm.write("mov","%rdi",dest);break;
+                case 1 :cm.write("mov","%rsi",dest);break;
+                case 2 :cm.write("mov","%rdx",dest);break;
+                case 3 :cm.write("mov","%rcx",dest);break;
+                case 4 :cm.write("mov","%r8" ,dest);break;
+                case 5 :cm.write("mov","%r9" ,dest);break;
+                default:
+                        cm.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
+                        cm.write("mov","%rax",dest);
+                        break;
+            }
+        }
+        for(auto s:*(com->stats))s->to_asm(cm);
+        cm.leave_scope();
+        //強制return
+        cm.write("mov","%rbp","%rsp");
+        cm.write("pop","%rbp");
+        cm.write("ret");
     }
 }
 void prog::to_asm(code::cgmanager&cm)const
@@ -440,10 +440,10 @@ void ident::check(semantics::analyzer&analy)const
 void fcall::check(semantics::analyzer&analy)const
 {
     if(auto fp=dynamic_cast<const ident*>(func)){
-	if(!analy.is_available_func(fp->name,vars->size()))throw std::runtime_error("未定義の関数です: "+fp->name);
-	for(auto v:*vars)v->check(analy);
+        if(!analy.is_available_func(fp->name,vars->size()))throw std::runtime_error("未定義の関数です: "+fp->name);
+        for(auto v:*vars)v->check(analy);
     }else{
-	throw std::runtime_error("無効な関数呼び出しです");
+        throw std::runtime_error("無効な関数呼び出しです");
     }
 }
 void unopr::check(semantics::analyzer&analy)const
@@ -478,9 +478,9 @@ void compound::check(semantics::analyzer&analy)const
 void define_var::check(semantics::analyzer&analy)const
 {
     for(auto v:*vars){
-	if(!analy.is_definable_var(v.first))throw std::runtime_error("二重定義されました: "+v.first);
-	analy.define_var(v.first);
-	if(v.second)v.second->check(analy);
+        if(!analy.is_definable_var(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+        analy.define_var(v.first);
+        if(v.second)v.second->check(analy);
     }
 }
 void _if_else_::check(semantics::analyzer&analy)const
@@ -518,13 +518,13 @@ void _for_::check(semantics::analyzer&analy)const
 void _break_::check(semantics::analyzer&analy)const
 {
     if(!analy.is_breakable()){
-	throw std::runtime_error("不適切なbreak文です");
+        throw std::runtime_error("不適切なbreak文です");
     }
 }
 void _continue_::check(semantics::analyzer&analy)const
 {
     if(!analy.is_continuable()){
-	throw std::runtime_error("不適切なcontinue文です");
+        throw std::runtime_error("不適切なcontinue文です");
     }
 }
 void _return_::check(semantics::analyzer&analy)const
@@ -536,10 +536,10 @@ void function::check(semantics::analyzer&analy)const
     if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
     analy.define_func(name,args->size());
     if(com){
-	analy.enter_scope();
-	for(auto a:*args)analy.define_var(a);
-	for(auto s:*(com->stats))s->check(analy);
-	analy.leave_scope();
+        analy.enter_scope();
+        for(auto a:*args)analy.define_var(a);
+        for(auto s:*(com->stats))s->check(analy);
+        analy.leave_scope();
     }
 }
 void prog::check(semantics::analyzer&analy)const
