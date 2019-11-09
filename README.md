@@ -1,5 +1,5 @@
-# REC -reka compiler-
-~~C言語のパクリ~~作者オリジナル言語の"reka"をアセンブリ言語に翻訳します。未完成です。
+# REC
+C言語をアセンブリ言語に翻訳します。未完成です。
 
 ## Overview
 大体コンパイラのセオリーに則っていると思います。
@@ -11,7 +11,7 @@
 ## Example
 <details>
   <summary>長いので折り畳み</summary>
-    こんな感じのソースファイルexample.rekaがあるとします。フィボナッチ数列の20項目を計算します。
+    こんな感じのソースファイルexample.cがあるとします。フィボナッチ数列の20項目を計算します。
     <pre>
       <code>
         int print_num(int num);
@@ -30,7 +30,7 @@
         }
       </code>
     </pre>
-    この1行目にあるのはprint_numのプロトタイプ宣言です。rekaには入出力の機能が未実装なので、そこはC言語で書いて後でリンクします。<br />
+    この1行目にあるのはprint_numのプロトタイプ宣言です(後でC言語で書いてリンクします)。<br />
     このファイルをfunc.cとします。
     <pre>
       <code>
@@ -43,11 +43,11 @@
       </code>
     </pre>
     これをこうします(rec.outはソースを適当にコンパイルしてすでに作成済みであるとします)。<br />
-    example.rekaを入力として受け取り、アセンブリに翻訳したものをexample.sに出力します。<br />
+    example.cを入力として受け取り、アセンブリに翻訳したものをexample.sに出力します。<br />
     それをexample.outという実行ファイルにするのですが、結局実行ファイルの生成でgccに頼っているため、このソフトウェアの存在意義は謎です。
     <pre>
       <code>
-        $ ./rec.out example.reka example.s
+        $ ./rec.out example.c example.s
         $ gcc -o example.out example.s func.c
         $ ./example.out
         6765
@@ -56,7 +56,7 @@
     計算できてました。
 </details>
 
-## rekaの機能
+## RECの機能
 <details>
   <summary>こっちも長いので折り畳み</summary>
   ✅は実装済み、🔵はそのうち実装予定。
