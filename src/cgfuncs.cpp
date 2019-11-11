@@ -4,7 +4,7 @@ namespace code{
     std::string unique_label(const std::string&base,unsigned int serial)
     {
         return base+std::to_string(serial++);
-    } 
+    }
     std::string address(int dis,const std::string&base,const std::string&ofs,int scl)
     {
         std::stringstream ss;

@@ -4,8 +4,8 @@
 #include<set>
 #include<map>
 #include<utility>
-namespace semantics{        
-    /* 
+namespace semantics{
+    /*
      * 検出すべき意味論的誤り
      * 右辺値への代入
      * 未定義変数/関数の使用
