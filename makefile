@@ -7,6 +7,7 @@ OBJS  =$(addprefix $(OBJDIR)/,$(notdir $(SRCS:.cpp=.o)))
 DEPS  =$(addprefix $(DEPDIR)/,$(notdir $(SRCS:.cpp=.d)))
 TARGET=$(TRGDIR)/rec.out
 
+.PHONY: all
 all: $(TARGET)
 
 -include $(DEPS)
@@ -20,7 +21,6 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(DEPDIR)
 	$(CXX) $< -c -MMD -MP -o $@ -MF $(DEPDIR)/$(notdir $*).d
 
+.PHONY: clean
 clean:
 	rm -rf $(OBJDIR) $(DEPDIR) $(TRGDIR)
-
-.PHONY: all clean
