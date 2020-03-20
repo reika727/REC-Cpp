@@ -9,7 +9,7 @@ namespace code{
             std::vector<std::map<std::string,int>>offset;
             int var_size=0;
             std::stack<std::string>break_labels,continue_labels;
-            std::ofstream ofs;
+            std::ofstream dst;
         public:
             generator(const std::string&dst);
             void enter_scope();

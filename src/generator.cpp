@@ -59,7 +59,7 @@ const std::string&generator::get_continue_label()
 }
 void generator::write(const std::string&str)
 {
-    ofs<<str<<std::endl;
+    dst<<str<<std::endl;
 }
 void generator::write(const std::string&inst,const std::string&reg1,const std::string&reg2)
 {
@@ -105,7 +105,7 @@ std::string generator::address(const std::string&base,int scl)
 {
     return generator::address(0,base,"",scl);
 }
-generator::generator(const std::string&dst):ofs(dst)
+generator::generator(const std::string&dst):dst(dst)
 {
 
 }
