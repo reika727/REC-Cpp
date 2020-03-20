@@ -1,427 +1,427 @@
 #include"syntax/node.hpp"
-#include"code/cgmanager.hpp"
+#include"code/generator.hpp"
 #include<stdexcept>
 #include<typeinfo>
 using namespace syntax;
-void numeric::to_asm(code::cgmanager&cm)const
+void numeric::to_asm(code::generator&cg)const
 {
-    cm.write("push",value);
+    cg.write("push",value);
 }
-void ident::to_asm(code::cgmanager&cm)const
+void ident::to_asm(code::generator&cg)const
 {
-    cm.write("push",code::cgmanager::address(-cm.get_offset(name),"%rbp"));
+    cg.write("push",code::generator::address(-cg.get_offset(name),"%rbp"));
 }
-void ident::refer(code::cgmanager&cm)const
+void ident::refer(code::generator&cg)const
 {
-    cm.write("lea",code::cgmanager::address(-cm.get_offset(name),"%rbp"),"%rax");
-    cm.write("push","%rax");
+    cg.write("lea",code::generator::address(-cg.get_offset(name),"%rbp"),"%rax");
+    cg.write("push","%rax");
 }
-void fcall::to_asm(code::cgmanager&cm)const
+void fcall::to_asm(code::generator&cg)const
 {
-    int align=(16-cm.get_var_size()%16)%16;
-    cm.write("sub",align,"%rsp");
+    int align=(16-cg.get_var_size()%16)%16;
+    cg.write("sub",align,"%rsp");
     for(int i=vars->size()-1;i>=0;--i){
-        (*vars)[i]->to_asm(cm);
+        (*vars)[i]->to_asm(cg);
         switch(i){
-            case 0 :cm.write("pop","%rdi");break;
-            case 1 :cm.write("pop","%rsi");break;
-            case 2 :cm.write("pop","%rdx");break;
-            case 3 :cm.write("pop","%rcx");break;
-            case 4 :cm.write("pop","%r8"); break;
-            case 5 :cm.write("pop","%r9"); break;
+            case 0 :cg.write("pop","%rdi");break;
+            case 1 :cg.write("pop","%rsi");break;
+            case 2 :cg.write("pop","%rdx");break;
+            case 3 :cg.write("pop","%rcx");break;
+            case 4 :cg.write("pop","%r8"); break;
+            case 5 :cg.write("pop","%r9"); break;
         }
     }
-    cm.write("call",dynamic_cast<const ident*>(func)->name);
+    cg.write("call",dynamic_cast<const ident*>(func)->name);
     if(vars->size()>6){
-        cm.write("add",8*(vars->size()-6),"%rsp");
+        cg.write("add",8*(vars->size()-6),"%rsp");
     }
-    cm.write("add",align,"%rsp");
-    cm.write("push","%rax");
+    cg.write("add",align,"%rsp");
+    cg.write("push","%rax");
 }
-void uplus::to_asm(code::cgmanager&cm)const
+void uplus::to_asm(code::generator&cg)const
 {
-    arg->to_asm(cm);
+    arg->to_asm(cg);
 }
-void uminus::to_asm(code::cgmanager&cm)const
+void uminus::to_asm(code::generator&cg)const
 {
-    arg->to_asm(cm);
-    cm.write("pop","%rax");
-    cm.write("mov","%rax","%rdi");
-    cm.write("mov",2,"%rsi");cm.write("mul","%rsi");
-    cm.write("sub","%rax","%rdi");
-    cm.write("push","%rdi");
+    arg->to_asm(cg);
+    cg.write("pop","%rax");
+    cg.write("mov","%rax","%rdi");
+    cg.write("mov",2,"%rsi");cg.write("mul","%rsi");
+    cg.write("sub","%rax","%rdi");
+    cg.write("push","%rdi");
 }
-void lognot::to_asm(code::cgmanager&cm)const
+void lognot::to_asm(code::generator&cg)const
 {
-    arg->to_asm(cm);
-    cm.write("pop","%rax");
-    cm.write("cmp",0,"%rax");
-    cm.write("sete","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    arg->to_asm(cg);
+    cg.write("pop","%rax");
+    cg.write("cmp",0,"%rax");
+    cg.write("sete","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void preinc::to_asm(code::cgmanager&cm)const
+void preinc::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cm);
-    cm.write("pop","%rax");
-    cm.write("add",1,code::cgmanager::address("%rax"));
-    cm.write("push",code::cgmanager::address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(cg);
+    cg.write("pop","%rax");
+    cg.write("add",1,code::generator::address("%rax"));
+    cg.write("push",code::generator::address("%rax"));
 }
-void predec::to_asm(code::cgmanager&cm)const
+void predec::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cm);
-    cm.write("pop","%rax");
-    cm.write("sub",1,code::cgmanager::address("%rax"));
-    cm.write("push",code::cgmanager::address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(cg);
+    cg.write("pop","%rax");
+    cg.write("sub",1,code::generator::address("%rax"));
+    cg.write("push",code::generator::address("%rax"));
 }
-void postinc::to_asm(code::cgmanager&cm)const
+void postinc::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cm);
-    cm.write("pop","%rax");
-    cm.write("push",code::cgmanager::address("%rax"));
-    cm.write("add",1,code::cgmanager::address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(cg);
+    cg.write("pop","%rax");
+    cg.write("push",code::generator::address("%rax"));
+    cg.write("add",1,code::generator::address("%rax"));
 }
-void postdec::to_asm(code::cgmanager&cm)const
+void postdec::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cm);
-    cm.write("pop","%rax");
-    cm.write("push",code::cgmanager::address("%rax"));
-    cm.write("sub",1,code::cgmanager::address("%rax"));
+    dynamic_cast<const ident*>(arg)->refer(cg);
+    cg.write("pop","%rax");
+    cg.write("push",code::generator::address("%rax"));
+    cg.write("sub",1,code::generator::address("%rax"));
 }
-void plus::to_asm(code::cgmanager&cm)const
+void plus::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("add","%rdi","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("add","%rdi","%rax");
+    cg.write("push","%rax");
 }
-void minus::to_asm(code::cgmanager&cm)const
+void minus::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("sub","%rdi","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("sub","%rdi","%rax");
+    cg.write("push","%rax");
 }
-void multi::to_asm(code::cgmanager&cm)const
+void multi::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("mul","%rdi");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("mul","%rdi");
+    cg.write("push","%rax");
 }
-void divide::to_asm(code::cgmanager&cm)const
+void divide::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("mov",0,"%rdx");
-    cm.write("div","%rdi");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("mov",0,"%rdx");
+    cg.write("div","%rdi");
+    cg.write("push","%rax");
 }
-void remain::to_asm(code::cgmanager&cm)const
+void remain::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("mov",0,"%rdx");
-    cm.write("div","%rdi");
-    cm.write("push","%rdx");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("mov",0,"%rdx");
+    cg.write("div","%rdi");
+    cg.write("push","%rdx");
 }
-void equal::to_asm(code::cgmanager&cm)const
+void equal::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("cmp","%rdi","%rax");
-    cm.write("sete","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("cmp","%rdi","%rax");
+    cg.write("sete","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void nequal::to_asm(code::cgmanager&cm)const
+void nequal::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("cmp","%rdi","%rax");
-    cm.write("setne","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("cmp","%rdi","%rax");
+    cg.write("setne","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void less::to_asm(code::cgmanager&cm)const
+void less::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("cmp","%rdi","%rax");
-    cm.write("setl","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("cmp","%rdi","%rax");
+    cg.write("setl","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void greater::to_asm(code::cgmanager&cm)const
+void greater::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("cmp","%rdi","%rax");
-    cm.write("setg","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("cmp","%rdi","%rax");
+    cg.write("setg","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void leeq::to_asm(code::cgmanager&cm)const
+void leeq::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("cmp","%rdi","%rax");
-    cm.write("setle","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("cmp","%rdi","%rax");
+    cg.write("setle","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void greq::to_asm(code::cgmanager&cm)const
+void greq::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("cmp","%rdi","%rax");
-    cm.write("setge","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("cmp","%rdi","%rax");
+    cg.write("setge","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void logand::to_asm(code::cgmanager&cm)const
+void logand::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("and","%rdi","%rax");
-    cm.write("cmp",0,"%rax");
-    cm.write("setne","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("and","%rdi","%rax");
+    cg.write("cmp",0,"%rax");
+    cg.write("setne","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void logor::to_asm(code::cgmanager&cm)const
+void logor::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("or","%rdi","%rax");
-    cm.write("cmp",0,"%rax");
-    cm.write("setne","%al");
-    cm.write("movzb","%al","%rax");
-    cm.write("push","%rax");
+    larg->to_asm(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("or","%rdi","%rax");
+    cg.write("cmp",0,"%rax");
+    cg.write("setne","%al");
+    cg.write("movzb","%al","%rax");
+    cg.write("push","%rax");
 }
-void comma::to_asm(code::cgmanager&cm)const
+void comma::to_asm(code::generator&cg)const
 {
-    larg->to_asm(cm);
-    cm.write("add",8,"%rsp");
-    rarg->to_asm(cm);
+    larg->to_asm(cg);
+    cg.write("add",8,"%rsp");
+    rarg->to_asm(cg);
 }
-void assign::to_asm(code::cgmanager&cm)const
+void assign::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("mov","%rdi",code::cgmanager::address("%rax"));
-    cm.write("push",code::cgmanager::address("%rax"));
+    dynamic_cast<const ident*>(larg)->refer(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("mov","%rdi",code::generator::address("%rax"));
+    cg.write("push",code::generator::address("%rax"));
 }
-void plasgn::to_asm(code::cgmanager&cm)const
+void plasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("add","%rdi",code::cgmanager::address("%rax"));
-    cm.write("push",code::cgmanager::address("%rax"));
+    dynamic_cast<const ident*>(larg)->refer(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("add","%rdi",code::generator::address("%rax"));
+    cg.write("push",code::generator::address("%rax"));
 }
-void miasgn::to_asm(code::cgmanager&cm)const
+void miasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("sub","%rdi",code::cgmanager::address("%rax"));
-    cm.write("push",code::cgmanager::address("%rax"));
+    dynamic_cast<const ident*>(larg)->refer(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("sub","%rdi",code::generator::address("%rax"));
+    cg.write("push",code::generator::address("%rax"));
 }
-void muasgn::to_asm(code::cgmanager&cm)const
+void muasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("mov","%rax","%rsi");
-    cm.write("mov",code::cgmanager::address("%rax"),"%rax");
-    cm.write("mul","%rdi");
-    cm.write("mov","%rax",code::cgmanager::address("%rsi"));
-    cm.write("push","%rax");
+    dynamic_cast<const ident*>(larg)->refer(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("mov","%rax","%rsi");
+    cg.write("mov",code::generator::address("%rax"),"%rax");
+    cg.write("mul","%rdi");
+    cg.write("mov","%rax",code::generator::address("%rsi"));
+    cg.write("push","%rax");
 }
-void diasgn::to_asm(code::cgmanager&cm)const
+void diasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("mov","%rax","%rsi");
-    cm.write("mov",code::cgmanager::address("%rax"),"%rax");
-    cm.write("mov",0,"%rdx");
-    cm.write("div","%rdi");
-    cm.write("mov","%rax",code::cgmanager::address("%rsi"));
-    cm.write("push","%rax");
+    dynamic_cast<const ident*>(larg)->refer(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("mov","%rax","%rsi");
+    cg.write("mov",code::generator::address("%rax"),"%rax");
+    cg.write("mov",0,"%rdx");
+    cg.write("div","%rdi");
+    cg.write("mov","%rax",code::generator::address("%rsi"));
+    cg.write("push","%rax");
 }
-void rmasgn::to_asm(code::cgmanager&cm)const
+void rmasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cm);
-    rarg->to_asm(cm);
-    cm.write("pop","%rdi");
-    cm.write("pop","%rax");
-    cm.write("mov","%rax","%rsi");
-    cm.write("mov",code::cgmanager::address("%rax"),"%rax");
-    cm.write("mov",0,"%rdx");
-    cm.write("div","%rdi");
-    cm.write("mov","%rdx",code::cgmanager::address("%rsi"));
-    cm.write("push","%rdx");
+    dynamic_cast<const ident*>(larg)->refer(cg);
+    rarg->to_asm(cg);
+    cg.write("pop","%rdi");
+    cg.write("pop","%rax");
+    cg.write("mov","%rax","%rsi");
+    cg.write("mov",code::generator::address("%rax"),"%rax");
+    cg.write("mov",0,"%rdx");
+    cg.write("div","%rdi");
+    cg.write("mov","%rdx",code::generator::address("%rsi"));
+    cg.write("push","%rdx");
 }
-void single::to_asm(code::cgmanager&cm)const
+void single::to_asm(code::generator&cg)const
 {
     if(stat){
-        stat->to_asm(cm);
-        cm.write("pop","%rax");
+        stat->to_asm(cg);
+        cg.write("pop","%rax");
     }
 }
-void compound::to_asm(code::cgmanager&cm)const
+void compound::to_asm(code::generator&cg)const
 {
-    cm.enter_scope();
-    for(auto s:*stats)s->to_asm(cm);
-    cm.leave_scope();
+    cg.enter_scope();
+    for(auto s:*stats)s->to_asm(cg);
+    cg.leave_scope();
 }
-void define_var::to_asm(code::cgmanager&cm)const
+void define_var::to_asm(code::generator&cg)const
 {
     for(auto v:*vars){
-        cm.write("sub",8,"%rsp");
-        cm.set_offset(v.first);
+        cg.write("sub",8,"%rsp");
+        cg.set_offset(v.first);
         if(v.second){
-            v.second->to_asm(cm);
-            cm.write("pop",code::cgmanager::address("%rsp"));
+            v.second->to_asm(cg);
+            cg.write("pop",code::generator::address("%rsp"));
         }
     }
 }
-void _if_else_::to_asm(code::cgmanager&cm)const
+void _if_else_::to_asm(code::generator&cg)const
 {
-    std::string lelse=code::cgmanager::unique_label(".Lieelse");
-    std::string lend=code::cgmanager::unique_label(".Lieend");
-    cm.enter_scope();
-    cond->to_asm(cm);
-    cm.write("cmp",0,"%rax");
-    cm.write("je",lelse);
-    st1->to_asm(cm);
-    cm.write("jmp",lend);
-    cm.write(lelse+':');
-    st2->to_asm(cm);
-    cm.write(lend+':');
-    cm.leave_scope();
+    std::string lelse=code::generator::unique_label(".Lieelse");
+    std::string lend=code::generator::unique_label(".Lieend");
+    cg.enter_scope();
+    cond->to_asm(cg);
+    cg.write("cmp",0,"%rax");
+    cg.write("je",lelse);
+    st1->to_asm(cg);
+    cg.write("jmp",lend);
+    cg.write(lelse+':');
+    st2->to_asm(cg);
+    cg.write(lend+':');
+    cg.leave_scope();
 }
-void _while_::to_asm(code::cgmanager&cm)const
+void _while_::to_asm(code::generator&cg)const
 {
-    std::string lbegin=code::cgmanager::unique_label(".Lwbegin");
-    std::string lend=code::cgmanager::unique_label(".Lwend");
-    cm.enter_scope();
-    cm.enter_break(lend);
-    cm.enter_continue(lbegin);
-    cm.write(lbegin+':');
-    cond->to_asm(cm);
-    cm.write("cmp",0,"%rax");
-    cm.write("je",lend);
-    st->to_asm(cm);
-    cm.write("jmp",lbegin);
-    cm.write(lend+':');
-    cm.leave_continue();
-    cm.leave_break();
-    cm.leave_scope();
+    std::string lbegin=code::generator::unique_label(".Lwbegin");
+    std::string lend=code::generator::unique_label(".Lwend");
+    cg.enter_scope();
+    cg.enter_break(lend);
+    cg.enter_continue(lbegin);
+    cg.write(lbegin+':');
+    cond->to_asm(cg);
+    cg.write("cmp",0,"%rax");
+    cg.write("je",lend);
+    st->to_asm(cg);
+    cg.write("jmp",lbegin);
+    cg.write(lend+':');
+    cg.leave_continue();
+    cg.leave_break();
+    cg.leave_scope();
 }
-void _for_::to_asm(code::cgmanager&cm)const
+void _for_::to_asm(code::generator&cg)const
 {
-    std::string lbegin=code::cgmanager::unique_label(".Lfbegin");
-    std::string lreini=code::cgmanager::unique_label(".Lfreini");
-    std::string lend=code::cgmanager::unique_label(".Lfend");
-    cm.enter_scope();
-    cm.enter_break(lend);
-    cm.enter_continue(lreini);
-    init->to_asm(cm);
-    cm.write(lbegin+':');
-    cm.write("mov",1,"%rax");
-    cond->to_asm(cm);
-    cm.write("cmp",0,"%rax");
-    cm.write("je",lend);
-    st->to_asm(cm);
-    cm.write(lreini+':');
-    reinit->to_asm(cm);
-    cm.write("jmp",lbegin);
-    cm.write(lend+':');
-    cm.leave_continue();
-    cm.leave_break();
-    cm.leave_scope();
+    std::string lbegin=code::generator::unique_label(".Lfbegin");
+    std::string lreini=code::generator::unique_label(".Lfreini");
+    std::string lend=code::generator::unique_label(".Lfend");
+    cg.enter_scope();
+    cg.enter_break(lend);
+    cg.enter_continue(lreini);
+    init->to_asm(cg);
+    cg.write(lbegin+':');
+    cg.write("mov",1,"%rax");
+    cond->to_asm(cg);
+    cg.write("cmp",0,"%rax");
+    cg.write("je",lend);
+    st->to_asm(cg);
+    cg.write(lreini+':');
+    reinit->to_asm(cg);
+    cg.write("jmp",lbegin);
+    cg.write(lend+':');
+    cg.leave_continue();
+    cg.leave_break();
+    cg.leave_scope();
 }
-void _break_::to_asm(code::cgmanager&cm)const
+void _break_::to_asm(code::generator&cg)const
 {
-    cm.write("jmp",cm.get_break_label());
+    cg.write("jmp",cg.get_break_label());
 }
-void _continue_::to_asm(code::cgmanager&cm)const
+void _continue_::to_asm(code::generator&cg)const
 {
-    cm.write("jmp",cm.get_continue_label());
+    cg.write("jmp",cg.get_continue_label());
 }
-void _return_::to_asm(code::cgmanager&cm)const
+void _return_::to_asm(code::generator&cg)const
 {
-    val->to_asm(cm);
-    cm.write("mov","%rbp","%rsp");
-    cm.write("pop","%rbp");
-    cm.write("ret");
+    val->to_asm(cg);
+    cg.write("mov","%rbp","%rsp");
+    cg.write("pop","%rbp");
+    cg.write("ret");
 }
-void function::to_asm(code::cgmanager&cm)const
+void function::to_asm(code::generator&cg)const
 {
     if(com){
-        cm.write(".globl "+name);
-        cm.write(name+':');
-        cm.write("push","%rbp");
-        cm.write("mov","%rsp","%rbp");
-        cm.enter_scope();
-        cm.write("sub",8*args->size(),"%rsp");
+        cg.write(".globl "+name);
+        cg.write(name+':');
+        cg.write("push","%rbp");
+        cg.write("mov","%rsp","%rbp");
+        cg.enter_scope();
+        cg.write("sub",8*args->size(),"%rsp");
         for(int i=0;i<args->size();++i){
-            std::string dest=code::cgmanager::address(i+1-args->size(),"%rsp");
-            cm.set_offset((*args)[i]);
+            std::string dest=code::generator::address(i+1-args->size(),"%rsp");
+            cg.set_offset((*args)[i]);
             switch(i){
-                case 0 :cm.write("mov","%rdi",dest);break;
-                case 1 :cm.write("mov","%rsi",dest);break;
-                case 2 :cm.write("mov","%rdx",dest);break;
-                case 3 :cm.write("mov","%rcx",dest);break;
-                case 4 :cm.write("mov","%r8" ,dest);break;
-                case 5 :cm.write("mov","%r9" ,dest);break;
+                case 0 :cg.write("mov","%rdi",dest);break;
+                case 1 :cg.write("mov","%rsi",dest);break;
+                case 2 :cg.write("mov","%rdx",dest);break;
+                case 3 :cg.write("mov","%rcx",dest);break;
+                case 4 :cg.write("mov","%r8" ,dest);break;
+                case 5 :cg.write("mov","%r9" ,dest);break;
                 default:
-                        cm.write("mov",code::cgmanager::address(8*(i-6)+16,"%rbp"),"%rax");
-                        cm.write("mov","%rax",dest);
+                        cg.write("mov",code::generator::address(8*(i-6)+16,"%rbp"),"%rax");
+                        cg.write("mov","%rax",dest);
                         break;
             }
         }
-        for(auto s:*(com->stats))s->to_asm(cm);
-        cm.leave_scope();
+        for(auto s:*(com->stats))s->to_asm(cg);
+        cg.leave_scope();
         //強制return
-        cm.write("mov","%rbp","%rsp");
-        cm.write("pop","%rbp");
-        cm.write("ret");
+        cg.write("mov","%rbp","%rsp");
+        cg.write("pop","%rbp");
+        cg.write("ret");
     }
 }
 void numeric::check(semantics::analyzer&analy)const

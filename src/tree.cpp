@@ -1,6 +1,6 @@
 #include"syntax/tree.hpp"
 #include"semantics/analyzer.hpp"
-#include"code/cgmanager.hpp"
+#include"code/generator.hpp"
 #include<stdexcept>
 using namespace syntax;
 using TK=lexicon::TK;
@@ -214,8 +214,8 @@ void tree::check()const
 }
 void tree::to_asm(const std::string&dst)const
 {
-    code::cgmanager cm(dst);
-    for(auto f:funcs)f->to_asm(cm);
+    code::generator cg(dst);
+    for(auto f:funcs)f->to_asm(cg);
 }
 tree::~tree()
 {

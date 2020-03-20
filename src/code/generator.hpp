@@ -1,17 +1,17 @@
 #pragma once
-#include"writer.hpp"
 #include<string>
 #include<vector>
 #include<map>
 #include<stack>
+#include<fstream>
 namespace code{
-    class cgmanager{
+    class generator{
             std::vector<std::map<std::string,int>>offset;
             int var_size=0;
             std::stack<std::string>break_labels,continue_labels;
+            std::ofstream ofs;
         public:
-            writer write;
-            cgmanager(const std::string&dst);
+            generator(const std::string&dst);
             void enter_scope();
             void leave_scope();
             void enter_break(const std::string&label);
@@ -23,6 +23,11 @@ namespace code{
             int get_var_size();
             const std::string&get_break_label();
             const std::string&get_continue_label();
+            void write(const std::string&str);
+            void write(const std::string&inst,const std::string&reg1,const std::string&reg2);
+            void write(const std::string&inst,int arg,const std::string&reg);
+            void write(const std::string&inst,const std::string&reg);
+            void write(const std::string&inst,int arg);
             static std::string unique_label(const std::string&base);
             static std::string address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
             static std::string address(int dis,const std::string&base,int scl);
