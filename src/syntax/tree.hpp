@@ -5,7 +5,7 @@
 namespace syntax{
     class tree{
             lexicon::token_array ta;
-            prog*root;
+            std::vector<const function*>funcs;
         private:
             const function*func();
             const statement*stat();
@@ -23,7 +23,8 @@ namespace syntax{
             const expression*order00();
         public:
             tree(const std::string&src);
+            void check()const;
+            void to_asm(const std::string&dst)const;
             ~tree();
-            const prog&get_root();
     };
 }

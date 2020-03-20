@@ -1,4 +1,6 @@
 #include"syntax/tree.hpp"
+#include"semantics/analyzer.hpp"
+#include"code/cgmanager.hpp"
 #include<stdexcept>
 using namespace syntax;
 using TK=lexicon::TK;
@@ -201,19 +203,21 @@ const expression*tree::order00() // literal, identifier, enclosed expression
         throw std::runtime_error("構文解析ができませんでした");
     }
 }
-const prog&tree::get_root()
-{
-    return *root;
-}
 tree::tree(const std::string&src):ta(src)
 {
-    auto fv=new std::vector<const function*>;
-    while(!ta.is_all_read()){
-        fv->push_back(func());
-    }
-    root=new prog(fv);
+    while(!ta.is_all_read())funcs.push_back(func());
+}
+void tree::check()const
+{
+    semantics::analyzer analy;
+    for(auto f:funcs)f->check(analy);
+}
+void tree::to_asm(const std::string&dst)const
+{
+    code::cgmanager cm(dst);
+    for(auto f:funcs)f->to_asm(cm);
 }
 tree::~tree()
 {
-    delete root;
+    for(auto f:funcs)delete f;
 }

@@ -425,10 +425,6 @@ void function::to_asm(code::cgmanager&cm)const
         cm.write("ret");
     }
 }
-void prog::to_asm(code::cgmanager&cm)const
-{
-    for(auto f:*funcs)f->to_asm(cm);
-}
 void numeric::check(semantics::analyzer&analy)const
 {
     return;
@@ -542,10 +538,6 @@ void function::check(semantics::analyzer&analy)const
         analy.leave_scope();
     }
 }
-void prog::check(semantics::analyzer&analy)const
-{
-    for(auto f:*funcs)f->check(analy);
-}
 numeric::numeric(int value):value(value)
 {
 
@@ -595,10 +587,6 @@ _return_::_return_(const single*val):val(val)
 
 }
 function::function(std::string name,const std::vector<std::string>*args,const compound*com):name(name),args(args),com(com)
-{
-
-}
-prog::prog(const std::vector<const function*>*funcs):funcs(funcs)
 {
 
 }
@@ -657,9 +645,4 @@ function::~function()
 {
     delete args;
     delete com;
-}
-prog::~prog()
-{
-    for(auto f:*funcs)delete f;
-    delete funcs;
 }

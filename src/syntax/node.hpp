@@ -282,12 +282,4 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::cgmanager&cm)const override;
     };
-    class prog:public node{
-        public:
-            const std::vector<const function*>*const funcs;
-            prog(decltype(funcs)funcs);
-            ~prog();
-            void check(semantics::analyzer&analy)const override;
-            void to_asm(code::cgmanager&cm)const override;
-    };
 }
