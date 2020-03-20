@@ -10,8 +10,8 @@ namespace code{
             int var_size=0;
             std::stack<std::string>break_labels,continue_labels;
         public:
-            writer&write;
-            cgmanager(writer&write);
+            writer write;
+            cgmanager(const std::string&dst);
             void enter_scope();
             void leave_scope();
             void enter_break(const std::string&label);

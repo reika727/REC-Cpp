@@ -56,7 +56,7 @@ const std::string&cgmanager::get_continue_label()
 {
     return continue_labels.top();
 }
-cgmanager::cgmanager(writer&write):write(write)
+cgmanager::cgmanager(const std::string&dst):write(dst)
 {
 
 }

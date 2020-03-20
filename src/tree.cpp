@@ -205,7 +205,7 @@ const prog&tree::get_root()
 {
     return *root;
 }
-tree::tree(lexicon::token_array&ta):ta(ta)
+tree::tree(const std::string&src):ta(src)
 {
     auto fv=new std::vector<const function*>;
     while(!ta.is_all_read()){

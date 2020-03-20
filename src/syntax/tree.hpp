@@ -1,9 +1,10 @@
 #pragma once
 #include"node.hpp"
 #include"../lexicon/token_array.hpp"
+#include<string>
 namespace syntax{
     class tree{
-            lexicon::token_array&ta;
+            lexicon::token_array ta;
             prog*root;
         private:
             const function*func();
@@ -21,7 +22,7 @@ namespace syntax{
             const expression*order01();
             const expression*order00();
         public:
-            tree(lexicon::token_array&ta);
+            tree(const std::string&src);
             ~tree();
             const prog&get_root();
     };
