@@ -23,5 +23,10 @@ namespace code{
             int get_var_size();
             const std::string&get_break_label();
             const std::string&get_continue_label();
+            static std::string unique_label(const std::string&base);
+            static std::string address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
+            static std::string address(int dis,const std::string&base,int scl);
+            static std::string address(const std::string&base,const std::string&ofs,int scl=1);
+            static std::string address(const std::string&base,int scl=1);
     };
 }

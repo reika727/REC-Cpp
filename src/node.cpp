@@ -1,21 +1,19 @@
 #include"syntax/node.hpp"
-#include"code/cgfuncs.hpp"
+#include"code/cgmanager.hpp"
 #include<stdexcept>
 #include<typeinfo>
 using namespace syntax;
-using code::address;
-using code::unique_label;
 void numeric::to_asm(code::cgmanager&cm)const
 {
     cm.write("push",value);
 }
 void ident::to_asm(code::cgmanager&cm)const
 {
-    cm.write("push",address(-cm.get_offset(name),"%rbp"));
+    cm.write("push",code::cgmanager::address(-cm.get_offset(name),"%rbp"));
 }
 void ident::refer(code::cgmanager&cm)const
 {
-    cm.write("lea",address(-cm.get_offset(name),"%rbp"),"%rax");
+    cm.write("lea",code::cgmanager::address(-cm.get_offset(name),"%rbp"),"%rax");
     cm.write("push","%rax");
 }
 void fcall::to_asm(code::cgmanager&cm)const
@@ -66,29 +64,29 @@ void preinc::to_asm(code::cgmanager&cm)const
 {
     dynamic_cast<const ident*>(arg)->refer(cm);
     cm.write("pop","%rax");
-    cm.write("add",1,address("%rax"));
-    cm.write("push",address("%rax"));
+    cm.write("add",1,code::cgmanager::address("%rax"));
+    cm.write("push",code::cgmanager::address("%rax"));
 }
 void predec::to_asm(code::cgmanager&cm)const
 {
     dynamic_cast<const ident*>(arg)->refer(cm);
     cm.write("pop","%rax");
-    cm.write("sub",1,address("%rax"));
-    cm.write("push",address("%rax"));
+    cm.write("sub",1,code::cgmanager::address("%rax"));
+    cm.write("push",code::cgmanager::address("%rax"));
 }
 void postinc::to_asm(code::cgmanager&cm)const
 {
     dynamic_cast<const ident*>(arg)->refer(cm);
     cm.write("pop","%rax");
-    cm.write("push",address("%rax"));
-    cm.write("add",1,address("%rax"));
+    cm.write("push",code::cgmanager::address("%rax"));
+    cm.write("add",1,code::cgmanager::address("%rax"));
 }
 void postdec::to_asm(code::cgmanager&cm)const
 {
     dynamic_cast<const ident*>(arg)->refer(cm);
     cm.write("pop","%rax");
-    cm.write("push",address("%rax"));
-    cm.write("sub",1,address("%rax"));
+    cm.write("push",code::cgmanager::address("%rax"));
+    cm.write("sub",1,code::cgmanager::address("%rax"));
 }
 void plus::to_asm(code::cgmanager&cm)const
 {
@@ -239,8 +237,8 @@ void assign::to_asm(code::cgmanager&cm)const
     rarg->to_asm(cm);
     cm.write("pop","%rdi");
     cm.write("pop","%rax");
-    cm.write("mov","%rdi",address("%rax"));
-    cm.write("push",address("%rax"));
+    cm.write("mov","%rdi",code::cgmanager::address("%rax"));
+    cm.write("push",code::cgmanager::address("%rax"));
 }
 void plasgn::to_asm(code::cgmanager&cm)const
 {
@@ -248,8 +246,8 @@ void plasgn::to_asm(code::cgmanager&cm)const
     rarg->to_asm(cm);
     cm.write("pop","%rdi");
     cm.write("pop","%rax");
-    cm.write("add","%rdi",address("%rax"));
-    cm.write("push",address("%rax"));
+    cm.write("add","%rdi",code::cgmanager::address("%rax"));
+    cm.write("push",code::cgmanager::address("%rax"));
 }
 void miasgn::to_asm(code::cgmanager&cm)const
 {
@@ -257,8 +255,8 @@ void miasgn::to_asm(code::cgmanager&cm)const
     rarg->to_asm(cm);
     cm.write("pop","%rdi");
     cm.write("pop","%rax");
-    cm.write("sub","%rdi",address("%rax"));
-    cm.write("push",address("%rax"));
+    cm.write("sub","%rdi",code::cgmanager::address("%rax"));
+    cm.write("push",code::cgmanager::address("%rax"));
 }
 void muasgn::to_asm(code::cgmanager&cm)const
 {
@@ -267,9 +265,9 @@ void muasgn::to_asm(code::cgmanager&cm)const
     cm.write("pop","%rdi");
     cm.write("pop","%rax");
     cm.write("mov","%rax","%rsi");
-    cm.write("mov",address("%rax"),"%rax");
+    cm.write("mov",code::cgmanager::address("%rax"),"%rax");
     cm.write("mul","%rdi");
-    cm.write("mov","%rax",address("%rsi"));
+    cm.write("mov","%rax",code::cgmanager::address("%rsi"));
     cm.write("push","%rax");
 }
 void diasgn::to_asm(code::cgmanager&cm)const
@@ -279,10 +277,10 @@ void diasgn::to_asm(code::cgmanager&cm)const
     cm.write("pop","%rdi");
     cm.write("pop","%rax");
     cm.write("mov","%rax","%rsi");
-    cm.write("mov",address("%rax"),"%rax");
+    cm.write("mov",code::cgmanager::address("%rax"),"%rax");
     cm.write("mov",0,"%rdx");
     cm.write("div","%rdi");
-    cm.write("mov","%rax",address("%rsi"));
+    cm.write("mov","%rax",code::cgmanager::address("%rsi"));
     cm.write("push","%rax");
 }
 void rmasgn::to_asm(code::cgmanager&cm)const
@@ -292,10 +290,10 @@ void rmasgn::to_asm(code::cgmanager&cm)const
     cm.write("pop","%rdi");
     cm.write("pop","%rax");
     cm.write("mov","%rax","%rsi");
-    cm.write("mov",address("%rax"),"%rax");
+    cm.write("mov",code::cgmanager::address("%rax"),"%rax");
     cm.write("mov",0,"%rdx");
     cm.write("div","%rdi");
-    cm.write("mov","%rdx",address("%rsi"));
+    cm.write("mov","%rdx",code::cgmanager::address("%rsi"));
     cm.write("push","%rdx");
 }
 void single::to_asm(code::cgmanager&cm)const
@@ -318,14 +316,14 @@ void define_var::to_asm(code::cgmanager&cm)const
         cm.set_offset(v.first);
         if(v.second){
             v.second->to_asm(cm);
-            cm.write("pop",address("%rsp"));
+            cm.write("pop",code::cgmanager::address("%rsp"));
         }
     }
 }
 void _if_else_::to_asm(code::cgmanager&cm)const
 {
-    static unsigned int serial=0;
-    std::string lelse=unique_label(".Lieelse",serial),lend=unique_label(".Lieend",serial++);
+    std::string lelse=code::cgmanager::unique_label(".Lieelse");
+    std::string lend=code::cgmanager::unique_label(".Lieend");
     cm.enter_scope();
     cond->to_asm(cm);
     cm.write("cmp",0,"%rax");
@@ -339,8 +337,8 @@ void _if_else_::to_asm(code::cgmanager&cm)const
 }
 void _while_::to_asm(code::cgmanager&cm)const
 {
-    static unsigned int serial=0;
-    std::string lbegin=unique_label(".Lwbegin",serial++),lend=unique_label(".Lwend",serial);
+    std::string lbegin=code::cgmanager::unique_label(".Lwbegin");
+    std::string lend=code::cgmanager::unique_label(".Lwend");
     cm.enter_scope();
     cm.enter_break(lend);
     cm.enter_continue(lbegin);
@@ -357,8 +355,9 @@ void _while_::to_asm(code::cgmanager&cm)const
 }
 void _for_::to_asm(code::cgmanager&cm)const
 {
-    static unsigned int serial=0;
-    std::string lbegin=unique_label(".Lfbegin",serial++),lreini=unique_label(".Lfreini",serial),lend=unique_label(".Lfend",serial);
+    std::string lbegin=code::cgmanager::unique_label(".Lfbegin");
+    std::string lreini=code::cgmanager::unique_label(".Lfreini");
+    std::string lend=code::cgmanager::unique_label(".Lfend");
     cm.enter_scope();
     cm.enter_break(lend);
     cm.enter_continue(lreini);
@@ -402,7 +401,7 @@ void function::to_asm(code::cgmanager&cm)const
         cm.enter_scope();
         cm.write("sub",8*args->size(),"%rsp");
         for(int i=0;i<args->size();++i){
-            std::string dest=address(i+1-args->size(),"%rsp");
+            std::string dest=code::cgmanager::address(i+1-args->size(),"%rsp");
             cm.set_offset((*args)[i]);
             switch(i){
                 case 0 :cm.write("mov","%rdi",dest);break;
@@ -412,7 +411,7 @@ void function::to_asm(code::cgmanager&cm)const
                 case 4 :cm.write("mov","%r8" ,dest);break;
                 case 5 :cm.write("mov","%r9" ,dest);break;
                 default:
-                        cm.write("mov",address(8*(i-6)+16,"%rbp"),"%rax");
+                        cm.write("mov",code::cgmanager::address(8*(i-6)+16,"%rbp"),"%rax");
                         cm.write("mov","%rax",dest);
                         break;
             }

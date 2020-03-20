@@ -1,5 +1,6 @@
 #include"code/cgmanager.hpp"
 #include<algorithm>
+#include<sstream>
 using namespace code;
 void cgmanager::enter_scope()
 {
@@ -55,6 +56,34 @@ const std::string&cgmanager::get_break_label()
 const std::string&cgmanager::get_continue_label()
 {
     return continue_labels.top();
+}
+std::string cgmanager::unique_label(const std::string&base)
+{
+    static unsigned int serial=0;
+    return base+std::to_string(serial++);
+}
+std::string cgmanager::address(int dis,const std::string&base,const std::string&ofs,int scl)
+{
+    std::stringstream ss;
+    if(dis!=0)ss<<dis;
+    ss<<'(';
+    if(base!="")ss<<base;
+    if(ofs!="")ss<<','<<ofs;
+    if(scl!=1)ss<<','<<scl;
+    ss<<')';
+    return ss.str();
+}
+std::string cgmanager::address(int dis,const std::string&base,int scl)
+{
+    return cgmanager::address(dis,base,"",scl);
+}
+std::string cgmanager::address(const std::string&base,const std::string&ofs,int scl)
+{
+    return cgmanager::address(0,base,ofs,scl);
+}
+std::string cgmanager::address(const std::string&base,int scl)
+{
+    return cgmanager::address(0,base,"",scl);
 }
 cgmanager::cgmanager(const std::string&dst):write(dst)
 {
