@@ -419,7 +419,7 @@ void function::to_asm(code::generator&cg)const
         }
         for(auto s:*(com->stats))s->to_asm(cg);
         cg.leave_scope();
-        //強制return
+        //TODO: なんとかする
         cg.write("mov","%rbp","%rsp");
         cg.write("pop","%rbp");
         cg.write("ret");

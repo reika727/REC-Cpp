@@ -14,7 +14,7 @@ int main(int argc,char**argv)
         tr.check();
         tr.to_asm(argc==2?"tmp.s":argv[2]);
     }catch(const std::exception&e){
-        std::cout<<e.what()<<std::endl;
+        std::cerr<<"\033[1;31m"<<e.what()<<"\033[m"<<std::endl;
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
