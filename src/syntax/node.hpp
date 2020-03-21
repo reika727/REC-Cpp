@@ -19,7 +19,7 @@ namespace syntax{
         public:
             const int value;
             numeric(int value);
-            void check(semantics::analyzer&analy)const override;
+            void check(semantics::analyzer&analy)const noexcept override;
             void to_asm(code::generator&cg)const override;
     };
     class ident final:public expression{

@@ -9,8 +9,8 @@ namespace lexicon{
         public:
             token_array(const std::string&s);
             ~token_array();
-            bool check(TK type);
-            const token*consume(TK type);
-            bool is_all_read();
+            bool check(TK type)noexcept;
+            const token*consume(TK type)noexcept;
+            bool is_all_read()noexcept;
     };
 }

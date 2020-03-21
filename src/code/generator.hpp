@@ -20,7 +20,7 @@ namespace code{
             void leave_continue();
             void set_offset(const std::string&name);
             int get_offset(const std::string&name);
-            int get_var_size();
+            int get_var_size()noexcept;
             const std::string&get_break_label();
             const std::string&get_continue_label();
             void write(const std::string&str);

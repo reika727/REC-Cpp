@@ -61,15 +61,15 @@ token_array::token_array(const std::string&s)
     }
     itr=tv.begin();
 }
-bool token_array::check(TK type)
+bool token_array::check(TK type)noexcept
 {
     return itr!=tv.end()&&(*itr)->type==type;
 }
-const token*token_array::consume(TK type)
+const token*token_array::consume(TK type)noexcept
 {
     return check(type)?*(itr++):nullptr;
 }
-bool token_array::is_all_read()
+bool token_array::is_all_read()noexcept
 {
     return itr==tv.end();
 }

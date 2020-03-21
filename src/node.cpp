@@ -425,7 +425,7 @@ void function::to_asm(code::generator&cg)const
         cg.write("ret");
     }
 }
-void numeric::check(semantics::analyzer&analy)const
+void numeric::check(semantics::analyzer&analy)const noexcept
 {
     return;
 }

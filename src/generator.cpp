@@ -45,7 +45,7 @@ int generator::get_offset(const std::string&name)
         )
     )[name];
 }
-int generator::get_var_size()
+int generator::get_var_size()noexcept
 {
     return var_size;
 }

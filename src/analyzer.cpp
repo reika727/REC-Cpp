@@ -9,19 +9,19 @@ void analyzer::leave_scope()
 {
     vars.pop_back();
 }
-void analyzer::enter_break()
+void analyzer::enter_break()noexcept
 {
     ++break_nest;
 }
-void analyzer::leave_break()
+void analyzer::leave_break()noexcept
 {
     --break_nest;
 }
-void analyzer::enter_continue()
+void analyzer::enter_continue()noexcept
 {
     ++continue_nest;
 }
-void analyzer::leave_continue()
+void analyzer::leave_continue()noexcept
 {
     --continue_nest;
 }
@@ -55,11 +55,11 @@ bool analyzer::is_definable_var(const std::string&name)
 {
     return vars.back().count(name)==0;
 }
-bool analyzer::is_breakable()
+bool analyzer::is_breakable()noexcept
 {
     return break_nest>0;
 }
-bool analyzer::is_continuable()
+bool analyzer::is_continuable()noexcept
 {
     return continue_nest>0;
 }
