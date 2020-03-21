@@ -31,6 +31,7 @@ void fcall::to_asm(code::generator&cg)const
             case 5 :cg.write("pop","%r9"); break;
         }
     }
+    // TODO: 関数ポインタに対応する
     cg.write("call",dynamic_cast<const ident*>(func)->name);
     if(vars->size()>6){
         cg.write("add",8*(vars->size()-6),"%rsp");
@@ -434,6 +435,7 @@ void ident::check(semantics::analyzer&analy)const
 }
 void fcall::check(semantics::analyzer&analy)const
 {
+    // TODO: 関数ポインタに対応する
     if(auto fp=dynamic_cast<const ident*>(func)){
         if(!analy.is_available_func(fp->name,vars->size()))throw std::runtime_error("未定義の関数です: "+fp->name);
         for(auto v:*vars)v->check(analy);
