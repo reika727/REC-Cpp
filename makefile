@@ -6,7 +6,6 @@ TESTDIR=test
 SRCS   =$(wildcard $(SRCDIR)/*.cpp)
 OBJS   =$(addprefix $(OBJDIR)/,$(notdir $(SRCS:.cpp=.o)))
 DEPS   =$(addprefix $(DEPDIR)/,$(notdir $(SRCS:.cpp=.d)))
-TESTSRC=$(TESTDIR)/test.c
 TARGET =$(TRGDIR)/rec.out
 
 .PHONY: all
@@ -25,11 +24,12 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 
 .PHONY: test
 test: $(TARGET)
-	./$(TARGET) $(TESTSRC) $(TESTDIR)/test.s
+	@mkdir -p $(TESTDIR)
+	./$(TARGET) test.c $(TESTDIR)/test.s
 	$(CXX) $(TESTDIR)/test.s -o $(TESTDIR)/test.out
 	./$(TESTDIR)/test.out
 	@echo "succeeded"
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR) $(DEPDIR) $(TRGDIR)
+	rm -rf $(OBJDIR) $(DEPDIR) $(TRGDIR) $(TESTDIR)
