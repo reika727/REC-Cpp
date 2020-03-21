@@ -2,6 +2,7 @@
 #include"node.hpp"
 #include"../lexicon/token_array.hpp"
 #include<string>
+#include<vector>
 namespace syntax{
     class tree{
             lexicon::token_array ta;

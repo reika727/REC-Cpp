@@ -1,6 +1,7 @@
 #include"syntax/tree.hpp"
 #include<iostream>
 #include<string>
+#include<fstream>
 #include<stdexcept>
 int main(int argc,char**argv)
 {

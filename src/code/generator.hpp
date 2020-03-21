@@ -33,5 +33,7 @@ namespace code{
             static std::string address(int dis,const std::string&base,int scl);
             static std::string address(const std::string&base,const std::string&ofs,int scl=1);
             static std::string address(const std::string&base,int scl=1);
+            generator&operator=(const generator&)=delete;
+            generator&operator=(generator&&)=delete;
     };
 }

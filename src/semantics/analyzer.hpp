@@ -3,7 +3,6 @@
 #include<vector>
 #include<set>
 #include<map>
-#include<utility>
 namespace semantics{
     /*
      * 検出すべき意味論的誤り
@@ -32,5 +31,6 @@ namespace semantics{
             bool is_breakable();
             bool is_continuable();
             analyzer&operator=(const analyzer&)=delete;
+            analyzer&operator=(analyzer&&)=delete;
     };
 }
