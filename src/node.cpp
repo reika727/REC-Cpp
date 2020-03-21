@@ -63,28 +63,28 @@ void lognot::to_asm(code::generator&cg)const
 }
 void preinc::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cg);
+    arg->refer(cg);
     cg.write("pop","%rax");
     cg.write("add",1,code::generator::address("%rax"));
     cg.write("push",code::generator::address("%rax"));
 }
 void predec::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cg);
+    arg->refer(cg);
     cg.write("pop","%rax");
     cg.write("sub",1,code::generator::address("%rax"));
     cg.write("push",code::generator::address("%rax"));
 }
 void postinc::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cg);
+    arg->refer(cg);
     cg.write("pop","%rax");
     cg.write("push",code::generator::address("%rax"));
     cg.write("add",1,code::generator::address("%rax"));
 }
 void postdec::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(arg)->refer(cg);
+    arg->refer(cg);
     cg.write("pop","%rax");
     cg.write("push",code::generator::address("%rax"));
     cg.write("sub",1,code::generator::address("%rax"));
@@ -234,7 +234,7 @@ void comma::to_asm(code::generator&cg)const
 }
 void assign::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cg);
+    larg->refer(cg);
     rarg->to_asm(cg);
     cg.write("pop","%rdi");
     cg.write("pop","%rax");
@@ -243,7 +243,7 @@ void assign::to_asm(code::generator&cg)const
 }
 void plasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cg);
+    larg->refer(cg);
     rarg->to_asm(cg);
     cg.write("pop","%rdi");
     cg.write("pop","%rax");
@@ -252,7 +252,7 @@ void plasgn::to_asm(code::generator&cg)const
 }
 void miasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cg);
+    larg->refer(cg);
     rarg->to_asm(cg);
     cg.write("pop","%rdi");
     cg.write("pop","%rax");
@@ -261,7 +261,7 @@ void miasgn::to_asm(code::generator&cg)const
 }
 void muasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cg);
+    larg->refer(cg);
     rarg->to_asm(cg);
     cg.write("pop","%rdi");
     cg.write("pop","%rax");
@@ -273,7 +273,7 @@ void muasgn::to_asm(code::generator&cg)const
 }
 void diasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cg);
+    larg->refer(cg);
     rarg->to_asm(cg);
     cg.write("pop","%rdi");
     cg.write("pop","%rax");
@@ -286,7 +286,7 @@ void diasgn::to_asm(code::generator&cg)const
 }
 void rmasgn::to_asm(code::generator&cg)const
 {
-    dynamic_cast<const ident*>(larg)->refer(cg);
+    larg->refer(cg);
     rarg->to_asm(cg);
     cg.write("pop","%rdi");
     cg.write("pop","%rax");
@@ -449,8 +449,7 @@ void unopr::check(semantics::analyzer&analy)const
 }
 void unopr_l::check(semantics::analyzer&analy)const
 {
-    if(typeid(*arg)!=typeid(ident))throw std::runtime_error("右辺値への操作です");
-    unopr::check(analy);
+    arg->check(analy);
 }
 void biopr::check(semantics::analyzer&analy)const
 {
@@ -459,8 +458,8 @@ void biopr::check(semantics::analyzer&analy)const
 }
 void biopr_l::check(semantics::analyzer&analy)const
 {
-    if(typeid(*larg)!=typeid(ident))throw std::runtime_error("右辺値への代入です");
-    biopr::check(analy);
+    larg->check(analy);
+    rarg->check(analy);
 }
 void single::check(semantics::analyzer&analy)const
 {
@@ -555,9 +554,23 @@ unopr::unopr(const expression*arg):arg(arg)
 {
 
 }
+unopr_l::unopr_l(const expression*arg):arg(dynamic_cast<const ident*>(arg))
+{
+    if(!(this->arg)){
+        this->~unopr_l();
+        throw std::runtime_error("右辺値を引数にとることはできません");
+    }
+}
 biopr::biopr(const expression*larg,const expression*rarg):larg(larg),rarg(rarg)
 {
 
+}
+biopr_l::biopr_l(const expression*larg,const expression*rarg):larg(dynamic_cast<const ident*>(larg)),rarg(rarg)
+{
+    if(!(this->larg)){
+        this->~biopr_l();
+        throw std::runtime_error("右辺値を引数にとることはできません");
+    }
 }
 single::single(const expression*stat):stat(stat)
 {
@@ -601,7 +614,16 @@ unopr::~unopr()
 {
     delete arg;
 }
+unopr_l::~unopr_l()
+{
+    delete arg;
+}
 biopr::~biopr()
+{
+    delete larg;
+    delete rarg;
+}
+biopr_l::~biopr_l()
 {
     delete larg;
     delete rarg;

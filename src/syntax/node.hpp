@@ -61,9 +61,11 @@ namespace syntax{
             using unopr::unopr;
             void to_asm(code::generator&cg)const override;
     };
-    class unopr_l:public unopr{
+    class unopr_l:public expression{
         public:
-            using unopr::unopr;
+            const ident*const arg;
+            unopr_l(const expression*arg);
+            virtual ~unopr_l()override;
             void check(semantics::analyzer&analy)const override;
     };
     class preinc:public unopr_l{
@@ -163,9 +165,12 @@ namespace syntax{
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class biopr_l:public biopr{
+    class biopr_l:public expression{
         public:
-            using biopr::biopr;
+            const ident*const larg;
+            const expression*const rarg;
+            biopr_l(const expression*larg,const expression*rarg);
+            virtual ~biopr_l()override;
             void check(semantics::analyzer&analy)const override;
     };
     class assign:public biopr_l{
