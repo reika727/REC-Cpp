@@ -15,14 +15,14 @@ namespace syntax{
         public:
             virtual ~expression()=default;
     };
-    class numeric:public expression{
+    class numeric final:public expression{
         public:
             const int value;
             numeric(int value);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class ident:public expression{
+    class ident final:public expression{
         public:
             const std::string name;
             ident(const std::string&name);
@@ -30,7 +30,7 @@ namespace syntax{
             void to_asm(code::generator&cg)const override;
             void refer(code::generator&cg)const;
     };
-    class fcall:public expression{
+    class fcall final:public expression{
         public:
             const expression*const func;
             const std::vector<const expression*>*const vars;
@@ -44,19 +44,19 @@ namespace syntax{
             const expression*const arg;
             unopr(const expression*arg);
             virtual ~unopr()override;
-            void check(semantics::analyzer&analy)const override;
+            void check(semantics::analyzer&analy)const override final;
     };
-    class uplus:public unopr{
+    class uplus final:public unopr{
         public:
             using unopr::unopr;
             void to_asm(code::generator&cg)const override;
     };
-    class uminus:public unopr{
+    class uminus final:public unopr{
         public:
             using unopr::unopr;
             void to_asm(code::generator&cg)const override;
     };
-    class lognot:public unopr{
+    class lognot final:public unopr{
         public:
             using unopr::unopr;
             void to_asm(code::generator&cg)const override;
@@ -66,24 +66,24 @@ namespace syntax{
             const ident*const arg;
             unopr_l(const expression*arg);
             virtual ~unopr_l()override;
-            void check(semantics::analyzer&analy)const override;
+            void check(semantics::analyzer&analy)const override final;
     };
-    class preinc:public unopr_l{
+    class preinc final:public unopr_l{
         public:
             using unopr_l::unopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class predec:public unopr_l{
+    class predec final:public unopr_l{
         public:
             using unopr_l::unopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class postinc:public unopr_l{
+    class postinc final:public unopr_l{
         public:
             using unopr_l::unopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class postdec:public unopr_l{
+    class postdec final:public unopr_l{
         public:
             using unopr_l::unopr_l;
             void to_asm(code::generator&cg)const override;
@@ -93,74 +93,74 @@ namespace syntax{
             const expression*const larg,*const rarg;
             biopr(const expression*larg,const expression*rarg);
             virtual ~biopr()override;
-            void check(semantics::analyzer&analy)const override;
+            void check(semantics::analyzer&analy)const override final;
     };
-    class plus:public biopr{
+    class plus final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class minus:public biopr{
+    class minus final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class multi:public biopr{
+    class multi final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class divide:public biopr{
+    class divide final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class remain:public biopr{
+    class remain final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class equal:public biopr{
+    class equal final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class nequal:public biopr{
+    class nequal final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class less:public biopr{
+    class less final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class greater:public biopr{
+    class greater final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class leeq:public biopr{
+    class leeq final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class greq:public biopr{
+    class greq final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class logand:public biopr{
+    class logand final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class logor:public biopr{
+    class logor final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
     };
-    class comma:public biopr{
+    class comma final:public biopr{
         public:
             using biopr::biopr;
             void to_asm(code::generator&cg)const override;
@@ -171,34 +171,34 @@ namespace syntax{
             const expression*const rarg;
             biopr_l(const expression*larg,const expression*rarg);
             virtual ~biopr_l()override;
-            void check(semantics::analyzer&analy)const override;
+            void check(semantics::analyzer&analy)const override final;
     };
-    class assign:public biopr_l{
+    class assign final:public biopr_l{
         public:
             using biopr_l::biopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class plasgn:public biopr_l{
+    class plasgn final:public biopr_l{
         public:
             using biopr_l::biopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class miasgn:public biopr_l{
+    class miasgn final:public biopr_l{
         public:
             using biopr_l::biopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class muasgn:public biopr_l{
+    class muasgn final:public biopr_l{
         public:
             using biopr_l::biopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class diasgn:public biopr_l{
+    class diasgn final:public biopr_l{
         public:
             using biopr_l::biopr_l;
             void to_asm(code::generator&cg)const override;
     };
-    class rmasgn:public biopr_l{
+    class rmasgn final:public biopr_l{
         public:
             using biopr_l::biopr_l;
             void to_asm(code::generator&cg)const override;
@@ -207,7 +207,7 @@ namespace syntax{
         public:
             virtual ~statement()=default;
     };
-    class single:public statement{
+    class single final:public statement{
         public:
             const expression*const stat;
             single(const expression*stat);
@@ -215,7 +215,7 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class compound:public statement{
+    class compound final:public statement{
         public:
             const std::vector<const statement*>*const stats;
             compound(decltype(stats)stats);
@@ -223,7 +223,7 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class define_var:public statement{
+    class define_var final:public statement{
         public:
             const std::vector<std::pair<std::string,const expression*>>*vars;
             define_var(decltype(vars)vars);
@@ -231,7 +231,7 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class _if_else_:public statement{
+    class _if_else_ final:public statement{
         public:
             const single*const cond;
             const statement*const st1,*const st2;
@@ -240,7 +240,7 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class _while_:public statement{
+    class _while_ final:public statement{
         public:
             const single*const cond;
             const statement*const st;
@@ -249,7 +249,7 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class _for_:public statement{
+    class _for_ final:public statement{
         public:
             const single*const init,*const cond,*const reinit;
             const statement*const st;
@@ -258,17 +258,17 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class _break_:public statement{
+    class _break_ final:public statement{
         public:
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class _continue_:public statement{
+    class _continue_ final:public statement{
         public:
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class _return_:public statement{
+    class _return_ final:public statement{
         public:
             const single*const val;
             _return_(const single*val);
@@ -276,7 +276,7 @@ namespace syntax{
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
-    class function:public node{
+    class function final:public node{
         public:
             const std::string name;
             const std::vector<std::string>*const args;

@@ -5,7 +5,7 @@
 #include<stack>
 #include<fstream>
 namespace code{
-    class generator{
+    class generator final{
             std::vector<std::map<std::string,int>>offset;
             int var_size=0;
             std::stack<std::string>break_labels,continue_labels;

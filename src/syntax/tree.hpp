@@ -4,7 +4,7 @@
 #include<string>
 #include<vector>
 namespace syntax{
-    class tree{
+    class tree final{
             lexicon::token_array ta;
             std::vector<const function*>funcs;
         private:

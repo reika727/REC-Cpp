@@ -47,17 +47,17 @@ namespace lexicon{
             token(TK type);
             virtual ~token()=default;
     };
-    class numeric:public token{
+    class numeric final:public token{
         public:
             const int value;
             numeric(int value);
     };
-    class ident:public token{
+    class ident final:public token{
         public:
             const std::string name;
             ident(const std::string&name);
     };
-    class symbol:public token{
+    class symbol final:public token{
         public:
             symbol(TK type);
     };

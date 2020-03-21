@@ -3,7 +3,7 @@
 #include<string>
 #include<vector>
 namespace lexicon{
-    class token_array{
+    class token_array final{
             std::vector<const token*>tv;
             decltype(tv)::const_iterator itr;
         public:
