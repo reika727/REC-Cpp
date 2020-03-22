@@ -24,11 +24,11 @@ namespace semantics{
             void define_func(const std::string&name,int var_num);
             void define_var(const std::string&name);
             bool is_available_func(const std::string&name,int var_num);
-            bool is_available_var(const std::string&name);
-            bool is_definable_func(const std::string&nane);
-            bool is_definable_var(const std::string&name);
-            bool is_breakable()noexcept;
-            bool is_continuable()noexcept;
+            bool is_available_var(const std::string&name)const;
+            bool is_definable_func(const std::string&nane)const;
+            bool is_definable_var(const std::string&name)const;
+            bool is_breakable()const noexcept;
+            bool is_continuable()const noexcept;
             analyzer&operator=(const analyzer&)=delete;
             analyzer&operator=(analyzer&&)=delete;
     };

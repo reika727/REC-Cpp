@@ -45,15 +45,15 @@ int generator::get_offset(const std::string&name)
         )
     )[name];
 }
-int generator::get_var_size()noexcept
+int generator::get_var_size()const noexcept
 {
     return var_size;
 }
-const std::string&generator::get_break_label()
+const std::string&generator::get_break_label()const
 {
     return break_labels.top();
 }
-const std::string&generator::get_continue_label()
+const std::string&generator::get_continue_label()const
 {
     return continue_labels.top();
 }
