@@ -3,6 +3,119 @@
 #include<stdexcept>
 #include<typeinfo>
 using namespace syntax;
+void numeric::check(semantics::analyzer&analy)const noexcept
+{
+    return;
+}
+void ident::check(semantics::analyzer&analy)const
+{
+    if(!analy.is_available_var(name))throw std::runtime_error("未定義の変数です: "+name);
+}
+void fcall::check(semantics::analyzer&analy)const
+{
+    // TODO: 関数ポインタに対応する
+    if(auto fp=dynamic_cast<const ident*>(func)){
+        if(!analy.is_available_func(fp->name,vars->size()))throw std::runtime_error("未定義の関数です: "+fp->name);
+        for(auto v:*vars)v->check(analy);
+    }else{
+        throw std::runtime_error("無効な関数呼び出しです");
+    }
+}
+void unopr::check(semantics::analyzer&analy)const
+{
+    arg->check(analy);
+}
+void unopr_l::check(semantics::analyzer&analy)const
+{
+    arg->check(analy);
+}
+void biopr::check(semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void biopr_l::check(semantics::analyzer&analy)const
+{
+    larg->check(analy);
+    rarg->check(analy);
+}
+void single::check(semantics::analyzer&analy)const
+{
+    if(stat)stat->check(analy);
+}
+void compound::check(semantics::analyzer&analy)const
+{
+    analy.enter_scope();
+    for(auto s:*stats)s->check(analy);
+    analy.leave_scope();
+}
+void define_var::check(semantics::analyzer&analy)const
+{
+    for(auto v:*vars){
+        if(!analy.is_definable_var(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+        analy.define_var(v.first);
+        if(v.second)v.second->check(analy);
+    }
+}
+void _if_else_::check(semantics::analyzer&analy)const
+{
+    analy.enter_scope();
+    cond->check(analy);
+    st1->check(analy);
+    st2->check(analy);
+    analy.leave_scope();
+}
+void _while_::check(semantics::analyzer&analy)const
+{
+    analy.enter_scope();
+    analy.enter_break();
+    analy.enter_continue();
+    cond->check(analy);
+    st->check(analy);
+    analy.leave_continue();
+    analy.leave_break();
+    analy.leave_scope();
+}
+void _for_::check(semantics::analyzer&analy)const
+{
+    analy.enter_scope();
+    analy.enter_break();
+    analy.enter_continue();
+    init->check(analy);
+    cond->check(analy);
+    reinit->check(analy);
+    st->check(analy);
+    analy.leave_continue();
+    analy.leave_break();
+    analy.leave_scope();
+}
+void _break_::check(semantics::analyzer&analy)const
+{
+    if(!analy.is_breakable()){
+        throw std::runtime_error("不適切なbreak文です");
+    }
+}
+void _continue_::check(semantics::analyzer&analy)const
+{
+    if(!analy.is_continuable()){
+        throw std::runtime_error("不適切なcontinue文です");
+    }
+}
+void _return_::check(semantics::analyzer&analy)const
+{
+    val->check(analy);
+}
+void function::check(semantics::analyzer&analy)const
+{
+    if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
+    analy.define_func(name,args->size());
+    if(com){
+        analy.enter_scope();
+        for(auto a:*args)analy.define_var(a);
+        for(auto s:*(com->stats))s->check(analy);
+        analy.leave_scope();
+    }
+}
 void numeric::to_asm(code::generator&cg)const
 {
     cg.write("push",value);
@@ -423,119 +536,6 @@ void function::to_asm(code::generator&cg)const
         cg.write("mov","%rbp","%rsp");
         cg.write("pop","%rbp");
         cg.write("ret");
-    }
-}
-void numeric::check(semantics::analyzer&analy)const noexcept
-{
-    return;
-}
-void ident::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_available_var(name))throw std::runtime_error("未定義の変数です: "+name);
-}
-void fcall::check(semantics::analyzer&analy)const
-{
-    // TODO: 関数ポインタに対応する
-    if(auto fp=dynamic_cast<const ident*>(func)){
-        if(!analy.is_available_func(fp->name,vars->size()))throw std::runtime_error("未定義の関数です: "+fp->name);
-        for(auto v:*vars)v->check(analy);
-    }else{
-        throw std::runtime_error("無効な関数呼び出しです");
-    }
-}
-void unopr::check(semantics::analyzer&analy)const
-{
-    arg->check(analy);
-}
-void unopr_l::check(semantics::analyzer&analy)const
-{
-    arg->check(analy);
-}
-void biopr::check(semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void biopr_l::check(semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void single::check(semantics::analyzer&analy)const
-{
-    if(stat)stat->check(analy);
-}
-void compound::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    for(auto s:*stats)s->check(analy);
-    analy.leave_scope();
-}
-void define_var::check(semantics::analyzer&analy)const
-{
-    for(auto v:*vars){
-        if(!analy.is_definable_var(v.first))throw std::runtime_error("二重定義されました: "+v.first);
-        analy.define_var(v.first);
-        if(v.second)v.second->check(analy);
-    }
-}
-void _if_else_::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    cond->check(analy);
-    st1->check(analy);
-    st2->check(analy);
-    analy.leave_scope();
-}
-void _while_::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    analy.enter_break();
-    analy.enter_continue();
-    cond->check(analy);
-    st->check(analy);
-    analy.leave_continue();
-    analy.leave_break();
-    analy.leave_scope();
-}
-void _for_::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    analy.enter_break();
-    analy.enter_continue();
-    init->check(analy);
-    cond->check(analy);
-    reinit->check(analy);
-    st->check(analy);
-    analy.leave_continue();
-    analy.leave_break();
-    analy.leave_scope();
-}
-void _break_::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_breakable()){
-        throw std::runtime_error("不適切なbreak文です");
-    }
-}
-void _continue_::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_continuable()){
-        throw std::runtime_error("不適切なcontinue文です");
-    }
-}
-void _return_::check(semantics::analyzer&analy)const
-{
-    val->check(analy);
-}
-void function::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
-    analy.define_func(name,args->size());
-    if(com){
-        analy.enter_scope();
-        for(auto a:*args)analy.define_var(a);
-        for(auto s:*(com->stats))s->check(analy);
-        analy.leave_scope();
     }
 }
 numeric::numeric(int value):value(value)
