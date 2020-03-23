@@ -1,7 +1,5 @@
 #include"syntax/node.hpp"
-#include"code/generator.hpp"
 #include<stdexcept>
-#include<typeinfo>
 using namespace syntax;
 void numeric::check(semantics::analyzer&analy)const noexcept
 {
