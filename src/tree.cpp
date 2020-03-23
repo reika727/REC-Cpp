@@ -10,13 +10,13 @@ const function*tree::func()
     auto fidp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT));
     if(!fidp)throw std::runtime_error("関数名が見つかりませんでした");
     if(!ta.consume(TK::OPARENT))throw std::runtime_error("引数リストが見つかりませんでした");
-    auto vars=new std::vector<std::string>;
+    auto vars=std::vector<std::string>();
     if(!ta.consume(TK::CPARENT)){
         while(true){
             if(!ta.consume(TK::INT))
                 throw std::runtime_error("引数の型が見つかりませんでした");
             if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT)))
-                vars->push_back(idp->name);
+                vars.push_back(idp->name);
             else
                 throw std::runtime_error("引数名が見つかりませんでした");
             if(ta.consume(TK::COMMA))
@@ -37,10 +37,10 @@ const function*tree::func()
 const statement*tree::stat()
 {
     if(ta.consume(TK::INT)){
-        auto vars=new std::vector<std::pair<std::string,const expression*>>;
+        auto vars=std::vector<std::pair<std::string,const expression*>>();
         while(true){
             if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT)))
-                vars->push_back(std::make_pair(idp->name,ta.consume(TK::EQUAL)?order14():nullptr));
+                vars.push_back(std::make_pair(idp->name,ta.consume(TK::EQUAL)?order14():nullptr));
             else
                 throw std::runtime_error("無効な宣言です");
             if(ta.consume(TK::SCOLON))
@@ -81,8 +81,8 @@ const statement*tree::stat()
     }else if(ta.consume(TK::RETURN)){
         return new _return_(new single(order15()));
     }else if(ta.consume(TK::OBRACE)){
-        auto stats=new std::vector<const statement*>;
-        while(!ta.consume(TK::CBRACE))stats->push_back(stat());
+        auto stats=std::vector<const statement*>();
+        while(!ta.consume(TK::CBRACE))stats.push_back(stat());
         return new compound(stats);
     }else{
         auto ret=emptiable_single();
@@ -214,10 +214,10 @@ const expression*tree::order01() // () left to right
     }else if(ta.consume(TK::MIMI)){
         ret=new postdec(ret);
     }else if(ta.consume(TK::OPARENT)){
-        auto vars=new std::vector<const expression*>;
+        auto vars=std::vector<const expression*>();
         if(!ta.consume(TK::CPARENT)){
             while(true){
-                vars->push_back(order14());
+                vars.push_back(order14());
                 if(ta.consume(TK::CPARENT))
                     break;
                 else if(!ta.consume(TK::COMMA))

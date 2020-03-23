@@ -33,8 +33,8 @@ namespace syntax{
     class fcall final:public expression{
         public:
             const expression*const func;
-            const std::vector<const expression*>*const vars;
-            fcall(const expression*func,decltype(vars)vars);
+            const std::vector<const expression*>vars;
+            fcall(const expression*func,const std::vector<const expression*>&vars);
             ~fcall()override;
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
@@ -217,16 +217,16 @@ namespace syntax{
     };
     class compound final:public statement{
         public:
-            const std::vector<const statement*>*const stats;
-            compound(decltype(stats)stats);
+            const std::vector<const statement*>stats;
+            compound(const std::vector<const statement*>&stats);
             ~compound()override;
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class define_var final:public statement{
         public:
-            const std::vector<std::pair<std::string,const expression*>>*vars;
-            define_var(decltype(vars)vars);
+            const std::vector<std::pair<std::string,const expression*>>vars;
+            define_var(const std::vector<std::pair<std::string,const expression*>>&vars);
             ~define_var()override;
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
@@ -279,9 +279,9 @@ namespace syntax{
     class function final:public node{
         public:
             const std::string name;
-            const std::vector<std::string>*const args;
+            const std::vector<std::string>args;
             const compound*const com;
-            function(std::string name,decltype(args)args,const compound*com);
+            function(std::string name,const std::vector<std::string>&args,const compound*com);
             ~function()override;
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;

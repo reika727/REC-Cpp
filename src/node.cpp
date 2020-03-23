@@ -15,8 +15,8 @@ void fcall::check(semantics::analyzer&analy)const
 {
     // TODO: 関数ポインタに対応する
     if(auto fp=dynamic_cast<const ident*>(func)){
-        if(!analy.is_available_func(fp->name,vars->size()))throw std::runtime_error("未定義の関数です: "+fp->name);
-        for(auto v:*vars)v->check(analy);
+        if(!analy.is_available_func(fp->name,vars.size()))throw std::runtime_error("未定義の関数です: "+fp->name);
+        for(auto v:vars)v->check(analy);
     }else{
         throw std::runtime_error("無効な関数呼び出しです");
     }
@@ -46,12 +46,12 @@ void single::check(semantics::analyzer&analy)const
 void compound::check(semantics::analyzer&analy)const
 {
     analy.enter_scope();
-    for(auto s:*stats)s->check(analy);
+    for(auto s:stats)s->check(analy);
     analy.leave_scope();
 }
 void define_var::check(semantics::analyzer&analy)const
 {
-    for(auto v:*vars){
+    for(auto v:vars){
         if(!analy.is_definable_var(v.first))throw std::runtime_error("二重定義されました: "+v.first);
         analy.define_var(v.first);
         if(v.second)v.second->check(analy);
@@ -104,11 +104,11 @@ void _return_::check(semantics::analyzer&analy)const
 void function::check(semantics::analyzer&analy)const
 {
     if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
-    analy.define_func(name,args->size());
+    analy.define_func(name,args.size());
     if(com){
         analy.enter_scope();
-        for(auto a:*args)analy.define_var(a);
-        for(auto s:*(com->stats))s->check(analy);
+        for(auto a:args)analy.define_var(a);
+        for(auto s:(com->stats))s->check(analy);
         analy.leave_scope();
     }
 }
@@ -129,8 +129,8 @@ void fcall::to_asm(code::generator&cg)const
 {
     int align=(16-cg.get_var_size()%16)%16;
     cg.write("sub",align,"%rsp");
-    for(int i=vars->size()-1;i>=0;--i){
-        (*vars)[i]->to_asm(cg);
+    for(int i=vars.size()-1;i>=0;--i){
+        vars[i]->to_asm(cg);
         switch(i){
             case 0 :cg.write("pop","%rdi");break;
             case 1 :cg.write("pop","%rsi");break;
@@ -142,7 +142,7 @@ void fcall::to_asm(code::generator&cg)const
     }
     // TODO: 関数ポインタに対応する
     cg.write("call",dynamic_cast<const ident*>(func)->name);
-    if(vars->size()>6)cg.write("add",8*(vars->size()-6),"%rsp");
+    if(vars.size()>6)cg.write("add",8*(vars.size()-6),"%rsp");
     cg.write("add",align,"%rsp");
     cg.write("push","%rax");
 }
@@ -415,12 +415,12 @@ void single::to_asm(code::generator&cg)const
 void compound::to_asm(code::generator&cg)const
 {
     cg.enter_scope();
-    for(auto s:*stats)s->to_asm(cg);
+    for(auto s:stats)s->to_asm(cg);
     cg.leave_scope();
 }
 void define_var::to_asm(code::generator&cg)const
 {
-    for(auto v:*vars){
+    for(auto v:vars){
         cg.write("sub",8,"%rsp");
         cg.set_offset(v.first);
         if(v.second){
@@ -508,10 +508,10 @@ void function::to_asm(code::generator&cg)const
         cg.write("push","%rbp");
         cg.write("mov","%rsp","%rbp");
         cg.enter_scope();
-        cg.write("sub",8*args->size(),"%rsp");
-        for(int i=0;i<args->size();++i){
-            std::string dest=code::generator::address(i+1-args->size(),"%rsp");
-            cg.set_offset((*args)[i]);
+        cg.write("sub",8*args.size(),"%rsp");
+        for(int i=0;i<args.size();++i){
+            std::string dest=code::generator::address(i+1-args.size(),"%rsp");
+            cg.set_offset(args[i]);
             switch(i){
                 case 0 :cg.write("mov","%rdi",dest);break;
                 case 1 :cg.write("mov","%rsi",dest);break;
@@ -525,7 +525,7 @@ void function::to_asm(code::generator&cg)const
                         break;
             }
         }
-        for(auto s:*(com->stats))s->to_asm(cg);
+        for(auto s:com->stats)s->to_asm(cg);
         cg.leave_scope();
         //TODO: なんとかする
         cg.write("mov","%rbp","%rsp");
@@ -537,7 +537,7 @@ numeric::numeric(int value)
     :value(value){}
 ident::ident(const std::string&name)
     :name(name){}
-fcall::fcall(const expression*func,const std::vector<const expression*>*vars)
+fcall::fcall(const expression*func,const std::vector<const expression*>&vars)
     :func(func),vars(vars){}
 unopr::unopr(const expression*arg)
     :arg(arg){}
@@ -561,9 +561,9 @@ biopr_l::biopr_l(const expression*larg,const expression*rarg)
 }
 single::single(const expression*stat)
     :stat(stat){}
-compound::compound(const std::vector<const statement*>*stats)
+compound::compound(const std::vector<const statement*>&stats)
     :stats(stats){}
-define_var::define_var(const std::vector<std::pair<std::string,const expression*>>*vars)
+define_var::define_var(const std::vector<std::pair<std::string,const expression*>>&vars)
     :vars(vars){}
 _if_else_::_if_else_(const single*cond,const statement*st1,const statement*st2)
     :cond(cond),st1(st1),st2(st2){}
@@ -573,13 +573,12 @@ _for_::_for_(const single*init,const single*cond,const single*reinit,const state
     :init(init),cond(cond),reinit(reinit),st(st){}
 _return_::_return_(const single*val)
     :val(val){}
-function::function(std::string name,const std::vector<std::string>*args,const compound*com)
+function::function(std::string name,const std::vector<std::string>&args,const compound*com)
     :name(name),args(args),com(com){}
 fcall::~fcall()
 {
     delete func;
-    for(auto v:*vars)delete v;
-    delete vars;
+    for(auto v:vars)delete v;
 }
 unopr::~unopr()
 {
@@ -605,13 +604,11 @@ single::~single()
 }
 compound::~compound()
 {
-    for(auto s:*stats)delete s;
-    delete stats;
+    for(auto s:stats)delete s;
 }
 define_var::~define_var()
 {
-    for(auto v:*vars)delete v.second;
-    delete vars;
+    for(auto v:vars)delete v.second;
 }
 _if_else_::~_if_else_()
 {
@@ -637,6 +634,5 @@ _return_::~_return_()
 }
 function::~function()
 {
-    delete args;
     delete com;
 }
