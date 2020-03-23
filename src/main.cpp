@@ -1,8 +1,8 @@
 #include"syntax/tree.hpp"
-#include<iostream>
-#include<string>
 #include<fstream>
+#include<iostream>
 #include<stdexcept>
+#include<string>
 int main(int argc,char**argv)
 {
     try{

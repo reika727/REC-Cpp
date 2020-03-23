@@ -2,8 +2,8 @@
 #include"../semantics/analyzer.hpp"
 #include"../code/generator.hpp"
 #include<string>
-#include<vector>
 #include<utility>
+#include<vector>
 namespace syntax{
     class node{
         public:

@@ -1,8 +1,8 @@
 #pragma once
+#include<map>
+#include<set>
 #include<string>
 #include<vector>
-#include<set>
-#include<map>
 namespace semantics{
     /*
      * 検出すべき意味論的誤り
@@ -11,6 +11,7 @@ namespace semantics{
      * 不適切な箇所でのbreak/continueの使用
      */
     class analyzer final{
+        private:
             std::vector<std::set<std::string>>vars;
             std::map<std::string,int>funcs;
             int break_nest=0,continue_nest=0;

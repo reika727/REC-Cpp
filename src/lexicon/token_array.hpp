@@ -4,6 +4,7 @@
 #include<vector>
 namespace lexicon{
     class token_array final{
+        private:
             std::vector<const token*>tv;
             decltype(tv)::const_iterator itr;
         public:

@@ -5,6 +5,7 @@
 #include<vector>
 namespace syntax{
     class tree final{
+        private:
             lexicon::token_array ta;
             std::vector<const function*>funcs;
         private:

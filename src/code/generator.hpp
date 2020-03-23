@@ -1,11 +1,12 @@
 #pragma once
-#include<string>
-#include<vector>
+#include<fstream>
 #include<map>
 #include<stack>
-#include<fstream>
+#include<string>
+#include<vector>
 namespace code{
     class generator final{
+        private:
             std::vector<std::map<std::string,int>>offset;
             int var_size=0;
             std::stack<std::string>break_labels,continue_labels;
