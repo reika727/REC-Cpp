@@ -14,7 +14,7 @@ void ident::check(semantics::analyzer&analy)const
 void fcall::check(semantics::analyzer&analy)const
 {
     // TODO: 関数ポインタに対応する
-    if(auto fp=dynamic_cast<const ident*>(func)){
+    if(auto fp=std::dynamic_pointer_cast<const ident>(func)){
         if(!analy.is_available_func(fp->name,vars.size()))throw std::runtime_error("未定義の関数です: "+fp->name);
         for(auto v:vars)v->check(analy);
     }else{
@@ -141,7 +141,7 @@ void fcall::to_asm(code::generator&cg)const
         }
     }
     // TODO: 関数ポインタに対応する
-    cg.write("call",dynamic_cast<const ident*>(func)->name);
+    cg.write("call",std::dynamic_pointer_cast<const ident>(func)->name);
     if(vars.size()>6)cg.write("add",8*(vars.size()-6),"%rsp");
     cg.write("add",align,"%rsp");
     cg.write("push","%rax");
@@ -537,102 +537,39 @@ numeric::numeric(int value)
     :value(value){}
 ident::ident(const std::string&name)
     :name(name){}
-fcall::fcall(const expression*func,const std::vector<const expression*>&vars)
+fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars)
     :func(func),vars(vars){}
-unopr::unopr(const expression*arg)
+unopr::unopr(const std::shared_ptr<const expression>&arg)
     :arg(arg){}
-unopr_l::unopr_l(const expression*arg)
-    :arg(dynamic_cast<const ident*>(arg))
+unopr_l::unopr_l(const std::shared_ptr<const expression>&arg)
+    :arg(std::dynamic_pointer_cast<const ident>(arg))
 {
     if(!(this->arg)){
-        this->~unopr_l();
         throw std::runtime_error("右辺値を引数にとることはできません");
     }
 }
-biopr::biopr(const expression*larg,const expression*rarg)
+biopr::biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg)
     :larg(larg),rarg(rarg){}
-biopr_l::biopr_l(const expression*larg,const expression*rarg)
-    :larg(dynamic_cast<const ident*>(larg)),rarg(rarg)
+biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg)
+    :larg(std::dynamic_pointer_cast<const ident>(larg)),rarg(rarg)
 {
     if(!(this->larg)){
-        this->~biopr_l();
         throw std::runtime_error("右辺値を引数にとることはできません");
     }
 }
-single::single(const expression*stat)
+single::single(const std::shared_ptr<const expression>&stat)
     :stat(stat){}
-compound::compound(const std::vector<const statement*>&stats)
+compound::compound(const std::vector<std::shared_ptr<const statement>>&stats)
     :stats(stats){}
-define_var::define_var(const std::vector<std::pair<std::string,const expression*>>&vars)
+define_var::define_var(const std::vector<std::pair<std::string,std::shared_ptr<const expression>>>&vars)
     :vars(vars){}
-_if_else_::_if_else_(const single*cond,const statement*st1,const statement*st2)
+_if_else_::_if_else_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st1,const std::shared_ptr<const statement>&st2)
     :cond(cond),st1(st1),st2(st2){}
-_while_::_while_(const single*cond,const statement*st)
+_while_::_while_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st)
     :cond(cond),st(st){}
-_for_::_for_(const single*init,const single*cond,const single*reinit,const statement*st)
+_for_::_for_(const std::shared_ptr<const single>&init,const std::shared_ptr<const single>&cond,const std::shared_ptr<const single>&reinit,const std::shared_ptr<const statement>&st)
     :init(init),cond(cond),reinit(reinit),st(st){}
-_return_::_return_(const single*val)
+_return_::_return_(const std::shared_ptr<const single>&val)
     :val(val){}
-function::function(std::string name,const std::vector<std::string>&args,const compound*com)
+function::function(std::string name,const std::vector<std::string>&args,const std::shared_ptr<const compound>&com)
     :name(name),args(args),com(com){}
-fcall::~fcall()
-{
-    delete func;
-    for(auto v:vars)delete v;
-}
-unopr::~unopr()
-{
-    delete arg;
-}
-unopr_l::~unopr_l()
-{
-    delete arg;
-}
-biopr::~biopr()
-{
-    delete larg;
-    delete rarg;
-}
-biopr_l::~biopr_l()
-{
-    delete larg;
-    delete rarg;
-}
-single::~single()
-{
-    delete stat;
-}
-compound::~compound()
-{
-    for(auto s:stats)delete s;
-}
-define_var::~define_var()
-{
-    for(auto v:vars)delete v.second;
-}
-_if_else_::~_if_else_()
-{
-    delete cond;
-    delete st1;
-    delete st2;
-}
-_while_::~_while_()
-{
-    delete cond;
-    delete st;
-}
-_for_::~_for_()
-{
-    delete init;
-    delete cond;
-    delete reinit;
-    delete st;
-}
-_return_::~_return_()
-{
-    delete val;
-}
-function::~function()
-{
-    delete com;
-}

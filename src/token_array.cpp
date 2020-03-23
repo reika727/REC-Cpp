@@ -39,83 +39,83 @@ token_array::token_array(const std::string&s)
             return ret;
         };
         if(check_keyword("int",' '))
-            tv.push_back(new symbol(TK::INT));
+            tv.push_back(std::make_shared<const symbol>(TK::INT));
         else if(check_keyword("if",'(',' '))
-            tv.push_back(new symbol(TK::IF));
+            tv.push_back(std::make_shared<const symbol>(TK::IF));
         else if(check_keyword("else",'{',';',' '))
-            tv.push_back(new symbol(TK::ELSE));
+            tv.push_back(std::make_shared<const symbol>(TK::ELSE));
         else if(check_keyword("while",'(',' '))
-            tv.push_back(new symbol(TK::WHILE));
+            tv.push_back(std::make_shared<const symbol>(TK::WHILE));
         else if(check_keyword("for",'(',' '))
-            tv.push_back(new symbol(TK::FOR));
+            tv.push_back(std::make_shared<const symbol>(TK::FOR));
         else if(check_keyword("break",';',' '))
-            tv.push_back(new symbol(TK::BREAK));
+            tv.push_back(std::make_shared<const symbol>(TK::BREAK));
         else if(check_keyword("continue",';',' '))
-            tv.push_back(new symbol(TK::CONTINUE));
+            tv.push_back(std::make_shared<const symbol>(TK::CONTINUE));
         else if(check_keyword("return",' '))
-            tv.push_back(new symbol(TK::RETURN));
+            tv.push_back(std::make_shared<const symbol>(TK::RETURN));
         else if(s.substr(i,2)=="/*")
             check_comment_closed();
         else if(check_keyword("&&"))
-            tv.push_back(new symbol(TK::APAP));
+            tv.push_back(std::make_shared<const symbol>(TK::APAP));
         else if(check_keyword("||"))
-            tv.push_back(new symbol(TK::VBVB));
+            tv.push_back(std::make_shared<const symbol>(TK::VBVB));
         else if(check_keyword("++"))
-            tv.push_back(new symbol(TK::PLPL));
+            tv.push_back(std::make_shared<const symbol>(TK::PLPL));
         else if(check_keyword("--"))
-            tv.push_back(new symbol(TK::MIMI));
+            tv.push_back(std::make_shared<const symbol>(TK::MIMI));
         else if(check_keyword("+="))
-            tv.push_back(new symbol(TK::PLEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::PLEQ));
         else if(check_keyword("-="))
-            tv.push_back(new symbol(TK::MIEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::MIEQ));
         else if(check_keyword("*="))
-            tv.push_back(new symbol(TK::ASEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::ASEQ));
         else if(check_keyword("/="))
-            tv.push_back(new symbol(TK::SLEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::SLEQ));
         else if(check_keyword("%="))
-            tv.push_back(new symbol(TK::PEEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::PEEQ));
         else if(check_keyword("=="))
-            tv.push_back(new symbol(TK::EQEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::EQEQ));
         else if(check_keyword("!="))
-            tv.push_back(new symbol(TK::EXEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::EXEQ));
         else if(check_keyword("<="))
-            tv.push_back(new symbol(TK::LEEQ));
+            tv.push_back(std::make_shared<const symbol>(TK::LEEQ));
         else if(check_keyword(">="))
-            tv.push_back(new symbol(TK::GREQ));
+            tv.push_back(std::make_shared<const symbol>(TK::GREQ));
         else if(check_keyword("+"))
-            tv.push_back(new symbol(TK::PLUS));
+            tv.push_back(std::make_shared<const symbol>(TK::PLUS));
         else if(check_keyword("-"))
-            tv.push_back(new symbol(TK::MINUS));
+            tv.push_back(std::make_shared<const symbol>(TK::MINUS));
         else if(check_keyword("*"))
-            tv.push_back(new symbol(TK::ASTER));
+            tv.push_back(std::make_shared<const symbol>(TK::ASTER));
         else if(check_keyword("/"))
-            tv.push_back(new symbol(TK::SLASH));
+            tv.push_back(std::make_shared<const symbol>(TK::SLASH));
         else if(check_keyword("%"))
-            tv.push_back(new symbol(TK::PERCENT));
+            tv.push_back(std::make_shared<const symbol>(TK::PERCENT));
         else if(check_keyword("<"))
-            tv.push_back(new symbol(TK::LESS));
+            tv.push_back(std::make_shared<const symbol>(TK::LESS));
         else if(check_keyword(">"))
-            tv.push_back(new symbol(TK::GREATER));
+            tv.push_back(std::make_shared<const symbol>(TK::GREATER));
         else if(check_keyword("!"))
-            tv.push_back(new symbol(TK::EXCLAM));
+            tv.push_back(std::make_shared<const symbol>(TK::EXCLAM));
         else if(check_keyword("="))
-            tv.push_back(new symbol(TK::EQUAL));
+            tv.push_back(std::make_shared<const symbol>(TK::EQUAL));
         else if(check_keyword(","))
-            tv.push_back(new symbol(TK::COMMA));
+            tv.push_back(std::make_shared<const symbol>(TK::COMMA));
         else if(check_keyword(";"))
-            tv.push_back(new symbol(TK::SCOLON));
+            tv.push_back(std::make_shared<const symbol>(TK::SCOLON));
         else if(check_keyword("("))
-            tv.push_back(new symbol(TK::OPARENT));
+            tv.push_back(std::make_shared<const symbol>(TK::OPARENT));
         else if(check_keyword(")"))
-            tv.push_back(new symbol(TK::CPARENT));
+            tv.push_back(std::make_shared<const symbol>(TK::CPARENT));
         else if(check_keyword("{"))
-            tv.push_back(new symbol(TK::OBRACE));
+            tv.push_back(std::make_shared<const symbol>(TK::OBRACE));
         else if(check_keyword("}"))
-            tv.push_back(new symbol(TK::CBRACE));
+            tv.push_back(std::make_shared<const symbol>(TK::CBRACE));
         else if(isdigit(s[i]))
-            tv.push_back(new numeric(get_numeric_literal()));
+            tv.push_back(std::make_shared<const numeric>(get_numeric_literal()));
         else if(isalpha(s[i])||s[i]=='_')
-            tv.push_back(new ident(get_identifier()));
+            tv.push_back(std::make_shared<const ident>(get_identifier()));
         else
             throw std::runtime_error("認識できないトークンが含まれます");
     }
@@ -125,15 +125,11 @@ bool token_array::check(TK type)const noexcept
 {
     return itr!=tv.end()&&(*itr)->type==type;
 }
-const token*token_array::consume(TK type)noexcept
+std::shared_ptr<const token>token_array::consume(TK type)noexcept
 {
     return check(type)?*(itr++):nullptr;
 }
 bool token_array::is_all_read()const noexcept
 {
     return itr==tv.end();
-}
-token_array::~token_array()
-{
-    for(auto t:tv)delete t;
 }

@@ -1,17 +1,17 @@
 #pragma once
 #include"token.hpp"
+#include<memory>
 #include<string>
 #include<vector>
 namespace lexicon{
     class token_array final{
         private:
-            std::vector<const token*>tv;
-            decltype(tv)::const_iterator itr;
+            std::vector<std::shared_ptr<const token>>tv;
+            std::vector<std::shared_ptr<const token>>::const_iterator itr;
         public:
             token_array(const std::string&s);
-            ~token_array();
             bool check(TK type)const noexcept;
-            const token*consume(TK type)noexcept;
+            std::shared_ptr<const token>consume(TK type)noexcept;
             bool is_all_read()const noexcept;
     };
 }

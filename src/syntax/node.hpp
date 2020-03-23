@@ -1,6 +1,7 @@
 #pragma once
 #include"../semantics/analyzer.hpp"
 #include"../code/generator.hpp"
+#include<memory>
 #include<string>
 #include<utility>
 #include<vector>
@@ -32,18 +33,16 @@ namespace syntax{
     };
     class fcall final:public expression{
         public:
-            const expression*const func;
-            const std::vector<const expression*>vars;
-            fcall(const expression*func,const std::vector<const expression*>&vars);
-            ~fcall()override;
+            const std::shared_ptr<const expression>func;
+            const std::vector<std::shared_ptr<const expression>>vars;
+            fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class unopr:public expression{
         public:
-            const expression*const arg;
-            unopr(const expression*arg);
-            virtual ~unopr()override;
+            const std::shared_ptr<const expression>arg;
+            unopr(const std::shared_ptr<const expression>&arg);
             void check(semantics::analyzer&analy)const override final;
     };
     class uplus final:public unopr{
@@ -63,9 +62,8 @@ namespace syntax{
     };
     class unopr_l:public expression{
         public:
-            const ident*const arg;
-            unopr_l(const expression*arg);
-            virtual ~unopr_l()override;
+            const std::shared_ptr<const ident>arg;
+            unopr_l(const std::shared_ptr<const expression>&arg);
             void check(semantics::analyzer&analy)const override final;
     };
     class preinc final:public unopr_l{
@@ -90,9 +88,8 @@ namespace syntax{
     };
     class biopr:public expression{
         public:
-            const expression*const larg,*const rarg;
-            biopr(const expression*larg,const expression*rarg);
-            virtual ~biopr()override;
+            const std::shared_ptr<const expression>larg,rarg;
+            biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg);
             void check(semantics::analyzer&analy)const override final;
     };
     class plus final:public biopr{
@@ -167,10 +164,9 @@ namespace syntax{
     };
     class biopr_l:public expression{
         public:
-            const ident*const larg;
-            const expression*const rarg;
-            biopr_l(const expression*larg,const expression*rarg);
-            virtual ~biopr_l()override;
+            const std::shared_ptr<const ident>larg;
+            const std::shared_ptr<const expression>rarg;
+            biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg);
             void check(semantics::analyzer&analy)const override final;
     };
     class assign final:public biopr_l{
@@ -209,52 +205,46 @@ namespace syntax{
     };
     class single final:public statement{
         public:
-            const expression*const stat;
-            single(const expression*stat);
-            ~single()override;
+            const std::shared_ptr<const expression>stat;
+            single(const std::shared_ptr<const expression>&stat);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class compound final:public statement{
         public:
-            const std::vector<const statement*>stats;
-            compound(const std::vector<const statement*>&stats);
-            ~compound()override;
+            const std::vector<std::shared_ptr<const statement>>stats;
+            compound(const std::vector<std::shared_ptr<const statement>>&stats);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class define_var final:public statement{
         public:
-            const std::vector<std::pair<std::string,const expression*>>vars;
-            define_var(const std::vector<std::pair<std::string,const expression*>>&vars);
-            ~define_var()override;
+            const std::vector<std::pair<std::string,std::shared_ptr<const expression>>>vars;
+            define_var(const std::vector<std::pair<std::string,std::shared_ptr<const expression>>>&vars);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class _if_else_ final:public statement{
         public:
-            const single*const cond;
-            const statement*const st1,*const st2;
-            _if_else_(const single*cond,const statement*st1,const statement*st2);
-            ~_if_else_()override;
+            const std::shared_ptr<const single>cond;
+            const std::shared_ptr<const statement>st1,st2;
+            _if_else_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st1,const std::shared_ptr<const statement>&st2);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class _while_ final:public statement{
         public:
-            const single*const cond;
-            const statement*const st;
-            _while_(const single*cond,const statement*st);
-            ~_while_()override;
+            const std::shared_ptr<const single>cond;
+            const std::shared_ptr<const statement>st;
+            _while_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class _for_ final:public statement{
         public:
-            const single*const init,*const cond,*const reinit;
-            const statement*const st;
-            _for_(const single*init,const single*cond,const single*reinit,const statement*st);
-            ~_for_()override;
+            const std::shared_ptr<const single>init,cond,reinit;
+            const std::shared_ptr<const statement>st;
+            _for_(const std::shared_ptr<const single>&init,const std::shared_ptr<const single>&cond,const std::shared_ptr<const single>&reinit,const std::shared_ptr<const statement>&st);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
@@ -270,9 +260,8 @@ namespace syntax{
     };
     class _return_ final:public statement{
         public:
-            const single*const val;
-            _return_(const single*val);
-            ~_return_();
+            const std::shared_ptr<const single>val;
+            _return_(const std::shared_ptr<const single>&val);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
@@ -280,9 +269,8 @@ namespace syntax{
         public:
             const std::string name;
             const std::vector<std::string>args;
-            const compound*const com;
-            function(std::string name,const std::vector<std::string>&args,const compound*com);
-            ~function()override;
+            const std::shared_ptr<const compound>com;
+            function(std::string name,const std::vector<std::string>&args,const std::shared_ptr<const compound>&com);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
