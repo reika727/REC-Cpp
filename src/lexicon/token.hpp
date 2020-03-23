@@ -45,7 +45,7 @@ namespace lexicon{
         public:
             const TK type;
             token(TK type);
-            virtual ~token()=default;
+            virtual ~token()=0;
     };
     class numeric final:public token{
         public:

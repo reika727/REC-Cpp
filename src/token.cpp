@@ -8,3 +8,4 @@ ident::ident(const std::string&name)
     :token(TK::IDENT),name(name){}
 symbol::symbol(TK type)
     :token(type){}
+token::~token(){}
