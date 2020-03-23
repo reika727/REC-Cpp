@@ -1,63 +1,84 @@
 #include"lexicon/token_array.hpp"
 #include<algorithm>
+#include<initializer_list>
 #include<stdexcept>
 using namespace lexicon;
 token_array::token_array(const std::string&s)
 {
     for(int i=0;i<s.length();){
-             if(s.substr(i,3)=="int"     &&i+3<s.length()&&                           isspace(s[i+3]) &&(i+=3))tv.push_back(new symbol(TK::INT));
-        else if(s.substr(i,2)=="if"      &&i+2<s.length()&&(s[i+2]=='('||             isspace(s[i+2]))&&(i+=2))tv.push_back(new symbol(TK::IF));
-        else if(s.substr(i,4)=="else"    &&i+4<s.length()&&(s[i+4]=='{'||s[i+4]==';'||isspace(s[i+4]))&&(i+=4))tv.push_back(new symbol(TK::ELSE));
-        else if(s.substr(i,5)=="while"   &&i+5<s.length()&&(s[i+5]=='('||             isspace(s[i+5]))&&(i+=5))tv.push_back(new symbol(TK::WHILE));
-        else if(s.substr(i,3)=="for"     &&i+3<s.length()&&(s[i+3]=='('||             isspace(s[i+3]))&&(i+=3))tv.push_back(new symbol(TK::FOR));
-        else if(s.substr(i,5)=="break"   &&i+5<s.length()&&(             s[i+5]==';'||isspace(s[i+5]))&&(i+=5))tv.push_back(new symbol(TK::BREAK));
-        else if(s.substr(i,8)=="continue"&&i+8<s.length()&&(             s[i+8]==';'||isspace(s[i+8]))&&(i+=8))tv.push_back(new symbol(TK::CONTINUE));
-        else if(s.substr(i,6)=="return"  &&i+6<s.length()&&                           isspace(s[i+6]) &&(i+=6))tv.push_back(new symbol(TK::RETURN));
-        else if(isdigit(s[i])){
-            size_t sz;
-            tv.push_back(new numeric(std::stoi(s.substr(i),&sz)));
-            i+=sz;
-        }else if(isalpha(s[i])||s[i]=='_'){
-            auto beg=s.begin()+i;
-            auto len=find_if_not(beg,s.end(),[](char c){return isalpha(c)||isdigit(c)||c=='_';})-beg;
-            tv.push_back(new ident(s.substr(i,len)));
-            i+=len;
-        }else if(s.substr(i,2)=="/*"){
+        bool token_detected=false;
+        auto check_keyword=[s,&i,&token_detected](const std::string&token,auto...follow){
+            if(s.substr(i,token.length())!=token)return false;
+            if(sizeof...(follow)!=0){
+                bool match=false;
+                for(auto&&f:std::initializer_list<char>{follow...})match|=i+token.length()<s.length()&&s[i+token.length()]==f;
+                if(!match)return false;
+            }
+            i+=token.length();
+            token_detected=true;
+            return true;
+        };
+        auto check_comment_closed=[s,&i](){
             while(true){
                 if(++i>=s.length())throw std::runtime_error("コメントが閉じられていません");
                 else if(s.substr(i,2)=="*/"&&(i+=2))break;
             }
-        }
-        else if(s.substr(i,2)=="&&"&&(i+=2))tv.push_back(new symbol(TK::APAP));
-        else if(s.substr(i,2)=="||"&&(i+=2))tv.push_back(new symbol(TK::VBVB));
-        else if(s.substr(i,2)=="++"&&(i+=2))tv.push_back(new symbol(TK::PLPL));
-        else if(s.substr(i,2)=="--"&&(i+=2))tv.push_back(new symbol(TK::MIMI));
-        else if(s.substr(i,2)=="+="&&(i+=2))tv.push_back(new symbol(TK::PLEQ));
-        else if(s.substr(i,2)=="-="&&(i+=2))tv.push_back(new symbol(TK::MIEQ));
-        else if(s.substr(i,2)=="*="&&(i+=2))tv.push_back(new symbol(TK::ASEQ));
-        else if(s.substr(i,2)=="/="&&(i+=2))tv.push_back(new symbol(TK::SLEQ));
-        else if(s.substr(i,2)=="%="&&(i+=2))tv.push_back(new symbol(TK::PEEQ));
-        else if(s.substr(i,2)=="=="&&(i+=2))tv.push_back(new symbol(TK::EQEQ));
-        else if(s.substr(i,2)=="!="&&(i+=2))tv.push_back(new symbol(TK::EXEQ));
-        else if(s.substr(i,2)=="<="&&(i+=2))tv.push_back(new symbol(TK::LEEQ));
-        else if(s.substr(i,2)==">="&&(i+=2))tv.push_back(new symbol(TK::GREQ));
-        else if(s[i]         =='+' &&++i)   tv.push_back(new symbol(TK::PLUS));
-        else if(s[i]         =='-' &&++i)   tv.push_back(new symbol(TK::MINUS));
-        else if(s[i]         =='*' &&++i)   tv.push_back(new symbol(TK::ASTER));
-        else if(s[i]         =='/' &&++i)   tv.push_back(new symbol(TK::SLASH));
-        else if(s[i]         =='%' &&++i)   tv.push_back(new symbol(TK::PERCENT));
-        else if(s[i]         =='<' &&++i)   tv.push_back(new symbol(TK::LESS));
-        else if(s[i]         =='>' &&++i)   tv.push_back(new symbol(TK::GREATER));
-        else if(s[i]         =='!' &&++i)   tv.push_back(new symbol(TK::EXCLAM));
-        else if(s[i]         =='=' &&++i)   tv.push_back(new symbol(TK::EQUAL));
-        else if(s[i]         ==',' &&++i)   tv.push_back(new symbol(TK::COMMA));
-        else if(s[i]         ==';' &&++i)   tv.push_back(new symbol(TK::SCOLON));
-        else if(s[i]         =='(' &&++i)   tv.push_back(new symbol(TK::OPARENT));
-        else if(s[i]         ==')' &&++i)   tv.push_back(new symbol(TK::CPARENT));
-        else if(s[i]         =='{' &&++i)   tv.push_back(new symbol(TK::OBRACE));
-        else if(s[i]         =='}' &&++i)   tv.push_back(new symbol(TK::CBRACE));
-        else if(isspace(s[i])      &&++i)   continue;
-        else                                throw std::runtime_error("認識できないトークンが含まれます");
+        };
+        auto get_numeric_literal=[s,&i,&token_detected](){
+            size_t sz;
+            int ret=std::stoi(s.substr(i),&sz);
+            i+=sz;
+            token_detected=true;
+            return ret;
+        };
+        auto get_identifier=[s,&i,&token_detected](){
+            auto beg=s.begin()+i;
+            auto ret=std::string(beg,find_if_not(beg,s.end(),[](char c){return isalpha(c)||isdigit(c)||c=='_';}));
+            i+=ret.length();
+            token_detected=true;
+            return ret;
+        };
+        if(check_keyword("int",' '))               tv.push_back(new symbol(TK::INT));
+        if(check_keyword("if",'(',' '))            tv.push_back(new symbol(TK::IF));
+        if(check_keyword("else",'{',';',' '))      tv.push_back(new symbol(TK::ELSE));
+        if(check_keyword("while",'(',' '))         tv.push_back(new symbol(TK::WHILE));
+        if(check_keyword("for",'(',' '))           tv.push_back(new symbol(TK::FOR));
+        if(check_keyword("break",';',' '))         tv.push_back(new symbol(TK::BREAK));
+        if(check_keyword("continue",';',' '))      tv.push_back(new symbol(TK::CONTINUE));
+        if(check_keyword("return",' '))            tv.push_back(new symbol(TK::RETURN));
+        if(s.substr(i,2)=="/*")                    check_comment_closed();
+        if(check_keyword("&&"))                    tv.push_back(new symbol(TK::APAP));
+        if(check_keyword("||"))                    tv.push_back(new symbol(TK::VBVB));
+        if(check_keyword("++"))                    tv.push_back(new symbol(TK::PLPL));
+        if(check_keyword("--"))                    tv.push_back(new symbol(TK::MIMI));
+        if(check_keyword("+="))                    tv.push_back(new symbol(TK::PLEQ));
+        if(check_keyword("-="))                    tv.push_back(new symbol(TK::MIEQ));
+        if(check_keyword("*="))                    tv.push_back(new symbol(TK::ASEQ));
+        if(check_keyword("/="))                    tv.push_back(new symbol(TK::SLEQ));
+        if(check_keyword("%="))                    tv.push_back(new symbol(TK::PEEQ));
+        if(check_keyword("=="))                    tv.push_back(new symbol(TK::EQEQ));
+        if(check_keyword("!="))                    tv.push_back(new symbol(TK::EXEQ));
+        if(check_keyword("<="))                    tv.push_back(new symbol(TK::LEEQ));
+        if(check_keyword(">="))                    tv.push_back(new symbol(TK::GREQ));
+        if(check_keyword("+"))                     tv.push_back(new symbol(TK::PLUS));
+        if(check_keyword("-"))                     tv.push_back(new symbol(TK::MINUS));
+        if(check_keyword("*"))                     tv.push_back(new symbol(TK::ASTER));
+        if(check_keyword("/"))                     tv.push_back(new symbol(TK::SLASH));
+        if(check_keyword("%"))                     tv.push_back(new symbol(TK::PERCENT));
+        if(check_keyword("<"))                     tv.push_back(new symbol(TK::LESS));
+        if(check_keyword(">"))                     tv.push_back(new symbol(TK::GREATER));
+        if(check_keyword("!"))                     tv.push_back(new symbol(TK::EXCLAM));
+        if(check_keyword("="))                     tv.push_back(new symbol(TK::EQUAL));
+        if(check_keyword(","))                     tv.push_back(new symbol(TK::COMMA));
+        if(check_keyword(";"))                     tv.push_back(new symbol(TK::SCOLON));
+        if(check_keyword("("))                     tv.push_back(new symbol(TK::OPARENT));
+        if(check_keyword(")"))                     tv.push_back(new symbol(TK::CPARENT));
+        if(check_keyword("{"))                     tv.push_back(new symbol(TK::OBRACE));
+        if(check_keyword("}"))                     tv.push_back(new symbol(TK::CBRACE));
+        if(check_keyword(" ")||check_keyword("\n"))continue;
+        if(isdigit(s[i]))                          tv.push_back(new numeric(get_numeric_literal()));
+        if(isalpha(s[i])||s[i]=='_')               tv.push_back(new ident(get_identifier()));
+        if(!token_detected)                        throw std::runtime_error("認識できないトークンが含まれます");
     }
     itr=tv.begin();
 }

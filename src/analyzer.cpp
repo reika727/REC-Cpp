@@ -40,8 +40,7 @@ bool analyzer::is_available_func(const std::string&name,int var_num)
 bool analyzer::is_available_var(const std::string&name)const
 {
     return std::any_of(
-        vars.begin(),
-        vars.end(),
+        vars.begin(),vars.end(),
         [name](const std::set<std::string>&st){
             return st.count(name)==1;
         }

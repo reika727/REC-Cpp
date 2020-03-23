@@ -6,8 +6,10 @@
 int main(int argc,char**argv)
 {
     try{
-        if(argc==1)throw std::runtime_error("引数が不足しています");
-        else if(argc>3)throw std::runtime_error("引数が多すぎます");
+        if(argc==1)
+            throw std::runtime_error("引数が不足しています");
+        else if(argc>3)
+            throw std::runtime_error("引数が多すぎます");
         std::ifstream ifs{argv[1]};
         std::string source_code{std::istreambuf_iterator<char>{ifs},std::istreambuf_iterator<char>{}};
         syntax::tree tr{source_code};

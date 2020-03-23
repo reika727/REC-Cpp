@@ -91,15 +91,11 @@ void _for_::check(semantics::analyzer&analy)const
 }
 void _break_::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_breakable()){
-        throw std::runtime_error("不適切なbreak文です");
-    }
+    if(!analy.is_breakable())throw std::runtime_error("不適切なbreak文です");
 }
 void _continue_::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_continuable()){
-        throw std::runtime_error("不適切なcontinue文です");
-    }
+    if(!analy.is_continuable())throw std::runtime_error("不適切なcontinue文です");
 }
 void _return_::check(semantics::analyzer&analy)const
 {
@@ -146,9 +142,7 @@ void fcall::to_asm(code::generator&cg)const
     }
     // TODO: 関数ポインタに対応する
     cg.write("call",dynamic_cast<const ident*>(func)->name);
-    if(vars->size()>6){
-        cg.write("add",8*(vars->size()-6),"%rsp");
-    }
+    if(vars->size()>6)cg.write("add",8*(vars->size()-6),"%rsp");
     cg.write("add",align,"%rsp");
     cg.write("push","%rax");
 }
@@ -161,7 +155,8 @@ void uminus::to_asm(code::generator&cg)const
     arg->to_asm(cg);
     cg.write("pop","%rax");
     cg.write("mov","%rax","%rdi");
-    cg.write("mov",2,"%rsi");cg.write("mul","%rsi");
+    cg.write("mov",2,"%rsi");
+    cg.write("mul","%rsi");
     cg.write("sub","%rax","%rdi");
     cg.write("push","%rdi");
 }
@@ -538,72 +533,48 @@ void function::to_asm(code::generator&cg)const
         cg.write("ret");
     }
 }
-numeric::numeric(int value):value(value)
-{
-
-}
-ident::ident(const std::string&name):name(name)
-{
-
-}
-fcall::fcall(const expression*func,const std::vector<const expression*>*vars):func(func),vars(vars)
-{
-
-}
-unopr::unopr(const expression*arg):arg(arg)
-{
-
-}
-unopr_l::unopr_l(const expression*arg):arg(dynamic_cast<const ident*>(arg))
+numeric::numeric(int value)
+    :value(value){}
+ident::ident(const std::string&name)
+    :name(name){}
+fcall::fcall(const expression*func,const std::vector<const expression*>*vars)
+    :func(func),vars(vars){}
+unopr::unopr(const expression*arg)
+    :arg(arg){}
+unopr_l::unopr_l(const expression*arg)
+    :arg(dynamic_cast<const ident*>(arg))
 {
     if(!(this->arg)){
         this->~unopr_l();
         throw std::runtime_error("右辺値を引数にとることはできません");
     }
 }
-biopr::biopr(const expression*larg,const expression*rarg):larg(larg),rarg(rarg)
-{
-
-}
-biopr_l::biopr_l(const expression*larg,const expression*rarg):larg(dynamic_cast<const ident*>(larg)),rarg(rarg)
+biopr::biopr(const expression*larg,const expression*rarg)
+    :larg(larg),rarg(rarg){}
+biopr_l::biopr_l(const expression*larg,const expression*rarg)
+    :larg(dynamic_cast<const ident*>(larg)),rarg(rarg)
 {
     if(!(this->larg)){
         this->~biopr_l();
         throw std::runtime_error("右辺値を引数にとることはできません");
     }
 }
-single::single(const expression*stat):stat(stat)
-{
-
-}
-compound::compound(const std::vector<const statement*>*stats):stats(stats)
-{
-
-}
-define_var::define_var(const std::vector<std::pair<std::string,const expression*>>*vars):vars(vars)
-{
-
-}
-_if_else_::_if_else_(const single*cond,const statement*st1,const statement*st2):cond(cond),st1(st1),st2(st2)
-{
-
-}
-_while_::_while_(const single*cond,const statement*st):cond(cond),st(st)
-{
-
-}
-_for_::_for_(const single*init,const single*cond,const single*reinit,const statement*st):init(init),cond(cond),reinit(reinit),st(st)
-{
-
-}
-_return_::_return_(const single*val):val(val)
-{
-
-}
-function::function(std::string name,const std::vector<std::string>*args,const compound*com):name(name),args(args),com(com)
-{
-
-}
+single::single(const expression*stat)
+    :stat(stat){}
+compound::compound(const std::vector<const statement*>*stats)
+    :stats(stats){}
+define_var::define_var(const std::vector<std::pair<std::string,const expression*>>*vars)
+    :vars(vars){}
+_if_else_::_if_else_(const single*cond,const statement*st1,const statement*st2)
+    :cond(cond),st1(st1),st2(st2){}
+_while_::_while_(const single*cond,const statement*st)
+    :cond(cond),st(st){}
+_for_::_for_(const single*init,const single*cond,const single*reinit,const statement*st)
+    :init(init),cond(cond),reinit(reinit),st(st){}
+_return_::_return_(const single*val)
+    :val(val){}
+function::function(std::string name,const std::vector<std::string>*args,const compound*com)
+    :name(name),args(args),com(com){}
 fcall::~fcall()
 {
     delete func;

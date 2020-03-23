@@ -13,29 +13,40 @@ const function*tree::func()
     auto vars=new std::vector<std::string>;
     if(!ta.consume(TK::CPARENT)){
         while(true){
-            if(!ta.consume(TK::INT))throw std::runtime_error("引数の型が見つかりませんでした");
-            auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT));
-            if(!idp)throw std::runtime_error("引数名が見つかりませんでした");
-            vars->push_back(idp->name);
-            if(ta.consume(TK::COMMA))continue;
-            else if(ta.consume(TK::CPARENT))break;
-            else throw std::runtime_error("不正な区切り文字です");
+            if(!ta.consume(TK::INT))
+                throw std::runtime_error("引数の型が見つかりませんでした");
+            if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT)))
+                vars->push_back(idp->name);
+            else
+                throw std::runtime_error("引数名が見つかりませんでした");
+            if(ta.consume(TK::COMMA))
+                continue;
+            else if(ta.consume(TK::CPARENT))
+                break;
+            else
+                throw std::runtime_error("不正な区切り文字です");
         }
     }
-    if(ta.consume(TK::SCOLON))return new function(fidp->name,vars,nullptr);
-    else if(auto comp=dynamic_cast<const compound*>(stat()))return new function(fidp->name,vars,comp);
-    else throw std::runtime_error("関数の本体が見つかりませんでした");
+    if(ta.consume(TK::SCOLON))
+        return new function(fidp->name,vars,nullptr);
+    else if(auto comp=dynamic_cast<const compound*>(stat()))
+        return new function(fidp->name,vars,comp);
+    else
+        throw std::runtime_error("関数の本体が見つかりませんでした");
 }
 const statement*tree::stat()
 {
     if(ta.consume(TK::INT)){
         auto vars=new std::vector<std::pair<std::string,const expression*>>;
         while(true){
-            auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT));
-            if(!idp)throw std::runtime_error("無効な宣言です");
-            vars->push_back(std::make_pair(idp->name,ta.consume(TK::EQUAL)?order14():nullptr));
-            if(ta.consume(TK::SCOLON))break;
-            else if(!ta.consume(TK::COMMA))throw std::runtime_error("不正な区切り文字です");
+            if(auto idp=dynamic_cast<const lexicon::ident*>(ta.consume(TK::IDENT)))
+                vars->push_back(std::make_pair(idp->name,ta.consume(TK::EQUAL)?order14():nullptr));
+            else
+                throw std::runtime_error("無効な宣言です");
+            if(ta.consume(TK::SCOLON))
+                break;
+            else if(!ta.consume(TK::COMMA))
+                throw std::runtime_error("不正な区切り文字です");
         }
         return new define_var(vars);
     }else if(ta.consume(TK::IF)){
@@ -81,93 +92,119 @@ const statement*tree::stat()
 }
 const single*tree::emptiable_single()
 {
-    if(ta.check(TK::SCOLON)||ta.check(TK::CPARENT))return new single(nullptr);
-    else                                           return new single(order15());
+    return new single(ta.check(TK::SCOLON)||ta.check(TK::CPARENT)?nullptr:order15());
 }
 const expression*tree::order15() // , left to right
 {
     auto ret=order14();
-    while(true){
-        if(ta.consume(TK::COMMA))ret=new comma(ret,order14());
-        else                     return ret;
-    }
+    while(ta.consume(TK::COMMA))ret=new comma(ret,order14());
+    return ret;
 }
 const expression*tree::order14() // = += -= *= /= right to left
 {
     auto ret=order12();
     while(true){
-              if(ta.consume(TK::EQUAL))ret=new assign(ret,order14());
-        else if(ta.consume(TK::PLEQ)) ret=new plasgn(ret,order14());
-        else if(ta.consume(TK::MIEQ)) ret=new miasgn(ret,order14());
-        else if(ta.consume(TK::ASEQ)) ret=new muasgn(ret,order14());
-        else if(ta.consume(TK::SLEQ)) ret=new diasgn(ret,order14());
-        else if(ta.consume(TK::PEEQ)) ret=new rmasgn(ret,order14());
-        else                          return ret;
+        if(ta.consume(TK::EQUAL))
+            ret=new assign(ret,order14());
+        else if(ta.consume(TK::PLEQ))
+            ret=new plasgn(ret,order14());
+        else if(ta.consume(TK::MIEQ))
+            ret=new miasgn(ret,order14());
+        else if(ta.consume(TK::ASEQ))
+            ret=new muasgn(ret,order14());
+        else if(ta.consume(TK::SLEQ))
+            ret=new diasgn(ret,order14());
+        else if(ta.consume(TK::PEEQ))
+            ret=new rmasgn(ret,order14());
+        else
+            break;
     }
+    return ret;
 }
 const expression*tree::order12() // || left to right
 {
     auto ret=order11();
-    while(true){
-        if(ta.consume(TK::VBVB))ret=new logor(ret,order11());
-        else                    return ret;
-    }
+    while(ta.consume(TK::VBVB))ret=new logor(ret,order11());
+    return ret;
 }
 const expression*tree::order11() // && left to right
 {
     auto ret=order07();
-    while(true){
-        if(ta.consume(TK::APAP))ret=new logand(ret,order07());
-        else                    return ret;
-    }
+    while(ta.consume(TK::APAP))ret=new logand(ret,order07());
+    return ret;
 }
 const expression*tree::order07() // == != left to right
 {
     auto ret=order06();
     while(true){
-             if(ta.consume(TK::EQEQ))ret=new equal (ret,order06());
-        else if(ta.consume(TK::EXEQ))ret=new nequal(ret,order06());
-        else                         return ret;
+        if(ta.consume(TK::EQEQ))
+            ret=new equal (ret,order06());
+        else if(ta.consume(TK::EXEQ))
+            ret=new nequal(ret,order06());
+        else
+            break;
     }
+    return ret;
 }
 const expression*tree::order06() // < > <= >= left to right
 {
     auto ret=order04();
     while(true){
-             if(ta.consume(TK::LESS))   ret=new less   (ret,order04());
-        else if(ta.consume(TK::GREATER))ret=new greater(ret,order04());
-        else if(ta.consume(TK::LEEQ))   ret=new leeq   (ret,order04());
-        else if(ta.consume(TK::GREQ))   ret=new greq   (ret,order04());
-        else                            return ret;
+        if(ta.consume(TK::LESS))
+            ret=new less(ret,order04());
+        else if(ta.consume(TK::GREATER))
+            ret=new greater(ret,order04());
+        else if(ta.consume(TK::LEEQ))
+            ret=new leeq(ret,order04());
+        else if(ta.consume(TK::GREQ))
+            ret=new greq(ret,order04());
+        else
+            break;
     }
+    return ret;
 }
 const expression*tree::order04() // + - left to right
 {
     auto ret=order03();
     while(true){
-             if(ta.consume(TK::PLUS)) ret=new plus (ret,order03());
-        else if(ta.consume(TK::MINUS))ret=new minus(ret,order03());
-        else                          return ret;
+        if(ta.consume(TK::PLUS))
+            ret=new plus(ret,order03());
+        else if(ta.consume(TK::MINUS))
+            ret=new minus(ret,order03());
+        else
+            break;
     }
+    return ret;
 }
 const expression*tree::order03() // * / % left to right
 {
     auto ret=order02();
     while(true){
-             if(ta.consume(TK::ASTER))  ret=new multi (ret,order02());
-        else if(ta.consume(TK::SLASH))  ret=new divide(ret,order02());
-        else if(ta.consume(TK::PERCENT))ret=new remain(ret,order02());
-        else                            return ret;
+        if(ta.consume(TK::ASTER))
+            ret=new multi(ret,order02());
+        else if(ta.consume(TK::SLASH))
+            ret=new divide(ret,order02());
+        else if(ta.consume(TK::PERCENT))
+            ret=new remain(ret,order02());
+        else
+            break;
     }
+    return ret;
 }
 const expression*tree::order02() // + - ++ -- ! right to left
 {
-         if(ta.consume(TK::PLUS))  return new uplus(order02());
-    else if(ta.consume(TK::MINUS)) return new uminus(order02());
-    else if(ta.consume(TK::PLPL))  return new preinc(order02());
-    else if(ta.consume(TK::MIMI))  return new predec(order02());
-    else if(ta.consume(TK::EXCLAM))return new lognot(order02());
-    else                           return order01();
+    if(ta.consume(TK::PLUS))
+        return new uplus(order02());
+    else if(ta.consume(TK::MINUS))
+        return new uminus(order02());
+    else if(ta.consume(TK::PLPL))
+        return new preinc(order02());
+    else if(ta.consume(TK::MIMI))
+        return new predec(order02());
+    else if(ta.consume(TK::EXCLAM))
+        return new lognot(order02());
+    else
+        return order01();
 }
 const expression*tree::order01() // () left to right
 {
@@ -181,8 +218,10 @@ const expression*tree::order01() // () left to right
         if(!ta.consume(TK::CPARENT)){
             while(true){
                 vars->push_back(order14());
-                if(ta.consume(TK::CPARENT))break;
-                else if(!ta.consume(TK::COMMA))throw std::runtime_error("無効な関数呼び出しです");
+                if(ta.consume(TK::CPARENT))
+                    break;
+                else if(!ta.consume(TK::COMMA))
+                    throw std::runtime_error("無効な関数呼び出しです");
             }
         }
         ret=new fcall(ret,vars);

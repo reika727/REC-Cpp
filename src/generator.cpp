@@ -37,8 +37,7 @@ int generator::get_offset(const std::string&name)
 {
     return (*
         std::find_if(
-            offset.rbegin(),
-            offset.rend(),
+            offset.rbegin(),offset.rend(),
             [name](const std::map<std::string,int>&mp){
                 return mp.count(name)==1;
             }
@@ -105,7 +104,5 @@ std::string generator::address(const std::string&base,int scl)
 {
     return generator::address(0,base,"",scl);
 }
-generator::generator(const std::string&dst):dst(dst)
-{
-
-}
+generator::generator(const std::string&dst)
+    :dst(dst){}
