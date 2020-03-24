@@ -37,9 +37,13 @@ void biopr_l::check(semantics::analyzer&analy)const
     larg->check(analy);
     rarg->check(analy);
 }
-void single::check(semantics::analyzer&analy)const
+void expression_statement::check(semantics::analyzer&analy)const
 {
-    if(stat)stat->check(analy);
+    expr->check(analy);
+}
+void null_statement::check(semantics::analyzer&analy)const
+{
+    return;
 }
 void compound::check(semantics::analyzer&analy)const
 {
@@ -403,12 +407,14 @@ void rmasgn::to_asm(code::generator&cg)const
     cg.write("mov","%rdx",code::generator::address("%rsi"));
     cg.write("push","%rdx");
 }
-void single::to_asm(code::generator&cg)const
+void expression_statement::to_asm(code::generator&cg)const
 {
-    if(stat){
-        stat->to_asm(cg);
-        cg.write("pop","%rax");
-    }
+    expr->to_asm(cg);
+    cg.write("pop","%rax");
+}
+void null_statement::to_asm(code::generator&cg)const
+{
+    return;
 }
 void compound::to_asm(code::generator&cg)const
 {
@@ -555,19 +561,19 @@ biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_
         throw std::runtime_error("右辺値を引数にとることはできません");
     }
 }
-single::single(const std::shared_ptr<const expression>&stat)
-    :stat(stat){}
+expression_statement::expression_statement(const std::shared_ptr<const expression>&expr)
+    :expr(expr){}
 compound::compound(const std::vector<std::shared_ptr<const statement>>&stats)
     :stats(stats){}
 define_var::define_var(const std::vector<std::pair<std::string,std::shared_ptr<const expression>>>&vars)
     :vars(vars){}
-_if_else_::_if_else_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st1,const std::shared_ptr<const statement>&st2)
+_if_else_::_if_else_(const std::shared_ptr<const expression_statement>&cond,const std::shared_ptr<const statement>&st1,const std::shared_ptr<const statement>&st2)
     :cond(cond),st1(st1),st2(st2){}
-_while_::_while_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st)
+_while_::_while_(const std::shared_ptr<const expression_statement>&cond,const std::shared_ptr<const statement>&st)
     :cond(cond),st(st){}
-_for_::_for_(const std::shared_ptr<const single>&init,const std::shared_ptr<const single>&cond,const std::shared_ptr<const single>&reinit,const std::shared_ptr<const statement>&st)
+_for_::_for_(const std::shared_ptr<const single_statement>&init,const std::shared_ptr<const single_statement>&cond,const std::shared_ptr<const single_statement>&reinit,const std::shared_ptr<const statement>&st)
     :init(init),cond(cond),reinit(reinit),st(st){}
-_return_::_return_(const std::shared_ptr<const single>&val)
+_return_::_return_(const std::shared_ptr<const expression_statement>&val)
     :val(val){}
 function::function(std::string name,const std::vector<std::string>&args,const std::shared_ptr<const compound>&com)
     :name(name),args(args),com(com){}

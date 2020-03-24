@@ -203,10 +203,19 @@ namespace syntax{
         public:
             virtual ~statement()=default;
     };
-    class single final:public statement{
+    class single_statement:public statement{
         public:
-            const std::shared_ptr<const expression>stat;
-            single(const std::shared_ptr<const expression>&stat);
+            virtual ~single_statement()=default;
+    };
+    class expression_statement:public single_statement{
+        public:
+            const std::shared_ptr<const expression>expr;
+            expression_statement(const std::shared_ptr<const expression>&expr);
+            void check(semantics::analyzer&analy)const override;
+            void to_asm(code::generator&cg)const override;
+    };
+    class null_statement final:public single_statement{
+        public:
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
@@ -226,25 +235,25 @@ namespace syntax{
     };
     class _if_else_ final:public statement{
         public:
-            const std::shared_ptr<const single>cond;
+            const std::shared_ptr<const expression_statement>cond;
             const std::shared_ptr<const statement>st1,st2;
-            _if_else_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st1,const std::shared_ptr<const statement>&st2);
+            _if_else_(const std::shared_ptr<const expression_statement>&cond,const std::shared_ptr<const statement>&st1,const std::shared_ptr<const statement>&st2);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class _while_ final:public statement{
         public:
-            const std::shared_ptr<const single>cond;
+            const std::shared_ptr<const expression_statement>cond;
             const std::shared_ptr<const statement>st;
-            _while_(const std::shared_ptr<const single>&cond,const std::shared_ptr<const statement>&st);
+            _while_(const std::shared_ptr<const expression_statement>&cond,const std::shared_ptr<const statement>&st);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
     class _for_ final:public statement{
         public:
-            const std::shared_ptr<const single>init,cond,reinit;
+            const std::shared_ptr<const single_statement>init,cond,reinit;
             const std::shared_ptr<const statement>st;
-            _for_(const std::shared_ptr<const single>&init,const std::shared_ptr<const single>&cond,const std::shared_ptr<const single>&reinit,const std::shared_ptr<const statement>&st);
+            _for_(const std::shared_ptr<const single_statement>&init,const std::shared_ptr<const single_statement>&cond,const std::shared_ptr<const single_statement>&reinit,const std::shared_ptr<const statement>&st);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };
@@ -260,8 +269,8 @@ namespace syntax{
     };
     class _return_ final:public statement{
         public:
-            const std::shared_ptr<const single>val;
-            _return_(const std::shared_ptr<const single>&val);
+            const std::shared_ptr<const expression_statement>val;
+            _return_(const std::shared_ptr<const expression_statement>&val);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&cg)const override;
     };

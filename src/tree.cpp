@@ -51,24 +51,22 @@ std::shared_ptr<const statement>tree::stat()
         return std::make_shared<const define_var>(vars);
     }else if(ta.consume(TK::IF)){
         if(!ta.consume(TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
-        auto cond=std::make_shared<const single>(order15());
+        auto cond=std::make_shared<const expression_statement>(order15());
         if(!ta.consume(TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
         auto st1=stat();
-        auto st2=ta.consume(TK::ELSE)?stat():std::make_shared<const single>(nullptr);
+        auto st2=ta.consume(TK::ELSE)?stat():std::make_shared<const null_statement>();
         return std::make_shared<const _if_else_>(cond,st1,st2);
     }else if(ta.consume(TK::WHILE)){
         if(!ta.consume(TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
-        auto cond=std::make_shared<const single>(order15());
+        auto cond=std::make_shared<const expression_statement>(order15());
         if(!ta.consume(TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
         auto st=stat();
         return std::make_shared<const _while_>(cond,st);
     }else if(ta.consume(TK::FOR)){
         if(!ta.consume(TK::OPARENT))throw std::runtime_error("forの後ろに括弧がありません");
-        auto init=emptiable_single();
-        if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
-        auto cond=emptiable_single();
-        if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
-        auto reinit=emptiable_single();
+        auto init=get_single();
+        auto cond=get_single();
+        auto reinit=get_single();
         if(!ta.consume(TK::CPARENT))throw std::runtime_error("forの後ろに括弧がありません");
         auto st=stat();
         return std::make_shared<const _for_>(init,cond,reinit,st);
@@ -79,20 +77,27 @@ std::shared_ptr<const statement>tree::stat()
         if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正なcontinue文です");
         return std::make_shared<const _continue_>();
     }else if(ta.consume(TK::RETURN)){
-        return std::make_shared<const _return_>(std::make_shared<const single>(order15()));
+        auto ret=std::make_shared<const _return_>(std::make_shared<const expression_statement>(order15()));
+        if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正なreturn文です");
+        return ret;
     }else if(ta.consume(TK::OBRACE)){
         auto stats=std::vector<std::shared_ptr<const statement>>();
         while(!ta.consume(TK::CBRACE))stats.push_back(stat());
         return std::make_shared<const compound>(stats);
     }else{
-        auto ret=emptiable_single();
-        if(!ta.consume(TK::SCOLON))throw std::runtime_error("不正な区切り文字です");
+        auto ret=get_single();
         return ret;
     }
 }
-std::shared_ptr<const single>tree::emptiable_single()
+std::shared_ptr<const single_statement>tree::get_single()
 {
-    return std::make_shared<const single>(ta.check(TK::SCOLON)||ta.check(TK::CPARENT)?nullptr:order15());
+    if(ta.consume(TK::SCOLON)){
+        return std::make_shared<const null_statement>();
+    }else{
+        auto ret=std::make_shared<const expression_statement>(order15());
+        if(!ta.consume(TK::SCOLON))throw std::runtime_error("式文の後ろにセミコロンがありません");
+        return ret;
+    }
 }
 std::shared_ptr<const expression>tree::order15() // , left to right
 {

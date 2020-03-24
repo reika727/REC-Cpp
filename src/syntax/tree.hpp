@@ -11,7 +11,7 @@ namespace syntax{
             std::vector<std::shared_ptr<const function>>funcs;
             std::shared_ptr<const function>func();
             std::shared_ptr<const statement>stat();
-            std::shared_ptr<const single>emptiable_single();
+            std::shared_ptr<const single_statement>get_single();
             std::shared_ptr<const expression>order15();
             std::shared_ptr<const expression>order14();
             std::shared_ptr<const expression>order12();

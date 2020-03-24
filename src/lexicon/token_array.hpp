@@ -10,7 +10,6 @@ namespace lexicon{
             std::vector<std::shared_ptr<const token>>::const_iterator itr;
         public:
             token_array(const std::string&s);
-            bool check(TK type)const noexcept;
             std::shared_ptr<const token>consume(TK type)noexcept;
             bool is_all_read()const noexcept;
     };
