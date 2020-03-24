@@ -1,12 +1,13 @@
-SRCDIR =src
-OBJDIR =obj
-DEPDIR =dep
-TRGDIR =bin
+CXXFLAGS=-std=c++17
+SRCDIR=src
+OBJDIR=obj
+DEPDIR=dep
+TRGDIR=bin
 TESTDIR=test
-SRCS   =$(wildcard $(SRCDIR)/*.cpp)
-OBJS   =$(addprefix $(OBJDIR)/,$(notdir $(SRCS:.cpp=.o)))
-DEPS   =$(addprefix $(DEPDIR)/,$(notdir $(SRCS:.cpp=.d)))
-TARGET =$(TRGDIR)/rec.out
+SRCS=$(wildcard $(SRCDIR)/*.cpp)
+OBJS=$(addprefix $(OBJDIR)/,$(notdir $(SRCS:.cpp=.o)))
+DEPS=$(addprefix $(DEPDIR)/,$(notdir $(SRCS:.cpp=.d)))
+TARGET=$(TRGDIR)/rec.out
 
 .PHONY: all
 all: $(TARGET)
@@ -20,7 +21,7 @@ $(TARGET): $(OBJS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
 	@mkdir -p $(DEPDIR)
-	$(CXX) $< -c -MMD -MP -o $@ -MF $(DEPDIR)/$(notdir $*).d
+	$(CXX) $< -c -MMD -MP -o $@ -MF $(DEPDIR)/$(notdir $*).d $(CXXFLAGS)
 
 .PHONY: test
 test: $(TARGET)

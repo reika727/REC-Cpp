@@ -1,6 +1,5 @@
 #include"lexicon/token_array.hpp"
 #include<algorithm>
-#include<initializer_list>
 #include<stdexcept>
 using namespace lexicon;
 token_array::token_array(const std::string&s)
@@ -13,9 +12,8 @@ token_array::token_array(const std::string&s)
         auto check_keyword=[s,&i](const std::string&token,auto...follow){
             if(s.substr(i,token.length())!=token)return false;
             if(sizeof...(follow)!=0){
-                bool match=false;
-                for(auto&&f:std::initializer_list<char>{follow...})match|=i+token.length()<s.length()&&s[i+token.length()]==f;
-                if(!match)return false;
+                if(i+token.length()>=s.length())return false;
+                if(((follow!=s[i+token.length()])&&...))return false;
             }
             i+=token.length();
             return true;
