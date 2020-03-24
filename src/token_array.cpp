@@ -121,7 +121,7 @@ token_array::token_array(const std::string&s)
 }
 std::shared_ptr<const token>token_array::consume(TK type)noexcept
 {
-    return itr!=tv.end()&&(*itr)->type==type?*(itr++):nullptr;
+    return itr!=tv.end()&&(*itr)->type==type?*itr++:nullptr;
 }
 bool token_array::is_all_read()const noexcept
 {

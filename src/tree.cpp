@@ -27,9 +27,7 @@ std::shared_ptr<const function>tree::func()
                 throw std::runtime_error("不正な区切り文字です");
         }
     }
-    if(ta.consume(TK::SCOLON))
-        return std::make_shared<const function>(fidp->name,vars,nullptr);
-    else if(auto comp=std::dynamic_pointer_cast<const compound>(stat()))
+    if(auto comp=std::dynamic_pointer_cast<const compound>(stat()))
         return std::make_shared<const function>(fidp->name,vars,comp);
     else
         throw std::runtime_error("関数の本体が見つかりませんでした");

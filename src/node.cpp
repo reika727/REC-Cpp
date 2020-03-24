@@ -107,12 +107,10 @@ void function::check(semantics::analyzer&analy)const
 {
     if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
     analy.define_func(name,args.size());
-    if(com){
-        analy.enter_scope();
-        for(auto a:args)analy.define_var(a);
-        for(auto s:(com->stats))s->check(analy);
-        analy.leave_scope();
-    }
+    analy.enter_scope();
+    for(auto a:args)analy.define_var(a);
+    for(auto s:(com->stats))s->check(analy);
+    analy.leave_scope();
 }
 void numeric::to_asm(code::generator&cg)const
 {
@@ -506,36 +504,34 @@ void _return_::to_asm(code::generator&cg)const
 }
 void function::to_asm(code::generator&cg)const
 {
-    if(com){
-        cg.write(".globl "+name);
-        cg.write(name+':');
-        cg.write("push","%rbp");
-        cg.write("mov","%rsp","%rbp");
-        cg.enter_scope();
-        cg.write("sub",8*args.size(),"%rsp");
-        for(int i=0;i<args.size();++i){
-            std::string dest=code::generator::address(i+1-args.size(),"%rsp");
-            cg.set_offset(args[i]);
-            switch(i){
-                case 0 :cg.write("mov","%rdi",dest);break;
-                case 1 :cg.write("mov","%rsi",dest);break;
-                case 2 :cg.write("mov","%rdx",dest);break;
-                case 3 :cg.write("mov","%rcx",dest);break;
-                case 4 :cg.write("mov","%r8" ,dest);break;
-                case 5 :cg.write("mov","%r9" ,dest);break;
-                default:
-                        cg.write("mov",code::generator::address(8*(i-6)+16,"%rbp"),"%rax");
-                        cg.write("mov","%rax",dest);
-                        break;
-            }
+    cg.write(".globl "+name);
+    cg.write(name+':');
+    cg.write("push","%rbp");
+    cg.write("mov","%rsp","%rbp");
+    cg.enter_scope();
+    cg.write("sub",8*args.size(),"%rsp");
+    for(int i=0;i<args.size();++i){
+        std::string dest=code::generator::address(i+1-args.size(),"%rsp");
+        cg.set_offset(args[i]);
+        switch(i){
+            case 0 :cg.write("mov","%rdi",dest);break;
+            case 1 :cg.write("mov","%rsi",dest);break;
+            case 2 :cg.write("mov","%rdx",dest);break;
+            case 3 :cg.write("mov","%rcx",dest);break;
+            case 4 :cg.write("mov","%r8" ,dest);break;
+            case 5 :cg.write("mov","%r9" ,dest);break;
+            default:
+                    cg.write("mov",code::generator::address(8*(i-6)+16,"%rbp"),"%rax");
+                    cg.write("mov","%rax",dest);
+                    break;
         }
-        for(auto s:com->stats)s->to_asm(cg);
-        cg.leave_scope();
-        //TODO: なんとかする
-        cg.write("mov","%rbp","%rsp");
-        cg.write("pop","%rbp");
-        cg.write("ret");
     }
+    for(auto s:com->stats)s->to_asm(cg);
+    cg.leave_scope();
+    //TODO: なんとかする
+    cg.write("mov","%rbp","%rsp");
+    cg.write("pop","%rbp");
+    cg.write("ret");
 }
 numeric::numeric(int value)
     :value(value){}
