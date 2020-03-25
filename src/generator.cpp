@@ -76,12 +76,12 @@ void generator::write(const std::string&inst,int arg)
 {
     write(inst+" $"+std::to_string(arg));
 }
-std::string generator::unique_label(const std::string&base)
+std::string generator::get_unique_label(const std::string&base)
 {
     static unsigned int serial=0;
     return base+std::to_string(serial++);
 }
-std::string generator::address(int dis,const std::string&base,const std::string&ofs,int scl)
+std::string generator::get_address(int dis,const std::string&base,const std::string&ofs,int scl)
 {
     std::stringstream ss;
     if(dis!=0)ss<<dis;
@@ -92,17 +92,17 @@ std::string generator::address(int dis,const std::string&base,const std::string&
     ss<<')';
     return ss.str();
 }
-std::string generator::address(int dis,const std::string&base,int scl)
+std::string generator::get_address(int dis,const std::string&base,int scl)
 {
-    return generator::address(dis,base,"",scl);
+    return generator::get_address(dis,base,"",scl);
 }
-std::string generator::address(const std::string&base,const std::string&ofs,int scl)
+std::string generator::get_address(const std::string&base,const std::string&ofs,int scl)
 {
-    return generator::address(0,base,ofs,scl);
+    return generator::get_address(0,base,ofs,scl);
 }
-std::string generator::address(const std::string&base,int scl)
+std::string generator::get_address(const std::string&base,int scl)
 {
-    return generator::address(0,base,"",scl);
+    return generator::get_address(0,base,"",scl);
 }
 generator::generator(const std::string&dst)
     :dst(dst){}

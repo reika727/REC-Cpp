@@ -52,10 +52,10 @@ namespace lexicon{
             const int value;
             numeric(int value);
     };
-    class ident final:public token{
+    class identifier final:public token{
         public:
             const std::string name;
-            ident(const std::string&name);
+            identifier(const std::string&name);
     };
     class symbol final:public token{
         public:

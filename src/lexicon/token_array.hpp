@@ -6,7 +6,7 @@
 namespace lexicon{
     class token_array final{
         private:
-            std::vector<std::shared_ptr<const token>>tv;
+            std::vector<std::shared_ptr<const token>>tokens;
             std::vector<std::shared_ptr<const token>>::const_iterator itr;
         public:
             token_array(const std::string&s);
