@@ -528,7 +528,7 @@ void define_function::to_asm(code::generator&gen)const
     }
     for(auto s:com->stats)s->to_asm(gen);
     gen.leave_scope();
-    //TODO: なんとかする
+    // TODO: 強制returnをなんとかする
     gen.write("mov","%rbp","%rsp");
     gen.write("pop","%rbp");
     gen.write("ret");

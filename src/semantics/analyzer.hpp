@@ -4,12 +4,6 @@
 #include<string>
 #include<vector>
 namespace semantics{
-    /*
-     * 検出すべき意味論的誤り
-     * 未定義変数/関数の使用
-     * 変数/関数の二重定義
-     * 不適切な箇所でのbreak/continueの使用
-     */
     class analyzer final{
         private:
             std::vector<std::set<std::string>>vars;
