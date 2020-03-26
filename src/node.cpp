@@ -1,6 +1,298 @@
 #include"syntax/node.hpp"
 #include<stdexcept>
 using namespace syntax;
+std::shared_ptr<const expression>expression::get(lexicon::token_array&ta,bool not_for_initialization)
+{
+    return not_for_initialization?get_order15(ta):get_order14(ta);
+}
+std::shared_ptr<const expression>expression::get_order15(lexicon::token_array&ta) // , left to right
+{
+    auto ret=get_order14(ta);
+    while(ta.consume(lexicon::TK::COMMA))
+        ret=std::make_shared<const comma>(ret,get_order14(ta));
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order14(lexicon::token_array&ta) // = += -= *= /= right to left
+{
+    auto ret=get_order12(ta);
+    while(true){
+        if(ta.consume(lexicon::TK::EQUAL))
+            ret=std::make_shared<const assign>(ret,get_order14(ta));
+        else if(ta.consume(lexicon::TK::PLEQ))
+            ret=std::make_shared<const plasgn>(ret,get_order14(ta));
+        else if(ta.consume(lexicon::TK::MIEQ))
+            ret=std::make_shared<const miasgn>(ret,get_order14(ta));
+        else if(ta.consume(lexicon::TK::ASEQ))
+            ret=std::make_shared<const muasgn>(ret,get_order14(ta));
+        else if(ta.consume(lexicon::TK::SLEQ))
+            ret=std::make_shared<const diasgn>(ret,get_order14(ta));
+        else if(ta.consume(lexicon::TK::PEEQ))
+            ret=std::make_shared<const rmasgn>(ret,get_order14(ta));
+        else
+            break;
+    }
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order12(lexicon::token_array&ta) // || left to right
+{
+    auto ret=get_order11(ta);
+    while(ta.consume(lexicon::TK::VBVB))
+        ret=std::make_shared<const logor>(ret,get_order11(ta));
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order11(lexicon::token_array&ta) // && left to right
+{
+    auto ret=get_order07(ta);
+    while(ta.consume(lexicon::TK::APAP))
+        ret=std::make_shared<const logand>(ret,get_order07(ta));
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order07(lexicon::token_array&ta) // == != left to right
+{
+    auto ret=get_order06(ta);
+    while(true){
+        if(ta.consume(lexicon::TK::EQEQ))
+            ret=std::make_shared<const equal>(ret,get_order06(ta));
+        else if(ta.consume(lexicon::TK::EXEQ))
+            ret=std::make_shared<const nequal>(ret,get_order06(ta));
+        else
+            break;
+    }
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order06(lexicon::token_array&ta) // < > <= >= left to right
+{
+    auto ret=get_order04(ta);
+    while(true){
+        if(ta.consume(lexicon::TK::LESS))
+            ret=std::make_shared<const less>(ret,get_order04(ta));
+        else if(ta.consume(lexicon::TK::GREATER))
+            ret=std::make_shared<const greater>(ret,get_order04(ta));
+        else if(ta.consume(lexicon::TK::LEEQ))
+            ret=std::make_shared<const leeq>(ret,get_order04(ta));
+        else if(ta.consume(lexicon::TK::GREQ))
+            ret=std::make_shared<const greq>(ret,get_order04(ta));
+        else
+            break;
+    }
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order04(lexicon::token_array&ta) // + - left to right
+{
+    auto ret=get_order03(ta);
+    while(true){
+        if(ta.consume(lexicon::TK::PLUS))
+            ret=std::make_shared<const bplus>(ret,get_order03(ta));
+        else if(ta.consume(lexicon::TK::MINUS))
+            ret=std::make_shared<const bminus>(ret,get_order03(ta));
+        else
+            break;
+    }
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order03(lexicon::token_array&ta) // * / % left to right
+{
+    auto ret=get_order02(ta);
+    while(true){
+        if(ta.consume(lexicon::TK::ASTER))
+            ret=std::make_shared<const multiply>(ret,get_order02(ta));
+        else if(ta.consume(lexicon::TK::SLASH))
+            ret=std::make_shared<const divide>(ret,get_order02(ta));
+        else if(ta.consume(lexicon::TK::PERCENT))
+            ret=std::make_shared<const remain>(ret,get_order02(ta));
+        else
+            break;
+    }
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order02(lexicon::token_array&ta) // + - ++ -- ! right to left
+{
+    if(ta.consume(lexicon::TK::PLUS))
+        return std::make_shared<const uplus>(get_order02(ta));
+    else if(ta.consume(lexicon::TK::MINUS))
+        return std::make_shared<const uminus>(get_order02(ta));
+    else if(ta.consume(lexicon::TK::PLPL))
+        return std::make_shared<const preinc>(get_order02(ta));
+    else if(ta.consume(lexicon::TK::MIMI))
+        return std::make_shared<const predec>(get_order02(ta));
+    else if(ta.consume(lexicon::TK::EXCLAM))
+        return std::make_shared<const lognot>(get_order02(ta));
+    else
+        return get_order01(ta);
+}
+std::shared_ptr<const expression>expression::get_order01(lexicon::token_array&ta) // () left to right
+{
+    auto ret=get_order00(ta);
+    if(ta.consume(lexicon::TK::PLPL)){
+        ret=std::make_shared<const postinc>(ret);
+    }else if(ta.consume(lexicon::TK::MIMI)){
+        ret=std::make_shared<const postdec>(ret);
+    }else if(ta.consume(lexicon::TK::OPARENT)){
+        auto vars=std::vector<std::shared_ptr<const expression>>();
+        if(!ta.consume(lexicon::TK::CPARENT)){
+            while(true){
+                vars.push_back(get_order14(ta));
+                if(ta.consume(lexicon::TK::CPARENT))
+                    break;
+                else if(!ta.consume(lexicon::TK::COMMA))
+                    throw std::runtime_error("無効な関数呼び出しです");
+            }
+        }
+        ret=std::make_shared<const fcall>(ret,vars);
+    }
+    return ret;
+}
+std::shared_ptr<const expression>expression::get_order00(lexicon::token_array&ta) // literal, identifier, enclosed expression
+{
+    if(auto nump=std::dynamic_pointer_cast<const lexicon::numeric>(ta.consume(lexicon::TK::NUMERIC))){
+        return std::make_shared<const numeric>(nump->value);
+    }else if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT))){
+        return std::make_shared<const identifier>(idp->name);
+    }else if(ta.consume(lexicon::TK::OPARENT)){
+        auto ret=get_order15(ta);
+        if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
+        return ret;
+    }else{
+        throw std::runtime_error("構文解析ができませんでした");
+    }
+}
+std::shared_ptr<const statement>statement::get(lexicon::token_array&ta)
+{
+    if(ta.check(lexicon::TK::INT))return define_var::get(ta);
+    else if(ta.check(lexicon::TK::IF))return _if_else_::get(ta);
+    else if(ta.check(lexicon::TK::WHILE))return _while_::get(ta);
+    else if(ta.check(lexicon::TK::FOR))return _for_::get(ta);
+    else if(ta.check(lexicon::TK::BREAK))return _break_::get(ta);
+    else if(ta.check(lexicon::TK::CONTINUE))return _continue_::get(ta);
+    else if(ta.check(lexicon::TK::RETURN))return _return_::get(ta);
+    else if(ta.check(lexicon::TK::OBRACE))return compound::get(ta);
+    else if(ta.check(lexicon::TK::SCOLON))return null_statement::get(ta);
+    else return expression_statement::get(ta);
+}
+std::shared_ptr<const expression_statement>expression_statement::get(lexicon::token_array&ta)
+{
+    auto ret=std::make_shared<expression_statement>();
+    ret->expr=expression::get(ta);
+    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    return ret;
+}
+std::shared_ptr<const null_statement>null_statement::get(lexicon::token_array&ta)
+{
+    auto ret=std::make_shared<const null_statement>();
+    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    return ret;
+}
+std::shared_ptr<const compound>compound::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::OBRACE))throw std::runtime_error("複文の開始ブラケットが見つかりませんでした");
+    auto ret=std::make_shared<compound>();
+    while(!ta.consume(lexicon::TK::CBRACE))ret->stats.push_back(statement::get(ta));
+    return ret;
+}
+std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::INT))throw std::runtime_error("型指定子が見つかりませんでした");
+    auto ret=std::make_shared<define_var>();
+    while(true){
+        if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
+            ret->vars.push_back(std::make_pair(idp->name,ta.consume(lexicon::TK::EQUAL)?expression::get(ta,false):nullptr));
+        else
+            throw std::runtime_error("無効な宣言です");
+        if(ta.consume(lexicon::TK::SCOLON))
+            break;
+        else if(!ta.consume(lexicon::TK::COMMA))
+            throw std::runtime_error("不正な区切り文字です");
+    }
+    return ret;
+}
+std::shared_ptr<const _if_else_>_if_else_::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::IF))throw std::runtime_error("ifキーワードが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
+    auto ret=std::make_shared<_if_else_>();
+    ret->cond=expression::get(ta);
+    if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
+    ret->stat_if=statement::get(ta);
+    // 「else節に空文のみが存在する場合、またその場合に限りそのelse節を省略できる」というルールが存在しているとみなす。
+    ret->stat_else=ta.consume(lexicon::TK::ELSE)?statement::get(ta):null_statement::get(ta);
+    return ret;
+}
+std::shared_ptr<const _while_>_while_::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::WHILE))throw std::runtime_error("whileキーワードが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
+    auto ret=std::make_shared<_while_>();
+    ret->cond=expression::get(ta);
+    if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
+    ret->stat=statement::get(ta);
+    return ret;
+}
+std::shared_ptr<const _for_>_for_::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::FOR))throw std::runtime_error("forキーワードが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("forの後ろに括弧がありません");
+    auto ret=std::make_shared<_for_>();
+    ret->init=expression::get(ta);
+    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    ret->cond=expression::get(ta);
+    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    ret->reinit=expression::get(ta);
+    if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("forの後ろに括弧がありません");
+    ret->stat=statement::get(ta);
+    return ret;
+}
+std::shared_ptr<const _break_>_break_::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::BREAK))throw std::runtime_error("breakキーワードが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("不正なbreak文です");
+    return std::make_shared<const _break_>();
+}
+std::shared_ptr<const _continue_>_continue_::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::CONTINUE))throw std::runtime_error("continueキーワードが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("不正なcontinue文です");
+    return std::make_shared<const _continue_>();
+}
+std::shared_ptr<const _return_>_return_::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::RETURN))throw std::runtime_error("returnキーワードが見つかりませんでした");
+    auto ret=std::make_shared<_return_>();
+    ret->value=expression::get(ta);
+    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("不正なreturn文です");
+    return ret;
+}
+std::shared_ptr<const define_function>define_function::get(lexicon::token_array&ta)
+{
+    if(!ta.consume(lexicon::TK::INT))throw std::runtime_error("関数の型が見つかりませんでした");
+    auto ret=std::make_shared<define_function>();
+    if(auto fidp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
+        ret->name=fidp->name;
+    else
+        throw std::runtime_error("関数名が見つかりませんでした");
+    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("引数リストが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::CPARENT)){
+        while(true){
+            if(!ta.consume(lexicon::TK::INT))
+                throw std::runtime_error("引数の型が見つかりませんでした");
+            if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
+                ret->args.push_back(idp->name);
+            else
+                throw std::runtime_error("引数名が見つかりませんでした");
+            if(ta.consume(lexicon::TK::COMMA))
+                continue;
+            else if(ta.consume(lexicon::TK::CPARENT))
+                break;
+            else
+                throw std::runtime_error("不正な区切り文字です");
+        }
+    }
+    try{
+        ret->com=compound::get(ta);
+    }catch(const std::runtime_error&e){
+        throw std::runtime_error("関数の本体が見つかりませんでした");
+    }
+    return ret;
+}
 void numeric::check(semantics::analyzer&analy)const noexcept
 {
     return;
@@ -11,12 +303,11 @@ void identifier::check(semantics::analyzer&analy)const
 }
 void fcall::check(semantics::analyzer&analy)const
 {
-    // TODO: 関数ポインタに対応する
     if(auto fp=std::dynamic_pointer_cast<const identifier>(func)){
         if(!analy.is_available_func(fp->name,vars.size()))throw std::runtime_error("未定義の関数です: "+fp->name);
         for(auto v:vars)v->check(analy);
     }else{
-        throw std::runtime_error("無効な関数呼び出しです");
+        throw std::runtime_error("現在関数は識別子からしか呼び出せません");
     }
 }
 void unopr::check(semantics::analyzer&analy)const
@@ -109,28 +400,28 @@ void define_function::check(semantics::analyzer&analy)const
     analy.define_func(name,args.size());
     analy.enter_scope();
     for(auto a:args)analy.define_var(a);
-    for(auto s:com->stats)s->check(analy);
+    com->check(analy);
     analy.leave_scope();
 }
 void numeric::to_asm(code::generator&gen)const
 {
-    gen.write("push",value);
+    gen.write("mov",value,"%rax");
 }
 void identifier::to_asm(code::generator&gen)const
 {
-    gen.write("push",code::generator::get_address(-gen.get_offset(name),"%rbp"));
+    gen.write("mov",code::generator::to_address(-gen.get_offset(name),"%rbp"),"%rax");
 }
 void identifier::refer(code::generator&gen)const
 {
-    gen.write("lea",code::generator::get_address(-gen.get_offset(name),"%rbp"),"%rax");
-    gen.write("push","%rax");
+    gen.write("lea",code::generator::to_address(-gen.get_offset(name),"%rbp"),"%rax");
 }
 void fcall::to_asm(code::generator&gen)const
 {
-    int align=(16-gen.get_var_size()%16)%16;
-    gen.write("sub",align,"%rsp");
     for(int i=vars.size()-1;i>=0;--i){
         vars[i]->to_asm(gen);
+        gen.write("push","%rax");
+    }
+    for(int i=0;i<std::min(6ul,vars.size());++i){
         switch(i){
             case 0 :gen.write("pop","%rdi");break;
             case 1 :gen.write("pop","%rsi");break;
@@ -140,11 +431,12 @@ void fcall::to_asm(code::generator&gen)const
             case 5 :gen.write("pop","%r9"); break;
         }
     }
+    int align=(16-gen.get_var_size()%16)%16;
+    gen.write("sub",align,"%rsp");
     // TODO: 関数ポインタに対応する
     gen.write("call",std::dynamic_pointer_cast<const identifier>(func)->name);
-    if(vars.size()>6)gen.write("add",8*(vars.size()-6),"%rsp");
     gen.write("add",align,"%rsp");
-    gen.write("push","%rax");
+    if(vars.size()>6)gen.write("add",8*(vars.size()-6),"%rsp");
 }
 void uplus::to_asm(code::generator&gen)const
 {
@@ -152,263 +444,243 @@ void uplus::to_asm(code::generator&gen)const
 }
 void uminus::to_asm(code::generator&gen)const
 {
+    // TODO: imul命令を使うべきか検証する
     arg->to_asm(gen);
-    gen.write("pop","%rax");
     gen.write("mov","%rax","%rdi");
     gen.write("mov",2,"%rsi");
     gen.write("mul","%rsi");
     gen.write("sub","%rax","%rdi");
-    gen.write("push","%rdi");
+    gen.write("mov","%rdi","%rax");
 }
 void lognot::to_asm(code::generator&gen)const
 {
     arg->to_asm(gen);
-    gen.write("pop","%rax");
     gen.write("cmp",0,"%rax");
     gen.write("sete","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void preinc::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
-    gen.write("pop","%rax");
-    gen.write("add",1,code::generator::get_address("%rax"));
-    gen.write("push",code::generator::get_address("%rax"));
+    gen.write("add",1,code::generator::to_address("%rax"));
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
 }
 void predec::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
-    gen.write("pop","%rax");
-    gen.write("sub",1,code::generator::get_address("%rax"));
-    gen.write("push",code::generator::get_address("%rax"));
+    gen.write("sub",1,code::generator::to_address("%rax"));
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
 }
 void postinc::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
+    gen.write("push",code::generator::to_address("%rax"));
+    gen.write("add",1,code::generator::to_address("%rax"));
     gen.write("pop","%rax");
-    gen.write("push",code::generator::get_address("%rax"));
-    gen.write("add",1,code::generator::get_address("%rax"));
 }
 void postdec::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
+    gen.write("push",code::generator::to_address("%rax"));
+    gen.write("sub",1,code::generator::to_address("%rax"));
     gen.write("pop","%rax");
-    gen.write("push",code::generator::get_address("%rax"));
-    gen.write("sub",1,code::generator::get_address("%rax"));
 }
 void bplus::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
-    gen.write("pop","%rdi");
-    gen.write("pop","%rax");
-    gen.write("add","%rdi","%rax");
     gen.write("push","%rax");
+    larg->to_asm(gen);
+    gen.write("pop","%rdi");
+    gen.write("add","%rdi","%rax");
 }
 void bminus::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
-    gen.write("pop","%rdi");
-    gen.write("pop","%rax");
-    gen.write("sub","%rdi","%rax");
     gen.write("push","%rax");
+    larg->to_asm(gen);
+    gen.write("pop","%rdi");
+    gen.write("sub","%rdi","%rax");
 }
 void multiply::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
-    gen.write("pop","%rdi");
-    gen.write("pop","%rax");
-    gen.write("mul","%rdi");
     gen.write("push","%rax");
+    larg->to_asm(gen);
+    gen.write("pop","%rdi");
+    gen.write("mul","%rdi");
 }
 void divide::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("mov",0,"%rdx");
     gen.write("div","%rdi");
-    gen.write("push","%rax");
 }
 void remain::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("mov",0,"%rdx");
     gen.write("div","%rdi");
-    gen.write("push","%rdx");
+    gen.write("mov","%rdx","%rax");
 }
 void equal::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("cmp","%rdi","%rax");
     gen.write("sete","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void nequal::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("cmp","%rdi","%rax");
     gen.write("setne","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void less::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("cmp","%rdi","%rax");
     gen.write("setl","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void greater::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("cmp","%rdi","%rax");
     gen.write("setg","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void leeq::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("cmp","%rdi","%rax");
     gen.write("setle","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void greq::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("cmp","%rdi","%rax");
     gen.write("setge","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void logand::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("and","%rdi","%rax");
     gen.write("cmp",0,"%rax");
     gen.write("setne","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void logor::to_asm(code::generator&gen)const
 {
-    larg->to_asm(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("or","%rdi","%rax");
     gen.write("cmp",0,"%rax");
     gen.write("setne","%al");
     gen.write("movzb","%al","%rax");
-    gen.write("push","%rax");
 }
 void comma::to_asm(code::generator&gen)const
 {
     larg->to_asm(gen);
-    gen.write("add",8,"%rsp");
     rarg->to_asm(gen);
 }
 void assign::to_asm(code::generator&gen)const
 {
-    larg->refer(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->refer(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
-    gen.write("mov","%rdi",code::generator::get_address("%rax"));
-    gen.write("push",code::generator::get_address("%rax"));
+    gen.write("mov","%rdi",code::generator::to_address("%rax"));
+    gen.write("push",code::generator::to_address("%rax"));
 }
 void plasgn::to_asm(code::generator&gen)const
 {
-    larg->refer(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->refer(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
-    gen.write("add","%rdi",code::generator::get_address("%rax"));
-    gen.write("push",code::generator::get_address("%rax"));
+    gen.write("add","%rdi",code::generator::to_address("%rax"));
+    gen.write("push",code::generator::to_address("%rax"));
 }
 void miasgn::to_asm(code::generator&gen)const
 {
-    larg->refer(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->refer(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
-    gen.write("sub","%rdi",code::generator::get_address("%rax"));
-    gen.write("push",code::generator::get_address("%rax"));
+    gen.write("sub","%rdi",code::generator::to_address("%rax"));
+    gen.write("push",code::generator::to_address("%rax"));
 }
 void muasgn::to_asm(code::generator&gen)const
 {
-    larg->refer(gen);
     rarg->to_asm(gen);
-    gen.write("pop","%rdi");
-    gen.write("pop","%rax");
-    gen.write("mov","%rax","%rsi");
-    gen.write("mov",code::generator::get_address("%rax"),"%rax");
-    gen.write("mul","%rdi");
-    gen.write("mov","%rax",code::generator::get_address("%rsi"));
     gen.write("push","%rax");
+    larg->refer(gen);
+    gen.write("pop","%rdi");
+    gen.write("mov","%rax","%rsi");
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
+    gen.write("mul","%rdi");
+    gen.write("mov","%rax",code::generator::to_address("%rsi"));
 }
 void diasgn::to_asm(code::generator&gen)const
 {
-    larg->refer(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->refer(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("mov","%rax","%rsi");
-    gen.write("mov",code::generator::get_address("%rax"),"%rax");
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
     gen.write("mov",0,"%rdx");
     gen.write("div","%rdi");
-    gen.write("mov","%rax",code::generator::get_address("%rsi"));
-    gen.write("push","%rax");
+    gen.write("mov","%rax",code::generator::to_address("%rsi"));
 }
 void rmasgn::to_asm(code::generator&gen)const
 {
-    larg->refer(gen);
     rarg->to_asm(gen);
+    gen.write("push","%rax");
+    larg->refer(gen);
     gen.write("pop","%rdi");
-    gen.write("pop","%rax");
     gen.write("mov","%rax","%rsi");
-    gen.write("mov",code::generator::get_address("%rax"),"%rax");
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
     gen.write("mov",0,"%rdx");
     gen.write("div","%rdi");
-    gen.write("mov","%rdx",code::generator::get_address("%rsi"));
-    gen.write("push","%rdx");
+    gen.write("mov","%rdx",code::generator::to_address("%rsi"));
+    gen.write("mov","%rdx","%rax");
 }
 void expression_statement::to_asm(code::generator&gen)const
 {
     expr->to_asm(gen);
-    gen.write("pop","%rax");
 }
 void null_statement::to_asm(code::generator&gen)const
 {
@@ -427,7 +699,7 @@ void define_var::to_asm(code::generator&gen)const
         gen.set_offset(v.first);
         if(v.second){
             v.second->to_asm(gen);
-            gen.write("pop",code::generator::get_address("%rsp"));
+            gen.write("mov","%rax",code::generator::to_address("%rsp"));
         }
     }
 }
@@ -511,7 +783,7 @@ void define_function::to_asm(code::generator&gen)const
     gen.enter_scope();
     gen.write("sub",8*args.size(),"%rsp");
     for(int i=0;i<args.size();++i){
-        std::string dst=code::generator::get_address(i+1-args.size(),"%rsp");
+        std::string dst=code::generator::to_address(i+1-args.size(),"%rsp");
         gen.set_offset(args[i]);
         switch(i){
             case 0 :gen.write("mov","%rdi",dst);break;
@@ -520,13 +792,10 @@ void define_function::to_asm(code::generator&gen)const
             case 3 :gen.write("mov","%rcx",dst);break;
             case 4 :gen.write("mov","%r8" ,dst);break;
             case 5 :gen.write("mov","%r9" ,dst);break;
-            default:
-                    gen.write("mov",code::generator::get_address(8*(i-6)+16,"%rbp"),"%rax");
-                    gen.write("mov","%rax",dst);
-                    break;
+            default:gen.write("mov",code::generator::to_address(8*(i-6)+16,"%rbp"),dst);break;
         }
     }
-    for(auto s:com->stats)s->to_asm(gen);
+    com->to_asm(gen);
     gen.leave_scope();
     // TODO: 強制returnをなんとかする
     gen.write("mov","%rbp","%rsp");
@@ -557,19 +826,3 @@ biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_
         throw std::runtime_error("右辺値を引数にとることはできません");
     }
 }
-expression_statement::expression_statement(const std::shared_ptr<const expression>&expr)
-    :expr(expr){}
-compound::compound(const std::vector<std::shared_ptr<const statement>>&stats)
-    :stats(stats){}
-define_var::define_var(const std::vector<std::pair<std::string,std::shared_ptr<const expression>>>&vars)
-    :vars(vars){}
-_if_else_::_if_else_(const std::shared_ptr<const expression_statement>&cond,const std::shared_ptr<const statement>&stat_if,const std::shared_ptr<const statement>&stat_else)
-    :cond(cond),stat_if(stat_if),stat_else(stat_else){}
-_while_::_while_(const std::shared_ptr<const expression_statement>&cond,const std::shared_ptr<const statement>&stat)
-    :cond(cond),stat(stat){}
-_for_::_for_(const std::shared_ptr<const single_statement>&init,const std::shared_ptr<const single_statement>&cond,const std::shared_ptr<const single_statement>&reinit,const std::shared_ptr<const statement>&stat)
-    :init(init),cond(cond),reinit(reinit),stat(stat){}
-_return_::_return_(const std::shared_ptr<const expression_statement>&value)
-    :value(value){}
-define_function::define_function(std::string name,const std::vector<std::string>&args,const std::shared_ptr<const compound>&com)
-    :name(name),args(args),com(com){}

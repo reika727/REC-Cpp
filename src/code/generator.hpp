@@ -30,10 +30,10 @@ namespace code{
             void write(const std::string&inst,const std::string&reg);
             void write(const std::string&inst,int arg);
             static std::string get_unique_label(const std::string&base);
-            static std::string get_address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
-            static std::string get_address(int dis,const std::string&base,int scl);
-            static std::string get_address(const std::string&base,const std::string&ofs,int scl=1);
-            static std::string get_address(const std::string&base,int scl=1);
+            static std::string to_address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
+            static std::string to_address(int dis,const std::string&base,int scl);
+            static std::string to_address(const std::string&base,const std::string&ofs,int scl=1);
+            static std::string to_address(const std::string&base,int scl=1);
             generator&operator=(const generator&)=delete;
             generator&operator=(generator&&)=delete;
     };

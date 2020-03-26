@@ -119,11 +119,15 @@ token_array::token_array(const std::string&s)
     }
     itr=tokens.begin();
 }
-std::shared_ptr<const token>token_array::consume(TK type)noexcept
-{
-    return itr!=tokens.end()&&(*itr)->type==type?*itr++:nullptr;
-}
 bool token_array::is_all_read()const noexcept
 {
     return itr==tokens.end();
+}
+bool token_array::check(TK type)const noexcept
+{
+    return !is_all_read()&&(*itr)->type==type;
+}
+std::shared_ptr<const token>token_array::consume(TK type)noexcept
+{
+    return check(type)?*itr++:nullptr;
 }
