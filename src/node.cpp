@@ -213,8 +213,7 @@ std::shared_ptr<const _if_else_>_if_else_::get(lexicon::token_array&ta)
     ret->cond=expression::get(ta);
     if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
     ret->stat_if=statement::get(ta);
-    // 「else節に空文のみが存在する場合、またその場合に限りそのelse節を省略できる」というルールが存在しているとみなす。
-    ret->stat_else=ta.consume(lexicon::TK::ELSE)?statement::get(ta):null_statement::get(ta);
+    ret->stat_else=ta.consume(lexicon::TK::ELSE)?statement::get(ta):nullptr;
     return ret;
 }
 std::shared_ptr<const _while_>_while_::get(lexicon::token_array&ta)
@@ -286,11 +285,7 @@ std::shared_ptr<const define_function>define_function::get(lexicon::token_array&
                 throw std::runtime_error("不正な区切り文字です");
         }
     }
-    try{
-        ret->com=compound::get(ta);
-    }catch(const std::runtime_error&e){
-        throw std::runtime_error("関数の本体が見つかりませんでした");
-    }
+    ret->com=compound::get(ta);
     return ret;
 }
 void numeric::check(semantics::analyzer&analy)const noexcept
@@ -355,7 +350,7 @@ void _if_else_::check(semantics::analyzer&analy)const
     analy.enter_scope();
     cond->check(analy);
     stat_if->check(analy);
-    stat_else->check(analy);
+    if(stat_else)stat_else->check(analy);
     analy.leave_scope();
 }
 void _while_::check(semantics::analyzer&analy)const
@@ -685,6 +680,7 @@ void expression_statement::to_asm(code::generator&gen)const
 }
 void null_statement::to_asm(code::generator&gen)const
 {
+    gen.write("nop");
     return;
 }
 void compound::to_asm(code::generator&gen)const
@@ -715,7 +711,7 @@ void _if_else_::to_asm(code::generator&gen)const
     stat_if->to_asm(gen);
     gen.write("jmp",lend);
     gen.write(lelse+':');
-    stat_else->to_asm(gen);
+    if(stat_else)stat_else->to_asm(gen);
     gen.write(lend+':');
     gen.leave_scope();
 }
