@@ -8,9 +8,7 @@ void generator::enter_scope()
 }
 void generator::leave_scope()
 {
-    int dec=offset.back().size()*8;
-    var_size-=dec;
-    write("add",dec,"%rsp");
+    write("add",offset.back().size()*8,"%rsp");
     offset.pop_back();
 }
 void generator::enter_break(const std::string&label)
@@ -31,7 +29,8 @@ void generator::leave_continue()
 }
 void generator::set_offset(const std::string&name)
 {
-    offset.back()[name]=var_size+=8;
+    int tmp=(offset.back().size()+1)*8;
+    offset.back()[name]=tmp;
 }
 int generator::get_offset(const std::string&name)
 {
@@ -43,10 +42,6 @@ int generator::get_offset(const std::string&name)
             }
         )
     )[name];
-}
-int generator::get_var_size()const noexcept
-{
-    return var_size;
 }
 const std::string&generator::get_break_label()const
 {
@@ -81,6 +76,10 @@ std::string generator::get_unique_label(const std::string&base)
     static unsigned int serial=0;
     return base+std::to_string(serial++);
 }
+std::string generator::get_asm()
+{
+    return dst.str();
+}
 std::string generator::to_address(int dis,const std::string&base,const std::string&ofs,int scl)
 {
     std::stringstream ss;
@@ -104,5 +103,4 @@ std::string generator::to_address(const std::string&base,int scl)
 {
     return generator::to_address(0,base,"",scl);
 }
-generator::generator(const std::string&dst)
-    :dst(dst){}
+generator::generator(){}

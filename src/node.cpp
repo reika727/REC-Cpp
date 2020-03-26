@@ -431,11 +431,12 @@ void fcall::to_asm(code::generator&gen)const
             case 5 :gen.write("pop","%r9"); break;
         }
     }
-    int align=(16-gen.get_var_size()%16)%16;
-    gen.write("sub",align,"%rsp");
+    // TODO: 呼び出し規約がよくわからん
+    //int align=(16-gen.get_var_size()%16)%16;
+    //gen.write("sub",align,"%rsp");
     // TODO: 関数ポインタに対応する
     gen.write("call",std::dynamic_pointer_cast<const identifier>(func)->name);
-    gen.write("add",align,"%rsp");
+    //gen.write("add",align,"%rsp");
     if(vars.size()>6)gen.write("add",8*(vars.size()-6),"%rsp");
 }
 void uplus::to_asm(code::generator&gen)const

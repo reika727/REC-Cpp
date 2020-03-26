@@ -12,6 +12,6 @@ namespace syntax{
         public:
             tree(const std::string&src);
             void check()const;
-            void to_asm(const std::string&dst)const;
+            std::string to_asm()const;
     };
 }

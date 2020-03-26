@@ -13,8 +13,9 @@ void tree::check()const
     semantics::analyzer analy;
     for(auto f:funcs)f->check(analy);
 }
-void tree::to_asm(const std::string&dst)const
+std::string tree::to_asm()const
 {
-    code::generator cg(dst);
-    for(auto f:funcs)f->to_asm(cg);
+    code::generator gen;
+    for(auto f:funcs)f->to_asm(gen);
+    return gen.get_asm();
 }
