@@ -310,7 +310,9 @@ std::shared_ptr<const define_function>define_function::get(lexicon::token_array&
                 throw exception::syntax_error("不正な区切り文字です",ta.get_line(),ta.get_column());
         }
     }
-    ret->com=compound::get(ta);
+    if(!ta.consume(lexicon::TK::OBRACE))
+        throw exception::syntax_error("関数の開始ブラケットが見つかりません",ta.get_line(),ta.get_column());
+    while(!ta.consume(lexicon::TK::CBRACE))ret->stats.push_back(statement::get(ta));
     return ret;
 }
 void numeric::check(semantics::analyzer&analy)const noexcept
@@ -416,7 +418,7 @@ void define_function::check(semantics::analyzer&analy)const
     analy.define_func(name,args.size());
     analy.enter_scope();
     for(auto a:args)analy.define_var(a);
-    com->check(analy);
+    for(auto s:stats)s->check(analy);
     analy.leave_scope();
 }
 void numeric::to_asm(code::generator&gen)const
@@ -706,7 +708,7 @@ void compound::to_asm(code::generator&gen)const
 {
     gen.enter_scope();
     for(auto s:stats)s->to_asm(gen);
-    gen.leave_scope();
+    gen.write("add",gen.leave_scope(),"%rsp");
 }
 void define_var::to_asm(code::generator&gen)const
 {
@@ -732,7 +734,7 @@ void _if_else_::to_asm(code::generator&gen)const
     gen.write(lelse+':');
     if(stat_else)stat_else->to_asm(gen);
     gen.write(lend+':');
-    gen.leave_scope();
+    gen.write("add",gen.leave_scope(),"%rsp");
 }
 void _while_::to_asm(code::generator&gen)const
 {
@@ -750,7 +752,7 @@ void _while_::to_asm(code::generator&gen)const
     gen.write(lend+':');
     gen.leave_continue();
     gen.leave_break();
-    gen.leave_scope();
+    gen.write("add",gen.leave_scope(),"%rsp");
 }
 void _for_::to_asm(code::generator&gen)const
 {
@@ -773,7 +775,7 @@ void _for_::to_asm(code::generator&gen)const
     gen.write(lend+':');
     gen.leave_continue();
     gen.leave_break();
-    gen.leave_scope();
+    gen.write("add",gen.leave_scope(),"%rsp");
 }
 void _break_::to_asm(code::generator&gen)const
 {
@@ -792,12 +794,12 @@ void _return_::to_asm(code::generator&gen)const
 }
 void define_function::to_asm(code::generator&gen)const
 {
+    gen.enter_scope();
     gen.write(".globl "+name);
     gen.write(name+':');
     gen.write("push","%rbp");
     gen.write("mov","%rsp","%rbp");
-    gen.enter_scope();
-    gen.write("sub",8*args.size(),"%rsp");
+    gen.write("sub",args.size()*8,"%rsp");
     for(int i=0;i<args.size();++i){
         std::string dst=code::generator::to_address(i+1-args.size(),"%rsp");
         gen.set_offset(args[i]);
@@ -811,12 +813,9 @@ void define_function::to_asm(code::generator&gen)const
             default:gen.write("mov",code::generator::to_address(8*(i-6)+16,"%rbp"),dst);break;
         }
     }
-    com->to_asm(gen);
+    // TODO: com内で必ずreturnすることを前提にしている問題を解決する
+    for(auto s:stats)s->to_asm(gen);
     gen.leave_scope();
-    // TODO: 強制returnをなんとかする
-    gen.write("mov","%rbp","%rsp");
-    gen.write("pop","%rbp");
-    gen.write("ret");
 }
 node::node(int line,int col)
     :line(line),col(col){}

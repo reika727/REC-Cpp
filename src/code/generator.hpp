@@ -13,7 +13,7 @@ namespace code{
         public:
             generator();
             void enter_scope();
-            void leave_scope();
+            int leave_scope();
             void enter_break(const std::string&label);
             void leave_break();
             void enter_continue(const std::string&label);

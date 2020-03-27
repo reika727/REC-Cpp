@@ -5,10 +5,11 @@ void generator::enter_scope()
 {
     offset.emplace_back();
 }
-void generator::leave_scope()
+int generator::leave_scope()
 {
-    write("add",offset.back().size()*8,"%rsp");
+    int ret=offset.back().size()*8;
     offset.pop_back();
+    return ret;
 }
 void generator::enter_break(const std::string&label)
 {

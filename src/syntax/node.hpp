@@ -329,7 +329,7 @@ namespace syntax{
         private:
             std::string name;
             std::vector<std::string>args;
-            std::shared_ptr<const compound>com;
+            std::vector<std::shared_ptr<const statement>>stats;
         public:
             using node::node;
             static std::shared_ptr<const define_function>get(lexicon::token_array&ta);
