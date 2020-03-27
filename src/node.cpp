@@ -1,9 +1,9 @@
 #include"syntax/node.hpp"
 #include"exception/compilation_error.hpp"
 using namespace syntax;
-std::shared_ptr<const expression>expression::get(lexicon::token_array&ta,bool not_for_initialization)
+std::shared_ptr<const expression>expression::get(lexicon::token_array&ta,bool for_initialization)
 {
-    return not_for_initialization?get_order15(ta):get_order14(ta);
+    return for_initialization?get_order14(ta):get_order15(ta);
 }
 std::shared_ptr<const expression>expression::get_order15(lexicon::token_array&ta) // , left to right
 {
@@ -14,7 +14,7 @@ std::shared_ptr<const expression>expression::get_order15(lexicon::token_array&ta
 }
 std::shared_ptr<const expression>expression::get_order14(lexicon::token_array&ta) // = += -= *= /= right to left
 {
-    auto ret=get_order12(ta);
+    auto ret=get_order13(ta);
     while(true){
         if(auto tp=ta.consume(lexicon::TK::EQUAL))
             ret=std::make_shared<const assign>(ret,get_order14(ta),tp->line,tp->col);
@@ -33,6 +33,11 @@ std::shared_ptr<const expression>expression::get_order14(lexicon::token_array&ta
     }
     return ret;
 }
+std::shared_ptr<const expression>expression::get_order13(lexicon::token_array&ta)
+{
+    // TODO: placeholder
+    return get_order12(ta);
+}
 std::shared_ptr<const expression>expression::get_order12(lexicon::token_array&ta) // || left to right
 {
     auto ret=get_order11(ta);
@@ -42,10 +47,25 @@ std::shared_ptr<const expression>expression::get_order12(lexicon::token_array&ta
 }
 std::shared_ptr<const expression>expression::get_order11(lexicon::token_array&ta) // && left to right
 {
-    auto ret=get_order07(ta);
+    auto ret=get_order10(ta);
     while(auto tp=ta.consume(lexicon::TK::APAP))
-        ret=std::make_shared<const logand>(ret,get_order07(ta),tp->line,tp->col);
+        ret=std::make_shared<const logand>(ret,get_order10(ta),tp->line,tp->col);
     return ret;
+}
+std::shared_ptr<const expression>expression::get_order10(lexicon::token_array&ta)
+{
+    // TODO: placeholder
+    return get_order09(ta);
+}
+std::shared_ptr<const expression>expression::get_order09(lexicon::token_array&ta)
+{
+    // TODO: placeholder
+    return get_order08(ta);
+}
+std::shared_ptr<const expression>expression::get_order08(lexicon::token_array&ta)
+{
+    // TODO: placeholder
+    return get_order07(ta);
 }
 std::shared_ptr<const expression>expression::get_order07(lexicon::token_array&ta) // == != left to right
 {
@@ -62,20 +82,25 @@ std::shared_ptr<const expression>expression::get_order07(lexicon::token_array&ta
 }
 std::shared_ptr<const expression>expression::get_order06(lexicon::token_array&ta) // < > <= >= left to right
 {
-    auto ret=get_order04(ta);
+    auto ret=get_order05(ta);
     while(true){
         if(auto tp=ta.consume(lexicon::TK::LESS))
-            ret=std::make_shared<const less>(ret,get_order04(ta),tp->line,tp->col);
+            ret=std::make_shared<const less>(ret,get_order05(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::GREATER))
-            ret=std::make_shared<const greater>(ret,get_order04(ta),tp->line,tp->col);
+            ret=std::make_shared<const greater>(ret,get_order05(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::LEEQ))
-            ret=std::make_shared<const leeq>(ret,get_order04(ta),tp->line,tp->col);
+            ret=std::make_shared<const leeq>(ret,get_order05(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::GREQ))
-            ret=std::make_shared<const greq>(ret,get_order04(ta),tp->line,tp->col);
+            ret=std::make_shared<const greq>(ret,get_order05(ta),tp->line,tp->col);
         else
             break;
     }
     return ret;
+}
+std::shared_ptr<const expression>expression::get_order05(lexicon::token_array&ta)
+{
+    // TODO: placeholder
+    return get_order04(ta);
 }
 std::shared_ptr<const expression>expression::get_order04(lexicon::token_array&ta) // + - left to right
 {
@@ -122,11 +147,11 @@ std::shared_ptr<const expression>expression::get_order02(lexicon::token_array&ta
 }
 std::shared_ptr<const expression>expression::get_order01(lexicon::token_array&ta) // () left to right
 {
-    auto ret=get_order00(ta);
+    auto ret=get_primary(ta);
     if(auto tp=ta.consume(lexicon::TK::PLPL)){
-        ret=std::make_shared<const postinc>(ret,tp->line,tp->col);
+        return std::make_shared<const postinc>(ret,tp->line,tp->col);
     }else if(tp=ta.consume(lexicon::TK::MIMI)){
-        ret=std::make_shared<const postdec>(ret,tp->line,tp->col);
+        return std::make_shared<const postdec>(ret,tp->line,tp->col);
     }else if(tp=ta.consume(lexicon::TK::OPARENT)){
         auto vars=std::vector<std::shared_ptr<const expression>>();
         if(!ta.consume(lexicon::TK::CPARENT)){
@@ -138,11 +163,12 @@ std::shared_ptr<const expression>expression::get_order01(lexicon::token_array&ta
                     throw exception::syntax_error("関数呼び出し演算子のコンマに問題があります",tp->line,tp->col);
             }
         }
-        ret=std::make_shared<const fcall>(ret,vars,tp->line,tp->col);
+        return std::make_shared<const fcall>(ret,vars,tp->line,tp->col);
+    }else{
+        return ret;
     }
-    return ret;
 }
-std::shared_ptr<const expression>expression::get_order00(lexicon::token_array&ta) // literal, identifier, enclosed expression
+std::shared_ptr<const expression>expression::get_primary(lexicon::token_array&ta) // literal, identifier, enclosed expression
 {
     if(auto nump=std::dynamic_pointer_cast<const lexicon::numeric>(ta.consume(lexicon::TK::NUMERIC))){
         return std::make_shared<const numeric>(nump->value,nump->line,nump->col);
@@ -152,9 +178,8 @@ std::shared_ptr<const expression>expression::get_order00(lexicon::token_array&ta
         auto ret=get_order15(ta);
         if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("括弧の対応が正しくありません",tp->line,tp->col);
         return ret;
-    }else{
-        throw exception::syntax_error("構文解析ができませんでした",ta.get_line(),ta.get_column());
     }
+    throw exception::syntax_error("構文解析ができませんでした",ta.get_line(),ta.get_column());
 }
 std::shared_ptr<const statement>statement::get(lexicon::token_array&ta)
 {

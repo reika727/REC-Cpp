@@ -20,18 +20,23 @@ namespace syntax{
         private:
             static std::shared_ptr<const expression>get_order15(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order14(lexicon::token_array&ta);
+            static std::shared_ptr<const expression>get_order13(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order12(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order11(lexicon::token_array&ta);
+            static std::shared_ptr<const expression>get_order10(lexicon::token_array&ta);
+            static std::shared_ptr<const expression>get_order09(lexicon::token_array&ta);
+            static std::shared_ptr<const expression>get_order08(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order07(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order06(lexicon::token_array&ta);
+            static std::shared_ptr<const expression>get_order05(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order04(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order03(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order02(lexicon::token_array&ta);
             static std::shared_ptr<const expression>get_order01(lexicon::token_array&ta);
-            static std::shared_ptr<const expression>get_order00(lexicon::token_array&ta);
+            static std::shared_ptr<const expression>get_primary(lexicon::token_array&ta);
         public:
             using node::node;
-            static std::shared_ptr<const expression>get(lexicon::token_array&ta,bool not_for_initialization=true);
+            static std::shared_ptr<const expression>get(lexicon::token_array&ta,bool for_initialization=false);
             virtual ~expression()=default;
     };
     class numeric final:public expression{
