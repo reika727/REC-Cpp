@@ -1,121 +1,149 @@
 #include"lexicon/token_array.hpp"
+#include"exception/compilation_error.hpp"
 #include<algorithm>
-#include<stdexcept>
 using namespace lexicon;
 token_array::token_array(const std::string&s)
 {
+    int line=1,col=1;
+    auto push_back_symbol=[this,&line,&col](TK sym){
+        tokens.push_back(std::make_shared<const symbol>(sym,line,col));
+    };
+    auto push_back_number=[this,&line,&col](int num){
+        tokens.push_back(std::make_shared<const numeric>(num,line,col));
+    };
+    auto push_back_identifier=[this,&line,&col](const std::string&name){
+        tokens.push_back(std::make_shared<const identifier>(name,line,col));
+    };
     for(int i=0;i<s.length();){
         if(isspace(s[i])){
+            if(s[i]=='\n'){
+                ++line;
+                col=0;
+            }
             ++i;
+            ++col;
             continue;
         }
-        auto check_keyword=[s,&i](const std::string&token,auto...follow){
+        auto check_keyword=[&col,s,&i](const std::string&token,auto...follow){
             if(s.substr(i,token.length())!=token)return false;
             if(sizeof...(follow)!=0){
                 if(i+token.length()>=s.length())return false;
                 if(((follow!=s[i+token.length()])&&...))return false;
             }
             i+=token.length();
+            col+=token.length();
             return true;
         };
-        auto check_comment_closed=[s,&i](){
-            while(true){
-                if(++i>=s.length())throw std::runtime_error("コメントが閉じられていません");
-                else if(s.substr(i,2)=="*/"&&(i+=2))break;
+        auto check_comment_closed=[&line,&col,s,&i](){
+            int l=line,c=col;
+            for(;i<s.length();++i){
+                if(s[i]=='\n'){
+                    ++line;
+                    col=1;
+                    continue;
+                }
+                if(s.substr(i,2)=="*/"){
+                    i+=2;
+                    col+=2;
+                    return;
+                }
             }
+            throw exception::lexical_error("コメントが閉じられていません",l,c);
         };
-        auto get_numeric_literal=[s,&i](){
+        auto get_numeric_literal=[&col,s,&i](){
             size_t sz;
             int ret=std::stoi(s.substr(i),&sz);
             i+=sz;
+            col+=sz;
             return ret;
         };
-        auto get_identifier=[s,&i](){
+        auto get_identifier=[&col,s,&i](){
             auto beg=s.begin()+i;
             auto ret=std::string(beg,find_if_not(beg,s.end(),[](char c){return isalpha(c)||isdigit(c)||c=='_';}));
             i+=ret.length();
+            col+=ret.length();
             return ret;
         };
         if(check_keyword("int",' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::INT));
+            push_back_symbol(TK::INT);
         else if(check_keyword("if",'(',' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::IF));
+            push_back_symbol(TK::IF);
         else if(check_keyword("else",'{',';',' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::ELSE));
+            push_back_symbol(TK::ELSE);
         else if(check_keyword("while",'(',' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::WHILE));
+            push_back_symbol(TK::WHILE);
         else if(check_keyword("for",'(',' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::FOR));
+            push_back_symbol(TK::FOR);
         else if(check_keyword("break",';',' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::BREAK));
+            push_back_symbol(TK::BREAK);
         else if(check_keyword("continue",';',' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::CONTINUE));
+            push_back_symbol(TK::CONTINUE);
         else if(check_keyword("return",' '))
-            tokens.push_back(std::make_shared<const symbol>(TK::RETURN));
+            push_back_symbol(TK::RETURN);
         else if(s.substr(i,2)=="/*")
             check_comment_closed();
         else if(check_keyword("&&"))
-            tokens.push_back(std::make_shared<const symbol>(TK::APAP));
+            push_back_symbol(TK::APAP);
         else if(check_keyword("||"))
-            tokens.push_back(std::make_shared<const symbol>(TK::VBVB));
+            push_back_symbol(TK::VBVB);
         else if(check_keyword("++"))
-            tokens.push_back(std::make_shared<const symbol>(TK::PLPL));
+            push_back_symbol(TK::PLPL);
         else if(check_keyword("--"))
-            tokens.push_back(std::make_shared<const symbol>(TK::MIMI));
+            push_back_symbol(TK::MIMI);
         else if(check_keyword("+="))
-            tokens.push_back(std::make_shared<const symbol>(TK::PLEQ));
+            push_back_symbol(TK::PLEQ);
         else if(check_keyword("-="))
-            tokens.push_back(std::make_shared<const symbol>(TK::MIEQ));
+            push_back_symbol(TK::MIEQ);
         else if(check_keyword("*="))
-            tokens.push_back(std::make_shared<const symbol>(TK::ASEQ));
+            push_back_symbol(TK::ASEQ);
         else if(check_keyword("/="))
-            tokens.push_back(std::make_shared<const symbol>(TK::SLEQ));
+            push_back_symbol(TK::SLEQ);
         else if(check_keyword("%="))
-            tokens.push_back(std::make_shared<const symbol>(TK::PEEQ));
+            push_back_symbol(TK::PEEQ);
         else if(check_keyword("=="))
-            tokens.push_back(std::make_shared<const symbol>(TK::EQEQ));
+            push_back_symbol(TK::EQEQ);
         else if(check_keyword("!="))
-            tokens.push_back(std::make_shared<const symbol>(TK::EXEQ));
+            push_back_symbol(TK::EXEQ);
         else if(check_keyword("<="))
-            tokens.push_back(std::make_shared<const symbol>(TK::LEEQ));
+            push_back_symbol(TK::LEEQ);
         else if(check_keyword(">="))
-            tokens.push_back(std::make_shared<const symbol>(TK::GREQ));
+            push_back_symbol(TK::GREQ);
         else if(check_keyword("+"))
-            tokens.push_back(std::make_shared<const symbol>(TK::PLUS));
+            push_back_symbol(TK::PLUS);
         else if(check_keyword("-"))
-            tokens.push_back(std::make_shared<const symbol>(TK::MINUS));
+            push_back_symbol(TK::MINUS);
         else if(check_keyword("*"))
-            tokens.push_back(std::make_shared<const symbol>(TK::ASTER));
+            push_back_symbol(TK::ASTER);
         else if(check_keyword("/"))
-            tokens.push_back(std::make_shared<const symbol>(TK::SLASH));
+            push_back_symbol(TK::SLASH);
         else if(check_keyword("%"))
-            tokens.push_back(std::make_shared<const symbol>(TK::PERCENT));
+            push_back_symbol(TK::PERCENT);
         else if(check_keyword("<"))
-            tokens.push_back(std::make_shared<const symbol>(TK::LESS));
+            push_back_symbol(TK::LESS);
         else if(check_keyword(">"))
-            tokens.push_back(std::make_shared<const symbol>(TK::GREATER));
+            push_back_symbol(TK::GREATER);
         else if(check_keyword("!"))
-            tokens.push_back(std::make_shared<const symbol>(TK::EXCLAM));
+            push_back_symbol(TK::EXCLAM);
         else if(check_keyword("="))
-            tokens.push_back(std::make_shared<const symbol>(TK::EQUAL));
+            push_back_symbol(TK::EQUAL);
         else if(check_keyword(","))
-            tokens.push_back(std::make_shared<const symbol>(TK::COMMA));
+            push_back_symbol(TK::COMMA);
         else if(check_keyword(";"))
-            tokens.push_back(std::make_shared<const symbol>(TK::SCOLON));
+            push_back_symbol(TK::SCOLON);
         else if(check_keyword("("))
-            tokens.push_back(std::make_shared<const symbol>(TK::OPARENT));
+            push_back_symbol(TK::OPARENT);
         else if(check_keyword(")"))
-            tokens.push_back(std::make_shared<const symbol>(TK::CPARENT));
+            push_back_symbol(TK::CPARENT);
         else if(check_keyword("{"))
-            tokens.push_back(std::make_shared<const symbol>(TK::OBRACE));
+            push_back_symbol(TK::OBRACE);
         else if(check_keyword("}"))
-            tokens.push_back(std::make_shared<const symbol>(TK::CBRACE));
+            push_back_symbol(TK::CBRACE);
         else if(isdigit(s[i]))
-            tokens.push_back(std::make_shared<const numeric>(get_numeric_literal()));
+            push_back_number(get_numeric_literal());
         else if(isalpha(s[i])||s[i]=='_')
-            tokens.push_back(std::make_shared<const identifier>(get_identifier()));
+            push_back_identifier(get_identifier());
         else
-            throw std::runtime_error("認識できないトークンが含まれます");
+            throw exception::lexical_error("認識できないトークンが含まれます",line,col);
     }
     itr=tokens.begin();
 }
@@ -126,6 +154,14 @@ bool token_array::is_all_read()const noexcept
 bool token_array::check(TK type)const noexcept
 {
     return !is_all_read()&&(*itr)->type==type;
+}
+int token_array::get_line()const noexcept
+{
+    return is_all_read()?-1:(*itr)->line;
+}
+int token_array::get_column()const noexcept
+{
+    return is_all_read()?-1:(*itr)->col;
 }
 std::shared_ptr<const token>token_array::consume(TK type)noexcept
 {

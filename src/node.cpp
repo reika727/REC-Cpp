@@ -1,5 +1,5 @@
 #include"syntax/node.hpp"
-#include<stdexcept>
+#include"exception/compilation_error.hpp"
 using namespace syntax;
 std::shared_ptr<const expression>expression::get(lexicon::token_array&ta,bool not_for_initialization)
 {
@@ -8,26 +8,26 @@ std::shared_ptr<const expression>expression::get(lexicon::token_array&ta,bool no
 std::shared_ptr<const expression>expression::get_order15(lexicon::token_array&ta) // , left to right
 {
     auto ret=get_order14(ta);
-    while(ta.consume(lexicon::TK::COMMA))
-        ret=std::make_shared<const comma>(ret,get_order14(ta));
+    while(auto tp=ta.consume(lexicon::TK::COMMA))
+        ret=std::make_shared<const comma>(ret,get_order14(ta),tp->line,tp->col);
     return ret;
 }
 std::shared_ptr<const expression>expression::get_order14(lexicon::token_array&ta) // = += -= *= /= right to left
 {
     auto ret=get_order12(ta);
     while(true){
-        if(ta.consume(lexicon::TK::EQUAL))
-            ret=std::make_shared<const assign>(ret,get_order14(ta));
-        else if(ta.consume(lexicon::TK::PLEQ))
-            ret=std::make_shared<const plasgn>(ret,get_order14(ta));
-        else if(ta.consume(lexicon::TK::MIEQ))
-            ret=std::make_shared<const miasgn>(ret,get_order14(ta));
-        else if(ta.consume(lexicon::TK::ASEQ))
-            ret=std::make_shared<const muasgn>(ret,get_order14(ta));
-        else if(ta.consume(lexicon::TK::SLEQ))
-            ret=std::make_shared<const diasgn>(ret,get_order14(ta));
-        else if(ta.consume(lexicon::TK::PEEQ))
-            ret=std::make_shared<const rmasgn>(ret,get_order14(ta));
+        if(auto tp=ta.consume(lexicon::TK::EQUAL))
+            ret=std::make_shared<const assign>(ret,get_order14(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::PLEQ))
+            ret=std::make_shared<const plasgn>(ret,get_order14(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::MIEQ))
+            ret=std::make_shared<const miasgn>(ret,get_order14(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::ASEQ))
+            ret=std::make_shared<const muasgn>(ret,get_order14(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::SLEQ))
+            ret=std::make_shared<const diasgn>(ret,get_order14(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::PEEQ))
+            ret=std::make_shared<const rmasgn>(ret,get_order14(ta),tp->line,tp->col);
         else
             break;
     }
@@ -36,25 +36,25 @@ std::shared_ptr<const expression>expression::get_order14(lexicon::token_array&ta
 std::shared_ptr<const expression>expression::get_order12(lexicon::token_array&ta) // || left to right
 {
     auto ret=get_order11(ta);
-    while(ta.consume(lexicon::TK::VBVB))
-        ret=std::make_shared<const logor>(ret,get_order11(ta));
+    while(auto tp=ta.consume(lexicon::TK::VBVB))
+        ret=std::make_shared<const logor>(ret,get_order11(ta),tp->line,tp->col);
     return ret;
 }
 std::shared_ptr<const expression>expression::get_order11(lexicon::token_array&ta) // && left to right
 {
     auto ret=get_order07(ta);
-    while(ta.consume(lexicon::TK::APAP))
-        ret=std::make_shared<const logand>(ret,get_order07(ta));
+    while(auto tp=ta.consume(lexicon::TK::APAP))
+        ret=std::make_shared<const logand>(ret,get_order07(ta),tp->line,tp->col);
     return ret;
 }
 std::shared_ptr<const expression>expression::get_order07(lexicon::token_array&ta) // == != left to right
 {
     auto ret=get_order06(ta);
     while(true){
-        if(ta.consume(lexicon::TK::EQEQ))
-            ret=std::make_shared<const equal>(ret,get_order06(ta));
-        else if(ta.consume(lexicon::TK::EXEQ))
-            ret=std::make_shared<const nequal>(ret,get_order06(ta));
+        if(auto tp=ta.consume(lexicon::TK::EQEQ))
+            ret=std::make_shared<const equal>(ret,get_order06(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::EXEQ))
+            ret=std::make_shared<const nequal>(ret,get_order06(ta),tp->line,tp->col);
         else
             break;
     }
@@ -64,14 +64,14 @@ std::shared_ptr<const expression>expression::get_order06(lexicon::token_array&ta
 {
     auto ret=get_order04(ta);
     while(true){
-        if(ta.consume(lexicon::TK::LESS))
-            ret=std::make_shared<const less>(ret,get_order04(ta));
-        else if(ta.consume(lexicon::TK::GREATER))
-            ret=std::make_shared<const greater>(ret,get_order04(ta));
-        else if(ta.consume(lexicon::TK::LEEQ))
-            ret=std::make_shared<const leeq>(ret,get_order04(ta));
-        else if(ta.consume(lexicon::TK::GREQ))
-            ret=std::make_shared<const greq>(ret,get_order04(ta));
+        if(auto tp=ta.consume(lexicon::TK::LESS))
+            ret=std::make_shared<const less>(ret,get_order04(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::GREATER))
+            ret=std::make_shared<const greater>(ret,get_order04(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::LEEQ))
+            ret=std::make_shared<const leeq>(ret,get_order04(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::GREQ))
+            ret=std::make_shared<const greq>(ret,get_order04(ta),tp->line,tp->col);
         else
             break;
     }
@@ -81,10 +81,10 @@ std::shared_ptr<const expression>expression::get_order04(lexicon::token_array&ta
 {
     auto ret=get_order03(ta);
     while(true){
-        if(ta.consume(lexicon::TK::PLUS))
-            ret=std::make_shared<const bplus>(ret,get_order03(ta));
-        else if(ta.consume(lexicon::TK::MINUS))
-            ret=std::make_shared<const bminus>(ret,get_order03(ta));
+        if(auto tp=ta.consume(lexicon::TK::PLUS))
+            ret=std::make_shared<const bplus>(ret,get_order03(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::MINUS))
+            ret=std::make_shared<const bminus>(ret,get_order03(ta),tp->line,tp->col);
         else
             break;
     }
@@ -94,12 +94,12 @@ std::shared_ptr<const expression>expression::get_order03(lexicon::token_array&ta
 {
     auto ret=get_order02(ta);
     while(true){
-        if(ta.consume(lexicon::TK::ASTER))
-            ret=std::make_shared<const multiply>(ret,get_order02(ta));
-        else if(ta.consume(lexicon::TK::SLASH))
-            ret=std::make_shared<const divide>(ret,get_order02(ta));
-        else if(ta.consume(lexicon::TK::PERCENT))
-            ret=std::make_shared<const remain>(ret,get_order02(ta));
+        if(auto tp=ta.consume(lexicon::TK::ASTER))
+            ret=std::make_shared<const multiply>(ret,get_order02(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::SLASH))
+            ret=std::make_shared<const divide>(ret,get_order02(ta),tp->line,tp->col);
+        else if(tp=ta.consume(lexicon::TK::PERCENT))
+            ret=std::make_shared<const remain>(ret,get_order02(ta),tp->line,tp->col);
         else
             break;
     }
@@ -107,27 +107,27 @@ std::shared_ptr<const expression>expression::get_order03(lexicon::token_array&ta
 }
 std::shared_ptr<const expression>expression::get_order02(lexicon::token_array&ta) // + - ++ -- ! right to left
 {
-    if(ta.consume(lexicon::TK::PLUS))
-        return std::make_shared<const uplus>(get_order02(ta));
-    else if(ta.consume(lexicon::TK::MINUS))
-        return std::make_shared<const uminus>(get_order02(ta));
-    else if(ta.consume(lexicon::TK::PLPL))
-        return std::make_shared<const preinc>(get_order02(ta));
-    else if(ta.consume(lexicon::TK::MIMI))
-        return std::make_shared<const predec>(get_order02(ta));
-    else if(ta.consume(lexicon::TK::EXCLAM))
-        return std::make_shared<const lognot>(get_order02(ta));
+    if(auto tp=ta.consume(lexicon::TK::PLUS))
+        return std::make_shared<const uplus>(get_order02(ta),tp->line,tp->col);
+    else if(tp=ta.consume(lexicon::TK::MINUS))
+        return std::make_shared<const uminus>(get_order02(ta),tp->line,tp->col);
+    else if(tp=ta.consume(lexicon::TK::PLPL))
+        return std::make_shared<const preinc>(get_order02(ta),tp->line,tp->col);
+    else if(tp=ta.consume(lexicon::TK::MIMI))
+        return std::make_shared<const predec>(get_order02(ta),tp->line,tp->col);
+    else if(tp=ta.consume(lexicon::TK::EXCLAM))
+        return std::make_shared<const lognot>(get_order02(ta),tp->line,tp->col);
     else
         return get_order01(ta);
 }
 std::shared_ptr<const expression>expression::get_order01(lexicon::token_array&ta) // () left to right
 {
     auto ret=get_order00(ta);
-    if(ta.consume(lexicon::TK::PLPL)){
-        ret=std::make_shared<const postinc>(ret);
-    }else if(ta.consume(lexicon::TK::MIMI)){
-        ret=std::make_shared<const postdec>(ret);
-    }else if(ta.consume(lexicon::TK::OPARENT)){
+    if(auto tp=ta.consume(lexicon::TK::PLPL)){
+        ret=std::make_shared<const postinc>(ret,tp->line,tp->col);
+    }else if(tp=ta.consume(lexicon::TK::MIMI)){
+        ret=std::make_shared<const postdec>(ret,tp->line,tp->col);
+    }else if(tp=ta.consume(lexicon::TK::OPARENT)){
         auto vars=std::vector<std::shared_ptr<const expression>>();
         if(!ta.consume(lexicon::TK::CPARENT)){
             while(true){
@@ -135,25 +135,25 @@ std::shared_ptr<const expression>expression::get_order01(lexicon::token_array&ta
                 if(ta.consume(lexicon::TK::CPARENT))
                     break;
                 else if(!ta.consume(lexicon::TK::COMMA))
-                    throw std::runtime_error("無効な関数呼び出しです");
+                    throw exception::syntax_error("関数呼び出し演算子のコンマに問題があります",tp->line,tp->col);
             }
         }
-        ret=std::make_shared<const fcall>(ret,vars);
+        ret=std::make_shared<const fcall>(ret,vars,tp->line,tp->col);
     }
     return ret;
 }
 std::shared_ptr<const expression>expression::get_order00(lexicon::token_array&ta) // literal, identifier, enclosed expression
 {
     if(auto nump=std::dynamic_pointer_cast<const lexicon::numeric>(ta.consume(lexicon::TK::NUMERIC))){
-        return std::make_shared<const numeric>(nump->value);
+        return std::make_shared<const numeric>(nump->value,nump->line,nump->col);
     }else if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT))){
-        return std::make_shared<const identifier>(idp->name);
-    }else if(ta.consume(lexicon::TK::OPARENT)){
+        return std::make_shared<const identifier>(idp->name,idp->line,idp->col);
+    }else if(auto tp=ta.consume(lexicon::TK::OPARENT)){
         auto ret=get_order15(ta);
-        if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("括弧の対応が正しくありません");
+        if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("括弧の対応が正しくありません",tp->line,tp->col);
         return ret;
     }else{
-        throw std::runtime_error("構文解析ができませんでした");
+        throw exception::syntax_error("構文解析ができませんでした",ta.get_line(),ta.get_column());
     }
 }
 std::shared_ptr<const statement>statement::get(lexicon::token_array&ta)
@@ -171,118 +171,118 @@ std::shared_ptr<const statement>statement::get(lexicon::token_array&ta)
 }
 std::shared_ptr<const expression_statement>expression_statement::get(lexicon::token_array&ta)
 {
-    auto ret=std::make_shared<expression_statement>();
+    auto ret=std::make_shared<expression_statement>(ta.get_line(),ta.get_column());
     ret->expr=expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     return ret;
 }
 std::shared_ptr<const null_statement>null_statement::get(lexicon::token_array&ta)
 {
-    auto ret=std::make_shared<const null_statement>();
-    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    auto ret=std::make_shared<null_statement>(ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     return ret;
 }
 std::shared_ptr<const compound>compound::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::OBRACE))throw std::runtime_error("複文の開始ブラケットが見つかりませんでした");
-    auto ret=std::make_shared<compound>();
+    if(!ta.consume(lexicon::TK::OBRACE))throw exception::syntax_error("複文の開始ブラケットが見つかりませんでした",ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<compound>(ta.get_line(),ta.get_column());
     while(!ta.consume(lexicon::TK::CBRACE))ret->stats.push_back(statement::get(ta));
     return ret;
 }
 std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::INT))throw std::runtime_error("型指定子が見つかりませんでした");
-    auto ret=std::make_shared<define_var>();
+    if(!ta.consume(lexicon::TK::INT))throw exception::syntax_error("型指定子が見つかりませんでした",ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<define_var>(ta.get_line(),ta.get_column());
     while(true){
         if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
             ret->vars.push_back(std::make_pair(idp->name,ta.consume(lexicon::TK::EQUAL)?expression::get(ta,false):nullptr));
         else
-            throw std::runtime_error("変数名が見つかりませんでした");
+            throw exception::syntax_error("変数名が見つかりませんでした",ta.get_line(),ta.get_column());
         if(ta.consume(lexicon::TK::SCOLON))
             break;
         else if(!ta.consume(lexicon::TK::COMMA))
-            throw std::runtime_error("不正な区切り文字です");
+            throw exception::syntax_error("不正な区切り文字です",ta.get_line(),ta.get_column());
     }
     return ret;
 }
 std::shared_ptr<const _if_else_>_if_else_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::IF))throw std::runtime_error("ifキーワードが見つかりませんでした");
-    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
-    auto ret=std::make_shared<_if_else_>();
+    if(!ta.consume(lexicon::TK::IF))throw exception::syntax_error("ifキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("ifの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<_if_else_>(ta.get_line(),ta.get_column());
     ret->cond=expression::get(ta);
-    if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("ifの後ろに括弧がありません");
+    if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("ifの後ろに括弧がありません",ta.get_line(),ta.get_column());
     ret->stat_if=statement::get(ta);
     ret->stat_else=ta.consume(lexicon::TK::ELSE)?statement::get(ta):nullptr;
     return ret;
 }
 std::shared_ptr<const _while_>_while_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::WHILE))throw std::runtime_error("whileキーワードが見つかりませんでした");
-    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
-    auto ret=std::make_shared<_while_>();
+    if(!ta.consume(lexicon::TK::WHILE))throw exception::syntax_error("whileキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("whileの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<_while_>(ta.get_line(),ta.get_column());
     ret->cond=expression::get(ta);
-    if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("whileの後ろに括弧がありません");
+    if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("whileの後ろに括弧がありません",ta.get_line(),ta.get_column());
     ret->stat=statement::get(ta);
     return ret;
 }
 std::shared_ptr<const _for_>_for_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::FOR))throw std::runtime_error("forキーワードが見つかりませんでした");
-    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("forの後ろに括弧がありません");
-    auto ret=std::make_shared<_for_>();
+    if(!ta.consume(lexicon::TK::FOR))throw exception::syntax_error("forキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("forの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<_for_>(ta.get_line(),ta.get_column());
     ret->init=ta.check(lexicon::TK::SCOLON)?nullptr:expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     ret->cond=ta.check(lexicon::TK::SCOLON)?nullptr:expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("セミコロンが見つかりませんでした");
+    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     ret->reinit=ta.check(lexicon::TK::CPARENT)?nullptr:expression::get(ta);
-    if(!ta.consume(lexicon::TK::CPARENT))throw std::runtime_error("forの後ろに括弧がありません");
+    if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("forの後ろに括弧がありません",ta.get_line(),ta.get_column());
     ret->stat=statement::get(ta);
     return ret;
 }
 std::shared_ptr<const _break_>_break_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::BREAK))throw std::runtime_error("breakキーワードが見つかりませんでした");
-    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("不正なbreak文です");
-    return std::make_shared<const _break_>();
+    if(!ta.consume(lexicon::TK::BREAK))throw exception::syntax_error("breakキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("不正なbreak文です",ta.get_line(),ta.get_column());
+    return std::make_shared<const _break_>(ta.get_line(),ta.get_column());
 }
 std::shared_ptr<const _continue_>_continue_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::CONTINUE))throw std::runtime_error("continueキーワードが見つかりませんでした");
-    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("不正なcontinue文です");
-    return std::make_shared<const _continue_>();
+    if(!ta.consume(lexicon::TK::CONTINUE))throw exception::syntax_error("continueキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("不正なcontinue文です",ta.get_line(),ta.get_column());
+    return std::make_shared<const _continue_>(ta.get_line(),ta.get_column());
 }
 std::shared_ptr<const _return_>_return_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::RETURN))throw std::runtime_error("returnキーワードが見つかりませんでした");
-    auto ret=std::make_shared<_return_>();
+    if(!ta.consume(lexicon::TK::RETURN))throw exception::syntax_error("returnキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<_return_>(ta.get_line(),ta.get_column());
     ret->value=expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw std::runtime_error("不正なreturn文です");
+    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("不正なreturn文です",ta.get_line(),ta.get_column());
     return ret;
 }
 std::shared_ptr<const define_function>define_function::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::INT))throw std::runtime_error("関数の型が見つかりませんでした");
-    auto ret=std::make_shared<define_function>();
+    if(!ta.consume(lexicon::TK::INT))throw exception::syntax_error("関数の型が見つかりませんでした",ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<define_function>(ta.get_line(),ta.get_column());
     if(auto fidp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
         ret->name=fidp->name;
     else
-        throw std::runtime_error("関数名が見つかりませんでした");
-    if(!ta.consume(lexicon::TK::OPARENT))throw std::runtime_error("引数リストが見つかりませんでした");
+        throw exception::syntax_error("関数名が見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("引数リストが見つかりませんでした",ta.get_line(),ta.get_column());
     if(!ta.consume(lexicon::TK::CPARENT)){
         while(true){
             if(!ta.consume(lexicon::TK::INT))
-                throw std::runtime_error("引数の型が見つかりませんでした");
+                throw exception::syntax_error("引数の型が見つかりませんでした",ta.get_line(),ta.get_column());
             if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
                 ret->args.push_back(idp->name);
             else
-                throw std::runtime_error("引数名が見つかりませんでした");
+                throw exception::syntax_error("引数名が見つかりませんでした",ta.get_line(),ta.get_column());
             if(ta.consume(lexicon::TK::COMMA))
                 continue;
             else if(ta.consume(lexicon::TK::CPARENT))
                 break;
             else
-                throw std::runtime_error("不正な区切り文字です");
+                throw exception::syntax_error("不正な区切り文字です",ta.get_line(),ta.get_column());
         }
     }
     ret->com=compound::get(ta);
@@ -294,11 +294,11 @@ void numeric::check(semantics::analyzer&analy)const noexcept
 }
 void identifier::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_available_var(name))throw std::runtime_error("未定義の変数です: "+name);
+    if(!analy.is_available_var(name))throw exception::semantic_error("未定義の変数です: "+name,line,col);
 }
 void fcall::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_available_func(func->name,vars.size()))throw std::runtime_error("未定義の関数です: "+func->name);
+    if(!analy.is_available_func(func->name,vars.size()))throw exception::semantic_error("未定義の関数です: "+func->name,line,col);
     for(auto v:vars)v->check(analy);
 }
 void unopr::check(semantics::analyzer&analy)const
@@ -336,7 +336,7 @@ void compound::check(semantics::analyzer&analy)const
 void define_var::check(semantics::analyzer&analy)const
 {
     for(auto v:vars){
-        if(!analy.is_definable_var(v.first))throw std::runtime_error("二重定義されました: "+v.first);
+        if(!analy.is_definable_var(v.first))throw exception::semantic_error("二重定義されました: "+v.first,line,col);
         analy.define_var(v.first);
         if(v.second)v.second->check(analy);
     }
@@ -375,11 +375,11 @@ void _for_::check(semantics::analyzer&analy)const
 }
 void _break_::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_breakable())throw std::runtime_error("不適切なbreak文です");
+    if(!analy.is_breakable())throw exception::semantic_error("不適切なbreak文です",line,col);
 }
 void _continue_::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_continuable())throw std::runtime_error("不適切なcontinue文です");
+    if(!analy.is_continuable())throw exception::semantic_error("不適切なcontinue文です",line,col);
 }
 void _return_::check(semantics::analyzer&analy)const
 {
@@ -387,7 +387,7 @@ void _return_::check(semantics::analyzer&analy)const
 }
 void define_function::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_definable_func(name))throw std::runtime_error("二重定義されました: "+name);
+    if(!analy.is_definable_func(name))throw exception::semantic_error("二重定義されました: "+name,line,col);
     analy.define_func(name,args.size());
     analy.enter_scope();
     for(auto a:args)analy.define_var(a);
@@ -794,32 +794,34 @@ void define_function::to_asm(code::generator&gen)const
     gen.write("pop","%rbp");
     gen.write("ret");
 }
-numeric::numeric(int value)
-    :value(value){}
-identifier::identifier(const std::string&name)
-    :name(name){}
-fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars)
-    :func(std::dynamic_pointer_cast<const identifier>(func)),vars(vars)
+node::node(int line,int col)
+    :line(line),col(col){}
+numeric::numeric(int value,int line,int col)
+    :expression(line,col),value(value){}
+identifier::identifier(const std::string&name,int line,int col)
+    :expression(line,col),name(name){}
+fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars,int line,int col)
+    :expression(line,col),func(std::dynamic_pointer_cast<const identifier>(func)),vars(vars)
 {
     if(!(this->func)){
-        throw("関数名が識別子ではありません");
+        throw exception::unsupported_error("関数名が識別子ではありません",line,col);
     }
 }
-unopr::unopr(const std::shared_ptr<const expression>&arg)
-    :arg(arg){}
-unopr_l::unopr_l(const std::shared_ptr<const expression>&arg)
-    :arg(std::dynamic_pointer_cast<const identifier>(arg))
+unopr::unopr(const std::shared_ptr<const expression>&arg,int line,int col)
+    :expression(line,col),arg(arg){}
+unopr_l::unopr_l(const std::shared_ptr<const expression>&arg,int line,int col)
+    :expression(line,col),arg(std::dynamic_pointer_cast<const identifier>(arg))
 {
     if(!(this->arg)){
-        throw std::runtime_error("引数が識別子ではありません");
+        throw exception::unsupported_error("引数が識別子ではありません",line,col);
     }
 }
-biopr::biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg)
-    :larg(larg),rarg(rarg){}
-biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg)
-    :larg(std::dynamic_pointer_cast<const identifier>(larg)),rarg(rarg)
+biopr::biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
+    :expression(line,col),larg(larg),rarg(rarg){}
+biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
+    :expression(line,col),larg(std::dynamic_pointer_cast<const identifier>(larg)),rarg(rarg)
 {
     if(!(this->larg)){
-        throw std::runtime_error("右引数が識別子ではありません");
+        throw exception::unsupported_error("右引数が識別子ではありません",line,col);
     }
 }

@@ -44,21 +44,22 @@ namespace lexicon{
     class token{
         public:
             const TK type;
-            token(TK type);
+            const int line,col;
+            token(TK type,int line,int col);
             virtual ~token()=0;
     };
     class numeric final:public token{
         public:
             const int value;
-            numeric(int value);
+            numeric(int value,int line,int col);
     };
     class identifier final:public token{
         public:
             const std::string name;
-            identifier(const std::string&name);
+            identifier(const std::string&name,int line,int col);
     };
     class symbol final:public token{
         public:
-            symbol(TK type);
+            symbol(TK type,int line,int col);
     };
 }
