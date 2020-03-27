@@ -27,7 +27,7 @@ namespace code{
             void write(const std::string&inst,int arg,const std::string&reg);
             void write(const std::string&inst,const std::string&reg);
             void write(const std::string&inst,int arg);
-            std::string get_asm();
+            std::string get_asm()const;
             static std::string get_unique_label(const std::string&base);
             static std::string to_address(int dis,const std::string&base,const std::string&ofs="",int scl=1);
             static std::string to_address(int dis,const std::string&base,int scl);

@@ -40,7 +40,7 @@ namespace syntax{
     };
     class identifier final:public expression{
         public:
-            // TODO: 関数ポインタに対応できたらprivateにできる
+            // TODO: fcallの方の問題に対応できたらprivateにする
             const std::string name;
             identifier(const std::string&name);
             void check(semantics::analyzer&analy)const override;
@@ -49,8 +49,8 @@ namespace syntax{
     };
     class fcall final:public expression{
         private:
-            // TODO: 関数ポインタに対応する
-            const std::shared_ptr<const expression>func;
+            // TODO: 関数部分が識別子でなくてもよいようにする
+            const std::shared_ptr<const identifier>func;
             const std::vector<std::shared_ptr<const expression>>vars;
         public:
             fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars);
@@ -81,6 +81,7 @@ namespace syntax{
     };
     class unopr_l:public expression{
         protected:
+            // TODO: 引数が識別子でなくてもよいようにする
             const std::shared_ptr<const identifier>arg;
         public:
             unopr_l(const std::shared_ptr<const expression>&arg);
@@ -185,6 +186,7 @@ namespace syntax{
     };
     class biopr_l:public expression{
         protected:
+            // TODO: 右引数が識別子でなくてもよいようにする
             const std::shared_ptr<const identifier>larg;
             const std::shared_ptr<const expression>rarg;
         public:

@@ -1,6 +1,5 @@
 #include"code/generator.hpp"
 #include<algorithm>
-#include<sstream>
 using namespace code;
 void generator::enter_scope()
 {
@@ -76,7 +75,7 @@ std::string generator::get_unique_label(const std::string&base)
     static unsigned int serial=0;
     return base+std::to_string(serial++);
 }
-std::string generator::get_asm()
+std::string generator::get_asm()const
 {
     return dst.str();
 }

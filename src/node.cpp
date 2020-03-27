@@ -197,7 +197,7 @@ std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
         if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
             ret->vars.push_back(std::make_pair(idp->name,ta.consume(lexicon::TK::EQUAL)?expression::get(ta,false):nullptr));
         else
-            throw std::runtime_error("無効な宣言です");
+            throw std::runtime_error("変数名が見つかりませんでした");
         if(ta.consume(lexicon::TK::SCOLON))
             break;
         else if(!ta.consume(lexicon::TK::COMMA))
@@ -298,12 +298,8 @@ void identifier::check(semantics::analyzer&analy)const
 }
 void fcall::check(semantics::analyzer&analy)const
 {
-    if(auto fp=std::dynamic_pointer_cast<const identifier>(func)){
-        if(!analy.is_available_func(fp->name,vars.size()))throw std::runtime_error("未定義の関数です: "+fp->name);
-        for(auto v:vars)v->check(analy);
-    }else{
-        throw std::runtime_error("現在関数は識別子からしか呼び出せません");
-    }
+    if(!analy.is_available_func(func->name,vars.size()))throw std::runtime_error("未定義の関数です: "+func->name);
+    for(auto v:vars)v->check(analy);
 }
 void unopr::check(semantics::analyzer&analy)const
 {
@@ -429,8 +425,7 @@ void fcall::to_asm(code::generator&gen)const
     // TODO: 呼び出し規約がよくわからん
     //int align=(16-gen.get_var_size()%16)%16;
     //gen.write("sub",align,"%rsp");
-    // TODO: 関数ポインタに対応する
-    gen.write("call",std::dynamic_pointer_cast<const identifier>(func)->name);
+    gen.write("call",func->name);
     //gen.write("add",align,"%rsp");
     if(vars.size()>6)gen.write("add",8*(vars.size()-6),"%rsp");
 }
@@ -804,14 +799,19 @@ numeric::numeric(int value)
 identifier::identifier(const std::string&name)
     :name(name){}
 fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars)
-    :func(func),vars(vars){}
+    :func(std::dynamic_pointer_cast<const identifier>(func)),vars(vars)
+{
+    if(!(this->func)){
+        throw("関数名が識別子ではありません");
+    }
+}
 unopr::unopr(const std::shared_ptr<const expression>&arg)
     :arg(arg){}
 unopr_l::unopr_l(const std::shared_ptr<const expression>&arg)
     :arg(std::dynamic_pointer_cast<const identifier>(arg))
 {
     if(!(this->arg)){
-        throw std::runtime_error("右辺値を引数にとることはできません");
+        throw std::runtime_error("引数が識別子ではありません");
     }
 }
 biopr::biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg)
@@ -820,6 +820,6 @@ biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_
     :larg(std::dynamic_pointer_cast<const identifier>(larg)),rarg(rarg)
 {
     if(!(this->larg)){
-        throw std::runtime_error("右辺値を引数にとることはできません");
+        throw std::runtime_error("右引数が識別子ではありません");
     }
 }
