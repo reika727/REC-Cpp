@@ -638,7 +638,7 @@ void assign::to_asm(code::generator&gen)const
     larg->refer(gen);
     gen.write("pop","%rdi");
     gen.write("mov","%rdi",code::generator::to_address("%rax"));
-    gen.write("push",code::generator::to_address("%rax"));
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
 }
 void plasgn::to_asm(code::generator&gen)const
 {
@@ -647,7 +647,7 @@ void plasgn::to_asm(code::generator&gen)const
     larg->refer(gen);
     gen.write("pop","%rdi");
     gen.write("add","%rdi",code::generator::to_address("%rax"));
-    gen.write("push",code::generator::to_address("%rax"));
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
 }
 void miasgn::to_asm(code::generator&gen)const
 {
@@ -656,7 +656,7 @@ void miasgn::to_asm(code::generator&gen)const
     larg->refer(gen);
     gen.write("pop","%rdi");
     gen.write("sub","%rdi",code::generator::to_address("%rax"));
-    gen.write("push",code::generator::to_address("%rax"));
+    gen.write("mov",code::generator::to_address("%rax"),"%rax");
 }
 void muasgn::to_asm(code::generator&gen)const
 {
@@ -701,7 +701,6 @@ void expression_statement::to_asm(code::generator&gen)const
 void null_statement::to_asm(code::generator&gen)const
 {
     gen.write("nop");
-    return;
 }
 void compound::to_asm(code::generator&gen)const
 {
