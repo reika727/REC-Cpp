@@ -220,7 +220,7 @@ std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
     auto ret=std::make_shared<define_var>(ta.get_line(),ta.get_column());
     while(true){
         if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
-            ret->vars.push_back(std::make_pair(idp->name,ta.consume(lexicon::TK::EQUAL)?expression::get(ta,false):nullptr));
+            ret->vars.push_back(std::make_pair(idp->name,ta.consume(lexicon::TK::EQUAL)?expression::get(ta,true):nullptr));
         else
             throw exception::syntax_error("変数名が見つかりませんでした",ta.get_line(),ta.get_column());
         if(ta.consume(lexicon::TK::SCOLON))
