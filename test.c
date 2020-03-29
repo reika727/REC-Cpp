@@ -1,13 +1,8 @@
-int fibo(int n)
-{
-    if(n==1||n==2){
-        return 1;
-    }else{
-        return fibo(n-1)+fibo(n-2);
-    }
-}
 int main()
 {
-    fibo(20);
+    int i,a=1;
+    for(i=0;i<10;++i){
+        __builtin_print_u64(a*=(i+1));
+    }
     return 0;
 }

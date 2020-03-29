@@ -3,6 +3,7 @@ SRCDIR=src
 OBJDIR=obj
 DEPDIR=dep
 TRGDIR=bin
+BUILTIN=builtin
 TESTDIR=test
 SRCS=$(wildcard $(SRCDIR)/*.cpp)
 OBJS=$(addprefix $(OBJDIR)/,$(notdir $(SRCS:.cpp=.o)))
@@ -27,7 +28,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 test: $(TARGET)
 	@mkdir -p $(TESTDIR)
 	./$(TARGET) test.c $(TESTDIR)/test.s
-	$(CXX) $(TESTDIR)/test.s -o $(TESTDIR)/test.out
+	$(CXX) $(TESTDIR)/test.s $(BUILTIN)/builtin_func.s -o $(TESTDIR)/test.out
 	./$(TESTDIR)/test.out
 	@echo "succeeded"
 

@@ -325,7 +325,10 @@ void identifier::check(semantics::analyzer&analy)const
 }
 void fcall::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_available_func(func->name,vars.size()))throw exception::semantic_error("未定義の関数です: "+func->name,line,col);
+    if(!analy.is_available_func(func->name,vars.size())){
+        if(func->name!="__builtin_print_u64"||vars.size()!=1)
+            throw exception::semantic_error("未定義の関数です: "+func->name,line,col);
+    }
     for(auto v:vars)v->check(analy);
 }
 void unopr::check(semantics::analyzer&analy)const
