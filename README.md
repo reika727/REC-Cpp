@@ -11,46 +11,40 @@ C言語をアセンブリ言語に翻訳します。未完成です。
 ## Example
 <details>
   <summary>長いので折り畳み</summary>
-    こんな感じのソースファイルexample.cがあるとします。フィボナッチ数列の20項目を計算します。
+    こんな感じのソースファイルexample.cがあるとします。10までの階乗を計算します。
     <pre>
       <code>
-        int print_num(int num);
-        int fibo(int n)
-        {
-            if(n==1||n==2){
-                return 1;
-            }else{
-                return fibo(n-1)+fibo(n-2);
-            }
-        }
         int main()
         {
-            print_num(fibo(20));
+            int a=1,i;
+            for(i=1;i<=10;++i){
+                a*=i;
+                __builtin_print_u64(a);
+            }
             return 0;
         }
       </code>
     </pre>
-    この1行目にあるのはprint_numのプロトタイプ宣言です(後でC言語で書いてリンクします)。<br />
-    このファイルをfunc.cとします。
-    <pre>
-      <code>
-        #include&lt;stdio.h&gt;
-        int print_num(int num)
-        {
-            printf("%d\n",num);
-            return 0;
-        }
-      </code>
-    </pre>
-    これをこうします(rec.outはソースを適当にコンパイルしてすでに作成済みであるとします)。<br />
+    __builtin_print_u64というのは名前の通りビルトイン関数です。符号なし64ビット整数を標準出力に書き出します。
+    将来的にはprintfなどを使いたいのですが、まだstdio.hは解析できないのでこれで妥協します。<br />
+    さて、これをこうします(recはソースを適当にコンパイルしてすでに作成済みであるとします)。<br />
     example.cを入力として受け取り、アセンブリに翻訳したものをexample.sに出力します。<br />
-    それをexample.outという実行ファイルにするのですが、結局実行ファイルの生成でgccに頼っているため、このソフトウェアの存在意義は謎です。
+    それをexample.outという実行ファイルにします。ビルトイン関数のソースコードも一緒にコンパイルするのをお忘れなく。
     <pre>
       <code>
-        $ ./rec.out example.c example.s
-        $ gcc -o example.out example.s func.c
+        $ ./rec example.c example.s
+        $ gcc -o example.out example.s builtin_func.s
         $ ./example.out
-        6765
+        1
+        2
+        6
+        24
+        120
+        720
+        5040
+        40320
+        362880
+        3628800
       </code>
     </pre>
     計算できてました。
