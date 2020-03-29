@@ -176,7 +176,8 @@ std::shared_ptr<const expression>expression::get_primary(lexicon::token_array&ta
         return std::make_shared<const identifier>(idp->name,idp->line,idp->col);
     }else if(auto tp=ta.consume(lexicon::TK::OPARENT)){
         auto ret=get_order15(ta);
-        if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("括弧の対応が正しくありません",tp->line,tp->col);
+        if(!ta.consume(lexicon::TK::CPARENT))
+            throw exception::syntax_error("括弧の対応が正しくありません",tp->line,tp->col);
         return ret;
     }
     throw exception::syntax_error("構文解析ができませんでした",ta.get_line(),ta.get_column());
@@ -198,25 +199,29 @@ std::shared_ptr<const expression_statement>expression_statement::get(lexicon::to
 {
     auto ret=std::make_shared<expression_statement>(ta.get_line(),ta.get_column());
     ret->expr=expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))
+        throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     return ret;
 }
 std::shared_ptr<const null_statement>null_statement::get(lexicon::token_array&ta)
 {
     auto ret=std::make_shared<null_statement>(ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))
+        throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     return ret;
 }
 std::shared_ptr<const compound>compound::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::OBRACE))throw exception::syntax_error("複文の開始ブラケットが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OBRACE))
+        throw exception::syntax_error("複文の開始ブラケットが見つかりませんでした",ta.get_line(),ta.get_column());
     auto ret=std::make_shared<compound>(ta.get_line(),ta.get_column());
     while(!ta.consume(lexicon::TK::CBRACE))ret->stats.push_back(statement::get(ta));
     return ret;
 }
 std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::INT))throw exception::syntax_error("型指定子が見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::INT))
+        throw exception::syntax_error("型指定子が見つかりませんでした",ta.get_line(),ta.get_column());
     auto ret=std::make_shared<define_var>(ta.get_line(),ta.get_column());
     while(true){
         if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
@@ -232,68 +237,87 @@ std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
 }
 std::shared_ptr<const _if_else_>_if_else_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::IF))throw exception::syntax_error("ifキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("ifの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::IF))
+        throw exception::syntax_error("ifキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))
+        throw exception::syntax_error("ifの後ろに括弧がありません",ta.get_line(),ta.get_column());
     auto ret=std::make_shared<_if_else_>(ta.get_line(),ta.get_column());
     ret->cond=expression::get(ta);
-    if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("ifの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::CPARENT))
+        throw exception::syntax_error("ifの後ろに括弧がありません",ta.get_line(),ta.get_column());
     ret->stat_if=statement::get(ta);
     ret->stat_else=ta.consume(lexicon::TK::ELSE)?statement::get(ta):nullptr;
     return ret;
 }
 std::shared_ptr<const _while_>_while_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::WHILE))throw exception::syntax_error("whileキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("whileの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::WHILE))
+        throw exception::syntax_error("whileキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))
+        throw exception::syntax_error("whileの後ろに括弧がありません",ta.get_line(),ta.get_column());
     auto ret=std::make_shared<_while_>(ta.get_line(),ta.get_column());
     ret->cond=expression::get(ta);
-    if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("whileの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::CPARENT))
+        throw exception::syntax_error("whileの後ろに括弧がありません",ta.get_line(),ta.get_column());
     ret->stat=statement::get(ta);
     return ret;
 }
 std::shared_ptr<const _for_>_for_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::FOR))throw exception::syntax_error("forキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("forの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::FOR))
+        throw exception::syntax_error("forキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))
+        throw exception::syntax_error("forの後ろに括弧がありません",ta.get_line(),ta.get_column());
     auto ret=std::make_shared<_for_>(ta.get_line(),ta.get_column());
     ret->init=ta.check(lexicon::TK::SCOLON)?nullptr:expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))
+        throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     ret->cond=ta.check(lexicon::TK::SCOLON)?nullptr:expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))
+        throw exception::syntax_error("セミコロンが見つかりませんでした",ta.get_line(),ta.get_column());
     ret->reinit=ta.check(lexicon::TK::CPARENT)?nullptr:expression::get(ta);
-    if(!ta.consume(lexicon::TK::CPARENT))throw exception::syntax_error("forの後ろに括弧がありません",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::CPARENT))
+        throw exception::syntax_error("forの後ろに括弧がありません",ta.get_line(),ta.get_column());
     ret->stat=statement::get(ta);
     return ret;
 }
 std::shared_ptr<const _break_>_break_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::BREAK))throw exception::syntax_error("breakキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("不正なbreak文です",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::BREAK))
+        throw exception::syntax_error("breakキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))
+        throw exception::syntax_error("不正なbreak文です",ta.get_line(),ta.get_column());
     return std::make_shared<const _break_>(ta.get_line(),ta.get_column());
 }
 std::shared_ptr<const _continue_>_continue_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::CONTINUE))throw exception::syntax_error("continueキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("不正なcontinue文です",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::CONTINUE))
+        throw exception::syntax_error("continueキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))
+        throw exception::syntax_error("不正なcontinue文です",ta.get_line(),ta.get_column());
     return std::make_shared<const _continue_>(ta.get_line(),ta.get_column());
 }
 std::shared_ptr<const _return_>_return_::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::RETURN))throw exception::syntax_error("returnキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::RETURN))
+        throw exception::syntax_error("returnキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
     auto ret=std::make_shared<_return_>(ta.get_line(),ta.get_column());
     ret->value=expression::get(ta);
-    if(!ta.consume(lexicon::TK::SCOLON))throw exception::syntax_error("不正なreturn文です",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::SCOLON))
+        throw exception::syntax_error("不正なreturn文です",ta.get_line(),ta.get_column());
     return ret;
 }
 std::shared_ptr<const define_function>define_function::get(lexicon::token_array&ta)
 {
-    if(!ta.consume(lexicon::TK::INT))throw exception::syntax_error("関数の型が見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::INT))
+        throw exception::syntax_error("関数の型が見つかりませんでした",ta.get_line(),ta.get_column());
     auto ret=std::make_shared<define_function>(ta.get_line(),ta.get_column());
     if(auto fidp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
         ret->name=fidp->name;
     else
         throw exception::syntax_error("関数名が見つかりませんでした",ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::OPARENT))throw exception::syntax_error("引数リストが見つかりませんでした",ta.get_line(),ta.get_column());
+    if(!ta.consume(lexicon::TK::OPARENT))
+        throw exception::syntax_error("引数リストが見つかりませんでした",ta.get_line(),ta.get_column());
     if(!ta.consume(lexicon::TK::CPARENT)){
         while(true){
             if(!ta.consume(lexicon::TK::INT))
@@ -321,14 +345,13 @@ void numeric::check(semantics::analyzer&analy)const noexcept
 }
 void identifier::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_available_var(name))throw exception::semantic_error("未定義の変数です: "+name,line,col);
+    if(!analy.is_available_var(name))
+        throw exception::semantic_error("未定義の変数です: "+name,line,col);
 }
 void fcall::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_available_func(func->name,vars.size())){
-        if(func->name!="__builtin_print_u64"||vars.size()!=1)
-            throw exception::semantic_error("未定義の関数です: "+func->name,line,col);
-    }
+    if(!analy.is_available_func(func->name,vars.size()))
+        throw exception::semantic_error("未定義の関数です: "+func->name,line,col);
     for(auto v:vars)v->check(analy);
 }
 void unopr::check(semantics::analyzer&analy)const
@@ -366,7 +389,8 @@ void compound::check(semantics::analyzer&analy)const
 void define_var::check(semantics::analyzer&analy)const
 {
     for(auto v:vars){
-        if(!analy.is_definable_var(v.first))throw exception::semantic_error("二重定義されました: "+v.first,line,col);
+        if(!analy.is_definable_var(v.first))
+            throw exception::semantic_error("二重定義されました: "+v.first,line,col);
         analy.define_var(v.first);
         if(v.second)v.second->check(analy);
     }
@@ -405,11 +429,13 @@ void _for_::check(semantics::analyzer&analy)const
 }
 void _break_::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_breakable())throw exception::semantic_error("不適切なbreak文です",line,col);
+    if(!analy.is_breakable())
+        throw exception::semantic_error("不適切なbreak文です",line,col);
 }
 void _continue_::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_continuable())throw exception::semantic_error("不適切なcontinue文です",line,col);
+    if(!analy.is_continuable())
+        throw exception::semantic_error("不適切なcontinue文です",line,col);
 }
 void _return_::check(semantics::analyzer&analy)const
 {
@@ -417,7 +443,8 @@ void _return_::check(semantics::analyzer&analy)const
 }
 void define_function::check(semantics::analyzer&analy)const
 {
-    if(!analy.is_definable_func(name))throw exception::semantic_error("二重定義されました: "+name,line,col);
+    if(!analy.is_definable_func(name))
+        throw exception::semantic_error("二重定義されました: "+name,line,col);
     analy.define_func(name,args.size());
     analy.enter_scope();
     for(auto a:args)analy.define_var(a);
@@ -829,25 +856,22 @@ identifier::identifier(const std::string&name,int line,int col)
 fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars,int line,int col)
     :expression(line,col),func(std::dynamic_pointer_cast<const identifier>(func)),vars(vars)
 {
-    if(!(this->func)){
+    if(!(this->func))
         throw exception::unsupported_error("関数名が識別子ではありません",line,col);
-    }
 }
 unopr::unopr(const std::shared_ptr<const expression>&arg,int line,int col)
     :expression(line,col),arg(arg){}
 unopr_l::unopr_l(const std::shared_ptr<const expression>&arg,int line,int col)
     :expression(line,col),arg(std::dynamic_pointer_cast<const identifier>(arg))
 {
-    if(!(this->arg)){
+    if(!(this->arg))
         throw exception::unsupported_error("引数が識別子ではありません",line,col);
-    }
 }
 biopr::biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
     :expression(line,col),larg(larg),rarg(rarg){}
 biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
     :expression(line,col),larg(std::dynamic_pointer_cast<const identifier>(larg)),rarg(rarg)
 {
-    if(!(this->larg)){
+    if(!(this->larg))
         throw exception::unsupported_error("右引数が識別子ではありません",line,col);
-    }
 }

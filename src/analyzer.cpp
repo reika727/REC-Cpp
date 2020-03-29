@@ -62,3 +62,7 @@ bool analyzer::is_continuable()const noexcept
 {
     return continue_nest>0;
 }
+analyzer::analyzer()
+{
+    funcs.emplace("__builtin_print_u64",1);
+}

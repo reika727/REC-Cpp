@@ -10,6 +10,7 @@ namespace semantics{
             std::map<std::string,int>funcs;
             int break_nest=0,continue_nest=0;
         public:
+            analyzer();
             void enter_scope();
             void leave_scope();
             void enter_break()noexcept;
