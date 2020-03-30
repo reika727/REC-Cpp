@@ -492,13 +492,8 @@ void uplus::to_asm(code::generator&gen)const
 }
 void uminus::to_asm(code::generator&gen)const
 {
-    // TODO: imul命令を使うべきか検証する
     arg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    gen.write("mov",2,"%rsi");
-    gen.write("mul","%rsi");
-    gen.write("sub","%rax","%rdi");
-    gen.write("mov","%rdi","%rax");
+    gen.write("neg","%rax");
 }
 void lognot::to_asm(code::generator&gen)const
 {
@@ -510,27 +505,27 @@ void lognot::to_asm(code::generator&gen)const
 void preinc::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
-    gen.write("add",1,code::generator::to_address("%rax"));
+    gen.write("incq",code::generator::to_address("%rax"));
     gen.write("mov",code::generator::to_address("%rax"),"%rax");
 }
 void predec::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
-    gen.write("sub",1,code::generator::to_address("%rax"));
+    gen.write("decq",code::generator::to_address("%rax"));
     gen.write("mov",code::generator::to_address("%rax"),"%rax");
 }
 void postinc::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
     gen.write("push",code::generator::to_address("%rax"));
-    gen.write("add",1,code::generator::to_address("%rax"));
+    gen.write("incq",code::generator::to_address("%rax"));
     gen.write("pop","%rax");
 }
 void postdec::to_asm(code::generator&gen)const
 {
     arg->refer(gen);
     gen.write("push",code::generator::to_address("%rax"));
-    gen.write("sub",1,code::generator::to_address("%rax"));
+    gen.write("decq",code::generator::to_address("%rax"));
     gen.write("pop","%rax");
 }
 void bplus::to_asm(code::generator&gen)const
@@ -555,7 +550,7 @@ void multiply::to_asm(code::generator&gen)const
     gen.write("push","%rax");
     larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("mul","%rdi");
+    gen.write("imul","%rdi");
 }
 void divide::to_asm(code::generator&gen)const
 {
@@ -563,8 +558,8 @@ void divide::to_asm(code::generator&gen)const
     gen.write("push","%rax");
     larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("mov",0,"%rdx");
-    gen.write("div","%rdi");
+    gen.write("xor","%rdx","%rdx");
+    gen.write("idiv","%rdi");
 }
 void remain::to_asm(code::generator&gen)const
 {
@@ -572,8 +567,8 @@ void remain::to_asm(code::generator&gen)const
     gen.write("push","%rax");
     larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("mov",0,"%rdx");
-    gen.write("div","%rdi");
+    gen.write("xor","%rdx","%rdx");
+    gen.write("idiv","%rdi");
     gen.write("mov","%rdx","%rax");
 }
 void equal::to_asm(code::generator&gen)const
@@ -696,34 +691,33 @@ void muasgn::to_asm(code::generator&gen)const
     gen.write("push","%rax");
     larg->refer(gen);
     gen.write("pop","%rdi");
-    gen.write("mov","%rax","%rsi");
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
-    gen.write("mul","%rdi");
-    gen.write("mov","%rax",code::generator::to_address("%rsi"));
+    gen.write("imul",code::generator::to_address("%rax"),"%rdi");
+    gen.write("mov","%rdi",code::generator::to_address("%rax"));
+    gen.write("mov","%rdi","%rax");
 }
 void diasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
     gen.write("push","%rax");
-    larg->refer(gen);
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("mov","%rax","%rsi");
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
-    gen.write("mov",0,"%rdx");
-    gen.write("div","%rdi");
-    gen.write("mov","%rax",code::generator::to_address("%rsi"));
+    gen.write("xor","%rdx","%rdx");
+    gen.write("idiv","%rdi");
+    gen.write("mov","%rax","%rdi");
+    larg->refer(gen);
+    gen.write("mov","%rdi",code::generator::to_address("%rax"));
+    gen.write("mov","%rdi","%rax");
 }
 void rmasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
     gen.write("push","%rax");
-    larg->refer(gen);
+    larg->to_asm(gen);
     gen.write("pop","%rdi");
-    gen.write("mov","%rax","%rsi");
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
-    gen.write("mov",0,"%rdx");
-    gen.write("div","%rdi");
-    gen.write("mov","%rdx",code::generator::to_address("%rsi"));
+    gen.write("xor","%rdx","%rdx");
+    gen.write("idiv","%rdi");
+    larg->refer(gen);
+    gen.write("mov","%rdx",code::generator::to_address("%rax"));
     gen.write("mov","%rdx","%rax");
 }
 void expression_statement::to_asm(code::generator&gen)const
