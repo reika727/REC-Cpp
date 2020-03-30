@@ -27,10 +27,13 @@ void generator::leave_continue()
 {
     continue_labels.pop();
 }
-void generator::set_offset(const std::string&name)
+int generator::set_offset(const std::string&name)
 {
-    int tmp=(offset.back().size()+1)*8;
-    offset.back()[name]=tmp;
+    return set_offset(name,-(offset.back().size()+1)*8);
+}
+int generator::set_offset(const std::string&name,int off)
+{
+    return offset.back()[name]=off;
 }
 int generator::get_offset(const std::string&name)
 {

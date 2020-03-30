@@ -457,33 +457,25 @@ void numeric::to_asm(code::generator&gen)const
 }
 void identifier::to_asm(code::generator&gen)const
 {
-    gen.write("mov",code::generator::to_address(-gen.get_offset(name),"%rbp"),"%rax");
+    gen.write("mov",code::generator::to_address(gen.get_offset(name),"%rbp"),"%rax");
 }
-void identifier::refer(code::generator&gen)const
+std::string identifier::refer(code::generator&gen)const
 {
-    gen.write("lea",code::generator::to_address(-gen.get_offset(name),"%rbp"),"%rax");
+    return code::generator::to_address(gen.get_offset(name),"%rbp");
 }
 void fcall::to_asm(code::generator&gen)const
 {
-    for(int i=vars.size()-1;i>=0;--i){
+    std::vector<std::string>regs{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"};
+    for(int i=vars.size()-1;i>=6;--i){
         vars[i]->to_asm(gen);
         gen.write("push","%rax");
     }
-    for(int i=0;i<std::min(6ul,vars.size());++i){
-        switch(i){
-            case 0 :gen.write("pop","%rdi");break;
-            case 1 :gen.write("pop","%rsi");break;
-            case 2 :gen.write("pop","%rdx");break;
-            case 3 :gen.write("pop","%rcx");break;
-            case 4 :gen.write("pop","%r8"); break;
-            case 5 :gen.write("pop","%r9"); break;
-        }
+    for(int i=std::min(5ul,vars.size()-1);i>=0;--i){
+        vars[i]->to_asm(gen);
+        gen.write("mov","%rax",regs[i]);
     }
-    // TODO: 呼び出し規約がよくわからん
-    //int align=(16-gen.get_var_size()%16)%16;
-    //gen.write("sub",align,"%rsp");
+    // TODO: System V ABIに従いスタックフレームを調整する
     gen.write("call",func->name);
-    //gen.write("add",align,"%rsp");
     if(vars.size()>6)gen.write("add",8*(vars.size()-6),"%rsp");
 }
 void uplus::to_asm(code::generator&gen)const
@@ -504,29 +496,23 @@ void lognot::to_asm(code::generator&gen)const
 }
 void preinc::to_asm(code::generator&gen)const
 {
-    arg->refer(gen);
-    gen.write("incq",code::generator::to_address("%rax"));
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
+    gen.write("incq",arg->refer(gen));
+    arg->to_asm(gen);
 }
 void predec::to_asm(code::generator&gen)const
 {
-    arg->refer(gen);
-    gen.write("decq",code::generator::to_address("%rax"));
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
+    gen.write("decq",arg->refer(gen));
+    arg->to_asm(gen);
 }
 void postinc::to_asm(code::generator&gen)const
 {
-    arg->refer(gen);
-    gen.write("push",code::generator::to_address("%rax"));
-    gen.write("incq",code::generator::to_address("%rax"));
-    gen.write("pop","%rax");
+    arg->to_asm(gen);
+    gen.write("incq",arg->refer(gen));
 }
 void postdec::to_asm(code::generator&gen)const
 {
-    arg->refer(gen);
-    gen.write("push",code::generator::to_address("%rax"));
-    gen.write("decq",code::generator::to_address("%rax"));
-    gen.write("pop","%rax");
+    arg->to_asm(gen);
+    gen.write("decq",arg->refer(gen));
 }
 void bplus::to_asm(code::generator&gen)const
 {
@@ -661,64 +647,46 @@ void comma::to_asm(code::generator&gen)const
 void assign::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
-    larg->refer(gen);
-    gen.write("pop","%rdi");
-    gen.write("mov","%rdi",code::generator::to_address("%rax"));
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
+    gen.write("mov","%rax",larg->refer(gen));
 }
 void plasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
-    larg->refer(gen);
-    gen.write("pop","%rdi");
-    gen.write("add","%rdi",code::generator::to_address("%rax"));
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
+    gen.write("add","%rax",larg->refer(gen));
+    larg->to_asm(gen);
 }
 void miasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
-    larg->refer(gen);
-    gen.write("pop","%rdi");
-    gen.write("sub","%rdi",code::generator::to_address("%rax"));
-    gen.write("mov",code::generator::to_address("%rax"),"%rax");
+    gen.write("sub","%rax",larg->refer(gen));
+    larg->to_asm(gen);
 }
 void muasgn::to_asm(code::generator&gen)const
 {
+    std::string addr=larg->refer(gen);
     rarg->to_asm(gen);
-    gen.write("push","%rax");
-    larg->refer(gen);
-    gen.write("pop","%rdi");
-    gen.write("imul",code::generator::to_address("%rax"),"%rdi");
-    gen.write("mov","%rdi",code::generator::to_address("%rax"));
-    gen.write("mov","%rdi","%rax");
+    gen.write("imulq",addr);
+    gen.write("mov","%rax",addr);
 }
 void diasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
-    gen.write("mov","%rax","%rdi");
-    larg->refer(gen);
-    gen.write("mov","%rdi",code::generator::to_address("%rax"));
-    gen.write("mov","%rdi","%rax");
+    gen.write("mov","%rax",larg->refer(gen));
+    larg->to_asm(gen);
 }
 void rmasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
-    larg->refer(gen);
-    gen.write("mov","%rdx",code::generator::to_address("%rax"));
-    gen.write("mov","%rdx","%rax");
+    gen.write("mov","%rdx",larg->refer(gen));
+    larg->to_asm(gen);
 }
 void expression_statement::to_asm(code::generator&gen)const
 {
@@ -818,25 +786,17 @@ void _return_::to_asm(code::generator&gen)const
 }
 void define_function::to_asm(code::generator&gen)const
 {
-    gen.enter_scope();
+    std::vector<std::string>regs{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"};
     gen.write(".globl "+name);
     gen.write(name+':');
     gen.write("push","%rbp");
     gen.write("mov","%rsp","%rbp");
-    gen.write("sub",args.size()*8,"%rsp");
-    for(int i=0;i<args.size();++i){
-        std::string dst=code::generator::to_address(i+1-args.size(),"%rsp");
-        gen.set_offset(args[i]);
-        switch(i){
-            case 0 :gen.write("mov","%rdi",dst);break;
-            case 1 :gen.write("mov","%rsi",dst);break;
-            case 2 :gen.write("mov","%rdx",dst);break;
-            case 3 :gen.write("mov","%rcx",dst);break;
-            case 4 :gen.write("mov","%r8" ,dst);break;
-            case 5 :gen.write("mov","%r9" ,dst);break;
-            default:gen.write("mov",code::generator::to_address(8*(i-6)+16,"%rbp"),dst);break;
-        }
-    }
+    gen.write("sub",std::min(6ul,args.size())*8,"%rsp");
+    gen.enter_scope();
+    for(int i=0;i<std::min(6ul,args.size());++i)
+        gen.write("mov",regs[i],code::generator::to_address(gen.set_offset(args[i]),"%rbp"));
+    for(int i=6;i<args.size();++i)
+        gen.set_offset(args[i],i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for(auto s:stats)s->to_asm(gen);
     gen.leave_scope();

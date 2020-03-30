@@ -54,7 +54,7 @@ namespace syntax{
             identifier(const std::string&name,int line,int col);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
-            void refer(code::generator&gen)const;
+            std::string refer(code::generator&gen)const;
     };
     class fcall final:public expression{
         private:

@@ -18,7 +18,8 @@ namespace code{
             void leave_break();
             void enter_continue(const std::string&label);
             void leave_continue();
-            void set_offset(const std::string&name);
+            int set_offset(const std::string&name);
+            int set_offset(const std::string&name,int off);
             int get_offset(const std::string&name);
             const std::string&get_break_label()const;
             const std::string&get_continue_label()const;
