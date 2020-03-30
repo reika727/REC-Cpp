@@ -54,7 +54,7 @@ namespace syntax{
             identifier(const std::string&name,int line,int col);
             void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
-            std::string refer(code::generator&gen)const;
+            std::string get_address(code::generator&gen)const;
     };
     class fcall final:public expression{
         private:
@@ -265,7 +265,7 @@ namespace syntax{
     };
     class define_var final:public statement{
         private:
-            std::vector<std::pair<std::string,std::shared_ptr<const expression>>>vars;
+            std::vector<std::pair<std::shared_ptr<const identifier>,std::shared_ptr<const expression>>>vars;
         public:
             using statement::statement;
             static std::shared_ptr<const define_var>get(lexicon::token_array&ta);
@@ -328,7 +328,7 @@ namespace syntax{
     class define_function final:public node{
         private:
             std::string name;
-            std::vector<std::string>args;
+            std::vector<std::shared_ptr<const identifier>>args;
             std::vector<std::shared_ptr<const statement>>stats;
         public:
             using node::node;

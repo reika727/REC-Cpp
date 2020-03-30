@@ -83,27 +83,4 @@ std::string generator::get_asm()const
 {
     return dst.str();
 }
-std::string generator::to_address(int dis,const std::string&base,const std::string&ofs,int scl)
-{
-    std::stringstream ss;
-    if(dis!=0)ss<<dis;
-    ss<<'(';
-    if(base!="")ss<<base;
-    if(ofs!="")ss<<','<<ofs;
-    if(scl!=1)ss<<','<<scl;
-    ss<<')';
-    return ss.str();
-}
-std::string generator::to_address(int dis,const std::string&base,int scl)
-{
-    return generator::to_address(dis,base,"",scl);
-}
-std::string generator::to_address(const std::string&base,const std::string&ofs,int scl)
-{
-    return generator::to_address(0,base,ofs,scl);
-}
-std::string generator::to_address(const std::string&base,int scl)
-{
-    return generator::to_address(0,base,"",scl);
-}
 generator::generator(){}

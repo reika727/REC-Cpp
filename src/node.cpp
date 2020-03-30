@@ -225,7 +225,12 @@ std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
     auto ret=std::make_shared<define_var>(ta.get_line(),ta.get_column());
     while(true){
         if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
-            ret->vars.push_back(std::make_pair(idp->name,ta.consume(lexicon::TK::EQUAL)?expression::get(ta,true):nullptr));
+            ret->vars.push_back(
+                std::make_pair(
+                    std::make_shared<identifier>(idp->name,idp->line,idp->col),
+                    ta.consume(lexicon::TK::EQUAL)?expression::get(ta,true):nullptr
+                )
+            );
         else
             throw exception::syntax_error("変数名が見つかりませんでした",ta.get_line(),ta.get_column());
         if(ta.consume(lexicon::TK::SCOLON))
@@ -323,7 +328,7 @@ std::shared_ptr<const define_function>define_function::get(lexicon::token_array&
             if(!ta.consume(lexicon::TK::INT))
                 throw exception::syntax_error("引数の型が見つかりませんでした",ta.get_line(),ta.get_column());
             if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
-                ret->args.push_back(idp->name);
+                ret->args.push_back(std::make_shared<identifier>(idp->name,idp->line,idp->col));
             else
                 throw exception::syntax_error("引数名が見つかりませんでした",ta.get_line(),ta.get_column());
             if(ta.consume(lexicon::TK::COMMA))
@@ -389,9 +394,9 @@ void compound::check(semantics::analyzer&analy)const
 void define_var::check(semantics::analyzer&analy)const
 {
     for(auto v:vars){
-        if(!analy.is_definable_var(v.first))
-            throw exception::semantic_error("二重定義されました: "+v.first,line,col);
-        analy.define_var(v.first);
+        if(!analy.is_definable_var(v.first->name))
+            throw exception::semantic_error("二重定義されました: "+v.first->name,line,col);
+        analy.define_var(v.first->name);
         if(v.second)v.second->check(analy);
     }
 }
@@ -447,7 +452,7 @@ void define_function::check(semantics::analyzer&analy)const
         throw exception::semantic_error("二重定義されました: "+name,line,col);
     analy.define_func(name,args.size());
     analy.enter_scope();
-    for(auto a:args)analy.define_var(a);
+    for(auto a:args)analy.define_var(a->name);
     for(auto s:stats)s->check(analy);
     analy.leave_scope();
 }
@@ -457,22 +462,22 @@ void numeric::to_asm(code::generator&gen)const
 }
 void identifier::to_asm(code::generator&gen)const
 {
-    gen.write("mov",code::generator::to_address(gen.get_offset(name),"%rbp"),"%rax");
+    gen.write("mov",get_address(gen),"%rax");
 }
-std::string identifier::refer(code::generator&gen)const
+std::string identifier::get_address(code::generator&gen)const
 {
-    return code::generator::to_address(gen.get_offset(name),"%rbp");
+    return std::to_string(gen.get_offset(name))+"(%rbp)";
 }
 void fcall::to_asm(code::generator&gen)const
 {
-    std::vector<std::string>regs{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"};
+    if(vars.size()>6)gen.write("sub",8*(vars.size()-6),"%rsp");
     for(int i=vars.size()-1;i>=6;--i){
         vars[i]->to_asm(gen);
-        gen.write("push","%rax");
+        gen.write("mov","%rax",std::to_string(8*(i-6))+"(%rsp)");
     }
     for(int i=std::min(5ul,vars.size()-1);i>=0;--i){
         vars[i]->to_asm(gen);
-        gen.write("mov","%rax",regs[i]);
+        gen.write("mov","%rax",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i]);
     }
     // TODO: System V ABIに従いスタックフレームを調整する
     gen.write("call",func->name);
@@ -496,63 +501,58 @@ void lognot::to_asm(code::generator&gen)const
 }
 void preinc::to_asm(code::generator&gen)const
 {
-    gen.write("incq",arg->refer(gen));
+    gen.write("incq",arg->get_address(gen));
     arg->to_asm(gen);
 }
 void predec::to_asm(code::generator&gen)const
 {
-    gen.write("decq",arg->refer(gen));
+    gen.write("decq",arg->get_address(gen));
     arg->to_asm(gen);
 }
 void postinc::to_asm(code::generator&gen)const
 {
     arg->to_asm(gen);
-    gen.write("incq",arg->refer(gen));
+    gen.write("incq",arg->get_address(gen));
 }
 void postdec::to_asm(code::generator&gen)const
 {
     arg->to_asm(gen);
-    gen.write("decq",arg->refer(gen));
+    gen.write("decq",arg->get_address(gen));
 }
 void bplus::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("add","%rdi","%rax");
 }
 void bminus::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("sub","%rdi","%rax");
 }
 void multiply::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("imul","%rdi");
 }
 void divide::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
 }
 void remain::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
     gen.write("mov","%rdx","%rax");
@@ -560,9 +560,8 @@ void remain::to_asm(code::generator&gen)const
 void equal::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("cmp","%rdi","%rax");
     gen.write("sete","%al");
     gen.write("movzb","%al","%rax");
@@ -570,9 +569,8 @@ void equal::to_asm(code::generator&gen)const
 void nequal::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("cmp","%rdi","%rax");
     gen.write("setne","%al");
     gen.write("movzb","%al","%rax");
@@ -580,9 +578,8 @@ void nequal::to_asm(code::generator&gen)const
 void less::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("cmp","%rdi","%rax");
     gen.write("setl","%al");
     gen.write("movzb","%al","%rax");
@@ -590,9 +587,8 @@ void less::to_asm(code::generator&gen)const
 void greater::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("cmp","%rdi","%rax");
     gen.write("setg","%al");
     gen.write("movzb","%al","%rax");
@@ -600,9 +596,8 @@ void greater::to_asm(code::generator&gen)const
 void leeq::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("cmp","%rdi","%rax");
     gen.write("setle","%al");
     gen.write("movzb","%al","%rax");
@@ -610,9 +605,8 @@ void leeq::to_asm(code::generator&gen)const
 void greq::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("cmp","%rdi","%rax");
     gen.write("setge","%al");
     gen.write("movzb","%al","%rax");
@@ -620,9 +614,8 @@ void greq::to_asm(code::generator&gen)const
 void logand::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("and","%rdi","%rax");
     gen.write("cmp",0,"%rax");
     gen.write("setne","%al");
@@ -631,9 +624,8 @@ void logand::to_asm(code::generator&gen)const
 void logor::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("push","%rax");
+    gen.write("mov","%rax","%rdi");
     larg->to_asm(gen);
-    gen.write("pop","%rdi");
     gen.write("or","%rdi","%rax");
     gen.write("cmp",0,"%rax");
     gen.write("setne","%al");
@@ -647,23 +639,23 @@ void comma::to_asm(code::generator&gen)const
 void assign::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("mov","%rax",larg->refer(gen));
+    gen.write("mov","%rax",larg->get_address(gen));
 }
 void plasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("add","%rax",larg->refer(gen));
+    gen.write("add","%rax",larg->get_address(gen));
     larg->to_asm(gen);
 }
 void miasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("sub","%rax",larg->refer(gen));
+    gen.write("sub","%rax",larg->get_address(gen));
     larg->to_asm(gen);
 }
 void muasgn::to_asm(code::generator&gen)const
 {
-    std::string addr=larg->refer(gen);
+    std::string addr=larg->get_address(gen);
     rarg->to_asm(gen);
     gen.write("imulq",addr);
     gen.write("mov","%rax",addr);
@@ -675,7 +667,7 @@ void diasgn::to_asm(code::generator&gen)const
     larg->to_asm(gen);
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
-    gen.write("mov","%rax",larg->refer(gen));
+    gen.write("mov","%rax",larg->get_address(gen));
     larg->to_asm(gen);
 }
 void rmasgn::to_asm(code::generator&gen)const
@@ -685,7 +677,7 @@ void rmasgn::to_asm(code::generator&gen)const
     larg->to_asm(gen);
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
-    gen.write("mov","%rdx",larg->refer(gen));
+    gen.write("mov","%rdx",larg->get_address(gen));
     larg->to_asm(gen);
 }
 void expression_statement::to_asm(code::generator&gen)const
@@ -704,12 +696,12 @@ void compound::to_asm(code::generator&gen)const
 }
 void define_var::to_asm(code::generator&gen)const
 {
+    gen.write("sub",8*vars.size(),"%rsp");
     for(auto v:vars){
-        gen.write("sub",8,"%rsp");
-        gen.set_offset(v.first);
+        gen.set_offset(v.first->name);
         if(v.second){
             v.second->to_asm(gen);
-            gen.write("mov","%rax",code::generator::to_address("%rsp"));
+            gen.write("mov","%rax",v.first->get_address(gen));
         }
     }
 }
@@ -786,17 +778,18 @@ void _return_::to_asm(code::generator&gen)const
 }
 void define_function::to_asm(code::generator&gen)const
 {
-    std::vector<std::string>regs{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"};
     gen.write(".globl "+name);
     gen.write(name+':');
     gen.write("push","%rbp");
     gen.write("mov","%rsp","%rbp");
     gen.write("sub",std::min(6ul,args.size())*8,"%rsp");
     gen.enter_scope();
-    for(int i=0;i<std::min(6ul,args.size());++i)
-        gen.write("mov",regs[i],code::generator::to_address(gen.set_offset(args[i]),"%rbp"));
+    for(int i=0;i<std::min(6ul,args.size());++i){
+        gen.set_offset(args[i]->name);
+        gen.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address(gen));
+    }
     for(int i=6;i<args.size();++i)
-        gen.set_offset(args[i],i*8-32);
+        gen.set_offset(args[i]->name,i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for(auto s:stats)s->to_asm(gen);
     gen.leave_scope();
