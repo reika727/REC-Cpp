@@ -1,19 +1,19 @@
 #pragma once
 #include"../lexicon/token_array.hpp"
-#include"../semantics/analyzer.hpp"
 #include"../code/generator.hpp"
 #include<memory>
 #include<string>
 #include<utility>
 #include<vector>
+namespace code{
+    class generator;
+}
 namespace syntax{
     class node{
-        protected:
-            const int line,col;
         public:
+            const int line,col;
             node(int line,int col);
             virtual ~node()=default;
-            virtual void check(semantics::analyzer&analy)const=0;
             virtual void to_asm(code::generator&gen)const=0;
     };
     class expression:public node{
@@ -44,7 +44,6 @@ namespace syntax{
             const int value;
         public:
             numeric(int value,int line,int col);
-            void check(semantics::analyzer&analy)const noexcept override;
             void to_asm(code::generator&gen)const override;
     };
     class identifier final:public expression{
@@ -52,7 +51,6 @@ namespace syntax{
             // TODO: fcallの方の問題に対応できたらprivateにする
             const std::string name;
             identifier(const std::string&name,int line,int col);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
             std::string get_address(code::generator&gen)const;
     };
@@ -63,7 +61,6 @@ namespace syntax{
             const std::vector<std::shared_ptr<const expression>>vars;
         public:
             fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars,int line,int col);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class unopr:public expression{
@@ -71,7 +68,6 @@ namespace syntax{
             const std::shared_ptr<const expression>arg;
         public:
             unopr(const std::shared_ptr<const expression>&arg,int line,int col);
-            void check(semantics::analyzer&analy)const override final;
     };
     class uplus final:public unopr{
         public:
@@ -94,7 +90,6 @@ namespace syntax{
             const std::shared_ptr<const identifier>arg;
         public:
             unopr_l(const std::shared_ptr<const expression>&arg,int line,int col);
-            void check(semantics::analyzer&analy)const override final;
     };
     class preinc final:public unopr_l{
         public:
@@ -121,7 +116,6 @@ namespace syntax{
             const std::shared_ptr<const expression>larg,rarg;
         public:
             biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col);
-            void check(semantics::analyzer&analy)const override final;
     };
     class bplus final:public biopr{
         public:
@@ -200,7 +194,6 @@ namespace syntax{
             const std::shared_ptr<const expression>rarg;
         public:
             biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col);
-            void check(semantics::analyzer&analy)const override final;
     };
     class assign final:public biopr_l{
         public:
@@ -244,14 +237,12 @@ namespace syntax{
         public:
             using statement::statement;
             static std::shared_ptr<const expression_statement>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class null_statement final:public statement{
         public:
             using statement::statement;
             static std::shared_ptr<const null_statement>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class compound final:public statement{
@@ -260,7 +251,6 @@ namespace syntax{
         public:
             using statement::statement;
             static std::shared_ptr<const compound>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class define_var final:public statement{
@@ -269,7 +259,6 @@ namespace syntax{
         public:
             using statement::statement;
             static std::shared_ptr<const define_var>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class _if_else_ final:public statement{
@@ -279,7 +268,6 @@ namespace syntax{
         public:
             using statement::statement;
             static std::shared_ptr<const _if_else_>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class _while_ final:public statement{
@@ -289,7 +277,6 @@ namespace syntax{
         public:
             using statement::statement;
             static std::shared_ptr<const _while_>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class _for_ final:public statement{
@@ -299,21 +286,18 @@ namespace syntax{
         public:
             using statement::statement;
             static std::shared_ptr<const _for_>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class _break_ final:public statement{
         public:
             using statement::statement;
             static std::shared_ptr<const _break_>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class _continue_ final:public statement{
         public:
             using statement::statement;
             static std::shared_ptr<const _continue_>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class _return_ final:public statement{
@@ -322,7 +306,6 @@ namespace syntax{
         public:
             using statement::statement;
             static std::shared_ptr<const _return_>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
     class define_function final:public node{
@@ -333,7 +316,6 @@ namespace syntax{
         public:
             using node::node;
             static std::shared_ptr<const define_function>get(lexicon::token_array&ta);
-            void check(semantics::analyzer&analy)const override;
             void to_asm(code::generator&gen)const override;
     };
 }

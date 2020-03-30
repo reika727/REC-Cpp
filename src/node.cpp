@@ -344,118 +344,6 @@ std::shared_ptr<const define_function>define_function::get(lexicon::token_array&
     while(!ta.consume(lexicon::TK::CBRACE))ret->stats.push_back(statement::get(ta));
     return ret;
 }
-void numeric::check(semantics::analyzer&analy)const noexcept
-{
-    return;
-}
-void identifier::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_available_var(name))
-        throw exception::semantic_error("未定義の変数です: "+name,line,col);
-}
-void fcall::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_available_func(func->name,vars.size()))
-        throw exception::semantic_error("未定義の関数です: "+func->name,line,col);
-    for(auto v:vars)v->check(analy);
-}
-void unopr::check(semantics::analyzer&analy)const
-{
-    arg->check(analy);
-}
-void unopr_l::check(semantics::analyzer&analy)const
-{
-    arg->check(analy);
-}
-void biopr::check(semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void biopr_l::check(semantics::analyzer&analy)const
-{
-    larg->check(analy);
-    rarg->check(analy);
-}
-void expression_statement::check(semantics::analyzer&analy)const
-{
-    expr->check(analy);
-}
-void null_statement::check(semantics::analyzer&analy)const
-{
-    return;
-}
-void compound::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    for(auto s:stats)s->check(analy);
-    analy.leave_scope();
-}
-void define_var::check(semantics::analyzer&analy)const
-{
-    for(auto v:vars){
-        if(!analy.is_definable_var(v.first->name))
-            throw exception::semantic_error("二重定義されました: "+v.first->name,line,col);
-        analy.define_var(v.first->name);
-        if(v.second)v.second->check(analy);
-    }
-}
-void _if_else_::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    cond->check(analy);
-    stat_if->check(analy);
-    if(stat_else)stat_else->check(analy);
-    analy.leave_scope();
-}
-void _while_::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    analy.enter_break();
-    analy.enter_continue();
-    cond->check(analy);
-    stat->check(analy);
-    analy.leave_continue();
-    analy.leave_break();
-    analy.leave_scope();
-}
-void _for_::check(semantics::analyzer&analy)const
-{
-    analy.enter_scope();
-    analy.enter_break();
-    analy.enter_continue();
-    if(init)init->check(analy);
-    if(cond)cond->check(analy);
-    if(reinit)reinit->check(analy);
-    stat->check(analy);
-    analy.leave_continue();
-    analy.leave_break();
-    analy.leave_scope();
-}
-void _break_::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_breakable())
-        throw exception::semantic_error("不適切なbreak文です",line,col);
-}
-void _continue_::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_continuable())
-        throw exception::semantic_error("不適切なcontinue文です",line,col);
-}
-void _return_::check(semantics::analyzer&analy)const
-{
-    value->check(analy);
-}
-void define_function::check(semantics::analyzer&analy)const
-{
-    if(!analy.is_definable_func(name))
-        throw exception::semantic_error("二重定義されました: "+name,line,col);
-    analy.define_func(name,args.size());
-    analy.enter_scope();
-    for(auto a:args)analy.define_var(a->name);
-    for(auto s:stats)s->check(analy);
-    analy.leave_scope();
-}
 void numeric::to_asm(code::generator&gen)const
 {
     gen.write("mov",value,"%rax");
@@ -466,7 +354,7 @@ void identifier::to_asm(code::generator&gen)const
 }
 std::string identifier::get_address(code::generator&gen)const
 {
-    return std::to_string(gen.get_offset(name))+"(%rbp)";
+    return std::to_string(gen.get_offset(*this))+"(%rbp)";
 }
 void fcall::to_asm(code::generator&gen)const
 {
@@ -698,7 +586,7 @@ void define_var::to_asm(code::generator&gen)const
 {
     gen.write("sub",8*vars.size(),"%rsp");
     for(auto v:vars){
-        gen.set_offset(v.first->name);
+        gen.set_offset(*v.first);
         if(v.second){
             v.second->to_asm(gen);
             gen.write("mov","%rax",v.first->get_address(gen));
@@ -763,11 +651,11 @@ void _for_::to_asm(code::generator&gen)const
 }
 void _break_::to_asm(code::generator&gen)const
 {
-    gen.write("jmp",gen.get_break_label());
+    gen.write("jmp",gen.get_break_label(*this));
 }
 void _continue_::to_asm(code::generator&gen)const
 {
-    gen.write("jmp",gen.get_continue_label());
+    gen.write("jmp",gen.get_continue_label(*this));
 }
 void _return_::to_asm(code::generator&gen)const
 {
@@ -785,11 +673,11 @@ void define_function::to_asm(code::generator&gen)const
     gen.write("sub",std::min(6ul,args.size())*8,"%rsp");
     gen.enter_scope();
     for(int i=0;i<std::min(6ul,args.size());++i){
-        gen.set_offset(args[i]->name);
+        gen.set_offset(*args[i]);
         gen.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address(gen));
     }
     for(int i=6;i<args.size();++i)
-        gen.set_offset(args[i]->name,i*8-32);
+        gen.set_offset(*args[i],i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for(auto s:stats)s->to_asm(gen);
     gen.leave_scope();

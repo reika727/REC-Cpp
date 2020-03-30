@@ -1,4 +1,6 @@
+// TODO: 関数の未定義・多重定義の検出の実装
 #include"code/generator.hpp"
+#include"exception/compilation_error.hpp"
 #include<algorithm>
 using namespace code;
 void generator::enter_scope()
@@ -27,31 +29,38 @@ void generator::leave_continue()
 {
     continue_labels.pop();
 }
-int generator::set_offset(const std::string&name)
+int generator::set_offset(const syntax::identifier&id)
 {
-    return set_offset(name,-(offset.back().size()+1)*8);
+    return set_offset(id,-(offset.back().size()+1)*8);
 }
-int generator::set_offset(const std::string&name,int off)
+int generator::set_offset(const syntax::identifier&id,int off)
 {
-    return offset.back()[name]=off;
+    if(offset.back().count(id.name))
+        throw exception::semantic_error("多重定義されました: "+id.name,id.line,id.col);
+    return offset.back()[id.name]=off;
 }
-int generator::get_offset(const std::string&name)
+int generator::get_offset(const syntax::identifier&id)
 {
-    return (*
-        std::find_if(
+    auto itr=std::find_if(
             offset.rbegin(),offset.rend(),
-            [name](const std::map<std::string,int>&mp){
-                return mp.count(name)==1;
+            [id](const std::map<std::string,int>&mp){
+                return mp.count(id.name)==1;
             }
-        )
-    )[name];
+        );
+    if(itr==offset.rend())
+        throw exception::semantic_error("未定義の変数です: "+id.name,id.line,id.col);
+    return(*itr)[id.name];
 }
-const std::string&generator::get_break_label()const
+const std::string&generator::get_break_label(const syntax::_break_&br)const
 {
+    if(break_labels.empty())
+        throw exception::semantic_error("不適切なbreak文です",br.line,br.col);
     return break_labels.top();
 }
-const std::string&generator::get_continue_label()const
+const std::string&generator::get_continue_label(const syntax::_continue_&con)const
 {
+    if(continue_labels.empty())
+        throw exception::semantic_error("不適切なcontinue文です",con.line,con.col);
     return continue_labels.top();
 }
 void generator::write(const std::string&str)
@@ -83,4 +92,3 @@ std::string generator::get_asm()const
 {
     return dst.str();
 }
-generator::generator(){}

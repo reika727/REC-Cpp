@@ -11,7 +11,6 @@ namespace syntax{
             std::vector<std::shared_ptr<const define_function>>funcs;
         public:
             tree(const std::string&src);
-            void check()const;
             std::string to_asm()const;
     };
 }

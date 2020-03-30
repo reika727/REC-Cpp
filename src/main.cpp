@@ -13,7 +13,6 @@ int main(int argc,char**argv)
         std::ifstream ifs(argv[1]);
         std::string src((std::istreambuf_iterator<char>(ifs)),std::istreambuf_iterator<char>());
         syntax::tree tr(src);
-        tr.check();
         std::ofstream(argc==2?"tmp.s":argv[2])<<tr.to_asm();
     }catch(const std::exception&e){
         std::cerr<<"\033[1;31m"<<e.what()<<"\033[m"<<std::endl;
