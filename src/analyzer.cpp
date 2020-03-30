@@ -64,5 +64,6 @@ bool analyzer::is_continuable()const noexcept
 }
 analyzer::analyzer()
 {
+    funcs.emplace("__builtin_put_ascii",1);
     funcs.emplace("__builtin_print_u64",1);
 }
