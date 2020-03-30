@@ -323,7 +323,10 @@ std::shared_ptr<const define_function>define_function::get(lexicon::token_array&
         throw exception::syntax_error("関数名が見つかりませんでした",ta.get_line(),ta.get_column());
     if(!ta.consume(lexicon::TK::OPARENT))
         throw exception::syntax_error("引数リストが見つかりませんでした",ta.get_line(),ta.get_column());
-    if(!ta.consume(lexicon::TK::CPARENT)){
+    if(ta.consume(lexicon::TK::VOID)){
+        if(!ta.consume(lexicon::TK::CPARENT))
+            throw exception::syntax_error("不正な引数リストです",ta.get_line(),ta.get_column());
+    }else{
         while(true){
             if(!ta.consume(lexicon::TK::INT))
                 throw exception::syntax_error("引数の型が見つかりませんでした",ta.get_line(),ta.get_column());

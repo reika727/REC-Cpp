@@ -31,6 +31,7 @@ namespace lexicon{
         LEEQ,     // <=
         GREQ,     // >=
         INT,      // int
+        VOID,     // void
         IF,       // if
         ELSE,     // else
         WHILE,    // while

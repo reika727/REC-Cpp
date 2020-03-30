@@ -28,7 +28,7 @@ int func(int a,int b,int c,int d,int e,int f,int g,int h,int i,int j,int k,int l
     __builtin_put_ascii(10);
     return 0;
 }
-int main()
+int main(void)
 {
     func(1,534,5,35,4,46,23,64,6543,34,465,6345,234);
     return 0;

@@ -66,6 +66,8 @@ token_array::token_array(const std::string&s)
         };
         if(check_keyword("int",' '))
             push_back_symbol(TK::INT);
+        else if(check_keyword("void",' ',')'))
+            push_back_symbol(TK::VOID);
         else if(check_keyword("if",'(',' '))
             push_back_symbol(TK::IF);
         else if(check_keyword("else",'{',';',' '))
