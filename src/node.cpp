@@ -690,7 +690,7 @@ node::node(int line,int col)
 numeric::numeric(int value,int line,int col)
     :expression(line,col),value(value){}
 identifier::identifier(const std::string&name,int line,int col)
-    :expression(line,col),name(name){}
+    :expression_l(line,col),name(name){}
 fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars,int line,int col)
     :expression(line,col),func(std::dynamic_pointer_cast<const identifier>(func)),vars(vars)
 {
@@ -700,16 +700,16 @@ fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std:
 unopr::unopr(const std::shared_ptr<const expression>&arg,int line,int col)
     :expression(line,col),arg(arg){}
 unopr_l::unopr_l(const std::shared_ptr<const expression>&arg,int line,int col)
-    :expression(line,col),arg(std::dynamic_pointer_cast<const identifier>(arg))
+    :expression(line,col),arg(std::dynamic_pointer_cast<const expression_l>(arg))
 {
     if(!(this->arg))
-        throw exception::compilation_error("未実装機能: 引数が識別子ではありません",line,col);
+        throw exception::compilation_error("引数が左辺値ではありません",line,col);
 }
 biopr::biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
     :expression(line,col),larg(larg),rarg(rarg){}
 biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
-    :expression(line,col),larg(std::dynamic_pointer_cast<const identifier>(larg)),rarg(rarg)
+    :expression(line,col),larg(std::dynamic_pointer_cast<const expression_l>(larg)),rarg(rarg)
 {
     if(!(this->larg))
-        throw exception::compilation_error("未実装機能: 右引数が識別子ではありません",line,col);
+        throw exception::compilation_error("右引数が左辺値ではありません",line,col);
 }

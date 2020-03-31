@@ -39,6 +39,11 @@ namespace syntax{
             static std::shared_ptr<const expression>get(lexicon::token_array&ta,bool for_initialization=false);
             virtual ~expression()=default;
     };
+    class expression_l:public expression{
+        public:
+            using expression::expression;
+            virtual std::string get_address(code::generator&gen)const=0;
+    };
     class numeric final:public expression{
         private:
             const int value;
@@ -46,13 +51,13 @@ namespace syntax{
             numeric(int value,int line,int col);
             void to_asm(code::generator&gen)const override;
     };
-    class identifier final:public expression{
+    class identifier final:public expression_l{
         public:
             // TODO: fcallの方の問題に対応できたらprivateにする
             const std::string name;
             identifier(const std::string&name,int line,int col);
             void to_asm(code::generator&gen)const override;
-            std::string get_address(code::generator&gen)const;
+            std::string get_address(code::generator&gen)const override;
     };
     class fcall final:public expression{
         private:
@@ -86,8 +91,7 @@ namespace syntax{
     };
     class unopr_l:public expression{
         protected:
-            // TODO: 引数が識別子でなくてもよいようにする
-            const std::shared_ptr<const identifier>arg;
+            const std::shared_ptr<const expression_l>arg;
         public:
             unopr_l(const std::shared_ptr<const expression>&arg,int line,int col);
     };
@@ -189,8 +193,7 @@ namespace syntax{
     };
     class biopr_l:public expression{
         protected:
-            // TODO: 右引数が識別子でなくてもよいようにする
-            const std::shared_ptr<const identifier>larg;
+            const std::shared_ptr<const expression_l>larg;
             const std::shared_ptr<const expression>rarg;
         public:
             biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col);
@@ -231,7 +234,7 @@ namespace syntax{
             virtual ~statement()=default;
             static std::shared_ptr<const statement>get(lexicon::token_array&ta);
     };
-    class expression_statement:public statement{
+    class expression_statement final:public statement{
         private:
             std::shared_ptr<const expression>expr;
         public:
