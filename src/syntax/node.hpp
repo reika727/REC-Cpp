@@ -244,13 +244,13 @@ namespace syntax{
         private:
             std::shared_ptr<const expression>expr;
         public:
-            static std::shared_ptr<const expression_statement>get(lexicon::token_array&ta);
+            expression_statement(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class null_statement final:public statement{
         using statement::statement;
         public:
-            static std::shared_ptr<const null_statement>get(lexicon::token_array&ta);
+            null_statement(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class compound final:public statement{
@@ -258,7 +258,7 @@ namespace syntax{
         private:
             std::vector<std::shared_ptr<const statement>>stats;
         public:
-            static std::shared_ptr<const compound>get(lexicon::token_array&ta);
+            compound(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class var_difinition final:public statement{
@@ -266,7 +266,7 @@ namespace syntax{
         private:
             std::vector<std::pair<std::shared_ptr<const identifier>,std::shared_ptr<const expression>>>vars;
         public:
-            static std::shared_ptr<const var_difinition>get(lexicon::token_array&ta);
+            var_difinition(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class _if_else_ final:public statement{
@@ -275,7 +275,7 @@ namespace syntax{
             std::shared_ptr<const expression>cond;
             std::shared_ptr<const statement>stat_if,stat_else;
         public:
-            static std::shared_ptr<const _if_else_>get(lexicon::token_array&ta);
+            _if_else_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class _while_ final:public statement{
@@ -284,7 +284,7 @@ namespace syntax{
             std::shared_ptr<const expression>cond;
             std::shared_ptr<const statement>stat;
         public:
-            static std::shared_ptr<const _while_>get(lexicon::token_array&ta);
+            _while_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class _for_ final:public statement{
@@ -293,19 +293,19 @@ namespace syntax{
             std::shared_ptr<const expression>init,cond,reinit;
             std::shared_ptr<const statement>stat;
         public:
-            static std::shared_ptr<const _for_>get(lexicon::token_array&ta);
+            _for_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class _break_ final:public statement{
         using statement::statement;
         public:
-            static std::shared_ptr<const _break_>get(lexicon::token_array&ta);
+            _break_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class _continue_ final:public statement{
         using statement::statement;
         public:
-            static std::shared_ptr<const _continue_>get(lexicon::token_array&ta);
+            _continue_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class _return_ final:public statement{
@@ -313,7 +313,7 @@ namespace syntax{
         private:
             std::shared_ptr<const expression>value;
         public:
-            static std::shared_ptr<const _return_>get(lexicon::token_array&ta);
+            _return_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class function_difinition final:public node{
@@ -323,7 +323,7 @@ namespace syntax{
             std::vector<std::shared_ptr<const identifier>>args;
             std::vector<std::shared_ptr<const statement>>stats;
         public:
-            static std::shared_ptr<const function_difinition>get(lexicon::token_array&ta);
+            function_difinition(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class translation_unit final:public node{
@@ -331,7 +331,7 @@ namespace syntax{
         private:
             std::vector<std::shared_ptr<const function_difinition>>funcs;
         public:
-            static std::shared_ptr<const translation_unit>get(lexicon::token_array&ta);
+            translation_unit(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
 }
