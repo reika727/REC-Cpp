@@ -256,12 +256,12 @@ namespace syntax{
             static std::shared_ptr<const compound>get(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
-    class define_var final:public statement{
+    class var_difinition final:public statement{
         private:
             std::vector<std::pair<std::shared_ptr<const identifier>,std::shared_ptr<const expression>>>vars;
         public:
             using statement::statement;
-            static std::shared_ptr<const define_var>get(lexicon::token_array&ta);
+            static std::shared_ptr<const var_difinition>get(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
     class _if_else_ final:public statement{
@@ -311,14 +311,14 @@ namespace syntax{
             static std::shared_ptr<const _return_>get(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
-    class define_function final:public node{
+    class function_difinition final:public node{
         private:
             std::string name;
             std::vector<std::shared_ptr<const identifier>>args;
             std::vector<std::shared_ptr<const statement>>stats;
         public:
             using node::node;
-            static std::shared_ptr<const define_function>get(lexicon::token_array&ta);
+            static std::shared_ptr<const function_difinition>get(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
 }

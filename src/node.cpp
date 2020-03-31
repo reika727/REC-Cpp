@@ -184,7 +184,7 @@ std::shared_ptr<const expression>expression::get_primary(lexicon::token_array&ta
 }
 std::shared_ptr<const statement>statement::get(lexicon::token_array&ta)
 {
-    if(ta.check(lexicon::TK::INT))return define_var::get(ta);
+    if(ta.check(lexicon::TK::INT))return var_difinition::get(ta);
     else if(ta.check(lexicon::TK::IF))return _if_else_::get(ta);
     else if(ta.check(lexicon::TK::WHILE))return _while_::get(ta);
     else if(ta.check(lexicon::TK::FOR))return _for_::get(ta);
@@ -218,11 +218,11 @@ std::shared_ptr<const compound>compound::get(lexicon::token_array&ta)
     while(!ta.consume(lexicon::TK::CBRACE))ret->stats.push_back(statement::get(ta));
     return ret;
 }
-std::shared_ptr<const define_var>define_var::get(lexicon::token_array&ta)
+std::shared_ptr<const var_difinition>var_difinition::get(lexicon::token_array&ta)
 {
     if(!ta.consume(lexicon::TK::INT))
         throw exception::compilation_error("型指定子が見つかりませんでした",ta.get_line(),ta.get_column());
-    auto ret=std::make_shared<define_var>(ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<var_difinition>(ta.get_line(),ta.get_column());
     while(true){
         if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
             ret->vars.push_back(
@@ -312,11 +312,11 @@ std::shared_ptr<const _return_>_return_::get(lexicon::token_array&ta)
         throw exception::compilation_error("不正なreturn文です",ta.get_line(),ta.get_column());
     return ret;
 }
-std::shared_ptr<const define_function>define_function::get(lexicon::token_array&ta)
+std::shared_ptr<const function_difinition>function_difinition::get(lexicon::token_array&ta)
 {
     if(!ta.consume(lexicon::TK::INT))
         throw exception::compilation_error("関数の型が見つかりませんでした",ta.get_line(),ta.get_column());
-    auto ret=std::make_shared<define_function>(ta.get_line(),ta.get_column());
+    auto ret=std::make_shared<function_difinition>(ta.get_line(),ta.get_column());
     if(auto fidp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
         ret->name=fidp->name;
     else
@@ -585,7 +585,7 @@ void compound::to_asm(code::generator&gen)const
     for(auto s:stats)s->to_asm(gen);
     gen.write("add",gen.leave_scope(),"%rsp");
 }
-void define_var::to_asm(code::generator&gen)const
+void var_difinition::to_asm(code::generator&gen)const
 {
     gen.write("sub",8*vars.size(),"%rsp");
     for(auto v:vars){
@@ -667,7 +667,7 @@ void _return_::to_asm(code::generator&gen)const
     gen.write("pop","%rbp");
     gen.write("ret");
 }
-void define_function::to_asm(code::generator&gen)const
+void function_difinition::to_asm(code::generator&gen)const
 {
     gen.write(".globl "+name);
     gen.write(name+':');
