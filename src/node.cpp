@@ -347,6 +347,12 @@ std::shared_ptr<const function_difinition>function_difinition::get(lexicon::toke
     while(!ta.consume(lexicon::TK::CBRACE))ret->stats.push_back(statement::get(ta));
     return ret;
 }
+std::shared_ptr<const translation_unit>translation_unit::get(lexicon::token_array&ta)
+{
+    auto ret=std::make_shared<translation_unit>(ta.get_line(),ta.get_column());
+    while(!ta.is_all_read())ret->funcs.push_back(syntax::function_difinition::get(ta));
+    return ret;
+}
 void numeric::to_asm(code::generator&gen)const
 {
     gen.write("mov",value,"%rax");
@@ -683,6 +689,12 @@ void function_difinition::to_asm(code::generator&gen)const
         gen.set_offset(*args[i],i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for(auto s:stats)s->to_asm(gen);
+    gen.leave_scope();
+}
+void translation_unit::to_asm(code::generator&gen)const
+{
+    gen.enter_scope();
+    for(auto f:funcs)f->to_asm(gen);
     gen.leave_scope();
 }
 node::node(int line,int col)

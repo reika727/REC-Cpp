@@ -321,4 +321,12 @@ namespace syntax{
             static std::shared_ptr<const function_difinition>get(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
+    class translation_unit final:public node{
+        private:
+            std::vector<std::shared_ptr<const function_difinition>>funcs;
+        public:
+            using node::node;
+            static std::shared_ptr<const translation_unit>get(lexicon::token_array&ta);
+            void to_asm(code::generator&gen)const override;
+    };
 }
