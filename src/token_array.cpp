@@ -2,7 +2,7 @@
 #include"exception/compilation_error.hpp"
 #include<algorithm>
 using namespace lexicon;
-token_array::token_array(const std::string&s)
+token_array::token_array(const std::string&src)
 {
     int line=1,col=1;
     auto push_symbol=[this,&line,&col](TK sym){
@@ -14,9 +14,9 @@ token_array::token_array(const std::string&s)
     auto push_identifier=[this,&line,&col](const std::string&name){
         tokens.push(std::make_shared<const identifier>(name,line,col));
     };
-    for(int i=0;i<s.length();){
-        if(isspace(s[i])){
-            if(s[i]=='\n'){
+    for(int i=0;i<src.length();){
+        if(isspace(src[i])){
+            if(src[i]=='\n'){
                 ++line;
                 col=0;
             }
@@ -24,25 +24,25 @@ token_array::token_array(const std::string&s)
             ++col;
             continue;
         }
-        auto check_keyword=[&col,s,&i](const std::string&token,auto...follow){
-            if(s.substr(i,token.length())!=token)return false;
+        auto check_keyword=[&col,src,&i](const std::string&token,auto...follow){
+            if(src.substr(i,token.length())!=token)return false;
             if(sizeof...(follow)!=0){
-                if(i+token.length()>=s.length())return false;
-                if(((follow!=s[i+token.length()])&&...))return false;
+                if(i+token.length()>=src.length())return false;
+                if(((follow!=src[i+token.length()])&&...))return false;
             }
             i+=token.length();
             col+=token.length();
             return true;
         };
-        auto check_comment_closed=[&line,&col,s,&i](){
+        auto check_comment_closed=[&line,&col,src,&i](){
             int l=line,c=col;
-            for(;i<s.length();++i){
-                if(s[i]=='\n'){
+            for(;i<src.length();++i){
+                if(src[i]=='\n'){
                     ++line;
                     col=1;
                     continue;
                 }
-                if(s.substr(i,2)=="*/"){
+                if(src.substr(i,2)=="*/"){
                     i+=2;
                     col+=2;
                     return;
@@ -50,16 +50,16 @@ token_array::token_array(const std::string&s)
             }
             throw exception::compilation_error("コメントが閉じられていません",l,c);
         };
-        auto get_numeric_literal=[&col,s,&i](){
+        auto get_numeric_literal=[&col,src,&i](){
             size_t sz;
-            int ret=std::stoi(s.substr(i),&sz);
+            int ret=std::stoi(src.substr(i),&sz);
             i+=sz;
             col+=sz;
             return ret;
         };
-        auto get_identifier=[&col,s,&i](){
-            auto beg=s.begin()+i;
-            auto ret=std::string(beg,find_if_not(beg,s.end(),[](char c){return isalpha(c)||isdigit(c)||c=='_';}));
+        auto get_identifier=[&col,src,&i](){
+            auto beg=src.begin()+i;
+            auto ret=std::string(beg,find_if_not(beg,src.end(),[](char c){return isalpha(c)||isdigit(c)||c=='_';}));
             i+=ret.length();
             col+=ret.length();
             return ret;
@@ -82,7 +82,7 @@ token_array::token_array(const std::string&s)
             push_symbol(TK::CONTINUE);
         else if(check_keyword("return",' '))
             push_symbol(TK::RETURN);
-        else if(s.substr(i,2)=="/*")
+        else if(src.substr(i,2)=="/*")
             check_comment_closed();
         else if(check_keyword("&&"))
             push_symbol(TK::APAP);
@@ -140,9 +140,9 @@ token_array::token_array(const std::string&s)
             push_symbol(TK::OBRACE);
         else if(check_keyword("}"))
             push_symbol(TK::CBRACE);
-        else if(isdigit(s[i]))
+        else if(isdigit(src[i]))
             push_number(get_numeric_literal());
-        else if(isalpha(s[i])||s[i]=='_')
+        else if(isalpha(src[i])||src[i]=='_')
             push_identifier(get_identifier());
         else
             throw exception::compilation_error("認識できないトークンが含まれます",line,col);
@@ -173,3 +173,12 @@ std::shared_ptr<const token>token_array::consume(TK type)noexcept
     }
     return ret;
 }
+token::token(TK type,int line,int col)
+    :type(type),line(line),col(col){}
+numeric::numeric(int value,int line,int col)
+    :token(TK::NUMERIC,line,col),value(value){}
+identifier::identifier(const std::string&name,int line,int col)
+    :token(TK::IDENT,line,col),name(name){}
+symbol::symbol(TK type,int line,int col)
+    :token(type,line,col){}
+token::~token(){}
