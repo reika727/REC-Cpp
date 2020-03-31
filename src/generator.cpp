@@ -36,7 +36,7 @@ int generator::set_offset(const syntax::identifier&id)
 int generator::set_offset(const syntax::identifier&id,int off)
 {
     if(offset.back().count(id.name))
-        throw exception::semantic_error("多重定義されました: "+id.name,id.line,id.col);
+        throw exception::compilation_error("多重定義されました: "+id.name,id.line,id.col);
     return offset.back()[id.name]=off;
 }
 int generator::get_offset(const syntax::identifier&id)
@@ -48,19 +48,19 @@ int generator::get_offset(const syntax::identifier&id)
             }
         );
     if(itr==offset.rend())
-        throw exception::semantic_error("未定義の変数です: "+id.name,id.line,id.col);
+        throw exception::compilation_error("未定義の変数です: "+id.name,id.line,id.col);
     return(*itr)[id.name];
 }
 const std::string&generator::get_break_label(const syntax::_break_&br)const
 {
     if(break_labels.empty())
-        throw exception::semantic_error("不適切なbreak文です",br.line,br.col);
+        throw exception::compilation_error("不適切なbreak文です",br.line,br.col);
     return break_labels.top();
 }
 const std::string&generator::get_continue_label(const syntax::_continue_&con)const
 {
     if(continue_labels.empty())
-        throw exception::semantic_error("不適切なcontinue文です",con.line,con.col);
+        throw exception::compilation_error("不適切なcontinue文です",con.line,con.col);
     return continue_labels.top();
 }
 void generator::write(const std::string&str)

@@ -48,7 +48,7 @@ token_array::token_array(const std::string&s)
                     return;
                 }
             }
-            throw exception::lexical_error("コメントが閉じられていません",l,c);
+            throw exception::compilation_error("コメントが閉じられていません",l,c);
         };
         auto get_numeric_literal=[&col,s,&i](){
             size_t sz;
@@ -145,7 +145,7 @@ token_array::token_array(const std::string&s)
         else if(isalpha(s[i])||s[i]=='_')
             push_back_identifier(get_identifier());
         else
-            throw exception::lexical_error("認識できないトークンが含まれます",line,col);
+            throw exception::compilation_error("認識できないトークンが含まれます",line,col);
     }
     itr=tokens.begin();
 }
