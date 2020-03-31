@@ -18,7 +18,7 @@ __builtin_print_u64:
     mov    %rsp, %rbp
     mov    %rdi, %rax
     mov    $10, %rdi # decimal
-    mov    $20, %rcx # floor(log10(2^64)+1)
+    mov    $20, %rcx # floor(log10(2^64-1)+1)
 BPU64_MAKE_STRING:
     xor    %rdx, %rdx
     div    %rdi
@@ -42,6 +42,29 @@ BPU64_WRITE:
     mov    $1, %rax
     mov    $1, %rdi
     syscall
+    mov    %rbp, %rsp
+    pop    %rbp
+    ret
+
+.globl __builtin_print_2c64
+__builtin_print_2c64:
+    push   %rbp
+    mov    %rsp, %rbp
+    mov    %rdi, %rax
+    shl    %rax
+    jc     BP2C64_NEGATIVE
+    call   __builtin_print_u64
+    jmp    BP2C64_RET
+BP2C64_NEGATIVE:
+    sub    $16, %rsp
+    mov    %rdi, -8(%rbp)
+    mov    $'-', %rdi
+    call   __builtin_put_ascii
+    mov    -8(%rbp), %rdi
+    add    $16, %rsp
+    neg    %rdi
+    call   __builtin_print_u64
+BP2C64_RET:
     mov    %rbp, %rsp
     pop    %rbp
     ret
