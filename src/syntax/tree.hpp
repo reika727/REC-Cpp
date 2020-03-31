@@ -1,16 +1,11 @@
 #pragma once
-#include"node.hpp"
-#include"../lexicon/token_array.hpp"
-#include<memory>
 #include<string>
-#include<vector>
 namespace syntax{
     class tree final{
         private:
-            lexicon::token_array ta;
-            std::vector<std::shared_ptr<const define_function>>funcs;
+            std::string assembly_source;
         public:
             tree(const std::string&src);
-            std::string to_asm()const;
+            std::string get_assembly()const noexcept;
     };
 }

@@ -2,12 +2,11 @@
 #include"token.hpp"
 #include<memory>
 #include<string>
-#include<vector>
+#include<queue>
 namespace lexicon{
     class token_array final{
         private:
-            std::vector<std::shared_ptr<const token>>tokens;
-            std::vector<std::shared_ptr<const token>>::const_iterator itr;
+            std::queue<std::shared_ptr<const token>>tokens;
         public:
             token_array(const std::string&s);
             bool is_all_read()const noexcept;
