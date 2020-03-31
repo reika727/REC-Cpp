@@ -1,3 +1,4 @@
+// TODO: 関数の未定義・多重定義の検出の実装
 #pragma once
 #include"../syntax/node.hpp"
 #include<map>

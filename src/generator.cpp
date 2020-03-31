@@ -1,4 +1,3 @@
-// TODO: 関数の未定義・多重定義の検出の実装
 #include"code/generator.hpp"
 #include"exception/compilation_error.hpp"
 #include<algorithm>

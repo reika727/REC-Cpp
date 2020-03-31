@@ -30,7 +30,6 @@ test: $(TARGET)
 	./$(TARGET) test.c $(TESTDIR)/test.s
 	$(CXX) $(TESTDIR)/test.s $(BUILTIN)/builtin_func.s -o $(TESTDIR)/test.out
 	./$(TESTDIR)/test.out
-	@echo "succeeded"
 
 .PHONY: clean
 clean:
