@@ -1,6 +1,6 @@
 #include"code/generator.hpp"
-#include"exception/compilation_error.hpp"
 #include<algorithm>
+#include<stdexcept>
 using namespace code;
 void generator::enter_scope()
 {
@@ -28,38 +28,38 @@ void generator::leave_continue()
 {
     continue_labels.pop();
 }
-int generator::set_offset(const syntax::identifier&id)
+int generator::set_offset(const std::string&name)
 {
-    return set_offset(id,-(offset.back().size()+1)*8);
+    return set_offset(name,-(offset.back().size()+1)*8);
 }
-int generator::set_offset(const syntax::identifier&id,int off)
+int generator::set_offset(const std::string&name,int off)
 {
-    if(offset.back().count(id.name))
-        throw exception::compilation_error("多重定義されました: "+id.name,id.line,id.col);
-    return offset.back()[id.name]=off;
+    if(offset.back().count(name))
+        throw std::runtime_error("double definition");
+    return offset.back()[name]=off;
 }
-int generator::get_offset(const syntax::identifier&id)
+int generator::get_offset(const std::string&name)
 {
     auto itr=std::find_if(
             offset.rbegin(),offset.rend(),
-            [id](const std::map<std::string,int>&mp){
-                return mp.count(id.name)==1;
+            [name](const std::map<std::string,int>&mp){
+                return mp.count(name)==1;
             }
         );
     if(itr==offset.rend())
-        throw exception::compilation_error("未定義の変数です: "+id.name,id.line,id.col);
-    return(*itr)[id.name];
+        throw std::runtime_error("unknown variable");
+    return(*itr)[name];
 }
-const std::string&generator::get_break_label(const syntax::_break_&br)const
+const std::string&generator::get_break_label()const
 {
     if(break_labels.empty())
-        throw exception::compilation_error("不適切なbreak文です",br.line,br.col);
+        throw std::runtime_error("can't break");
     return break_labels.top();
 }
-const std::string&generator::get_continue_label(const syntax::_continue_&con)const
+const std::string&generator::get_continue_label()const
 {
     if(continue_labels.empty())
-        throw exception::compilation_error("不適切なcontinue文です",con.line,con.col);
+        throw std::runtime_error("can't continue");
     return continue_labels.top();
 }
 void generator::write(const std::string&str)

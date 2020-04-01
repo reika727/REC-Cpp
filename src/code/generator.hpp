@@ -1,16 +1,10 @@
 // TODO: 関数の未定義・多重定義の検出の実装
 #pragma once
-#include"../syntax/node.hpp"
 #include<map>
 #include<sstream>
 #include<stack>
 #include<string>
 #include<vector>
-namespace syntax{
-    class identifier;
-    class _break_;
-    class _continue_;
-}
 namespace code{
     class generator final{
         private:
@@ -24,11 +18,11 @@ namespace code{
             void leave_break();
             void enter_continue(const std::string&label);
             void leave_continue();
-            int set_offset(const syntax::identifier&id);
-            int set_offset(const syntax::identifier&id,int off);
-            int get_offset(const syntax::identifier&id);
-            const std::string&get_break_label(const syntax::_break_&br)const;
-            const std::string&get_continue_label(const syntax::_continue_&con)const;
+            int set_offset(const std::string&name);
+            int set_offset(const std::string&name,int off);
+            int get_offset(const std::string&name);
+            const std::string&get_break_label()const;
+            const std::string&get_continue_label()const;
             void write(const std::string&str);
             void write(const std::string&inst,const std::string&reg1,const std::string&reg2);
             void write(const std::string&inst,int arg,const std::string&reg);

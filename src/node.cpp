@@ -205,7 +205,27 @@ void identifier::to_asm(code::generator&gen)const
 }
 std::string identifier::get_address(code::generator&gen)const
 {
-    return std::to_string(gen.get_offset(*this))+"(%rbp)";
+    try{
+        return std::to_string(gen.get_offset(name))+"(%rbp)";
+    }catch(const std::runtime_error&){
+        throw exception::compilation_error("未定義の変数です: "+name,line,col);
+    }
+}
+void identifier::allocate_on_stack(code::generator&gen)const
+{
+    try{
+        gen.set_offset(name);
+    }catch(const std::runtime_error&){
+        throw exception::compilation_error("多重定義されました: "+name,line,col);
+    }
+}
+void identifier::allocate_on_stack(code::generator&gen,int offset)const
+{
+    try{
+        gen.set_offset(name,offset);
+    }catch(const std::runtime_error&e){
+        throw exception::compilation_error("多重定義されました: "+name,line,col);
+    }
 }
 void fcall::to_asm(code::generator&gen)const
 {
@@ -437,7 +457,7 @@ void var_difinition::to_asm(code::generator&gen)const
 {
     gen.write("sub",8*vars.size(),"%rsp");
     for(auto v:vars){
-        gen.set_offset(*v.first);
+        v.first->allocate_on_stack(gen);
         if(v.second){
             v.second->to_asm(gen);
             gen.write("mov","%rax",v.first->get_address(gen));
@@ -502,11 +522,19 @@ void _for_::to_asm(code::generator&gen)const
 }
 void _break_::to_asm(code::generator&gen)const
 {
-    gen.write("jmp",gen.get_break_label(*this));
+    try{
+        gen.write("jmp",gen.get_break_label());
+    }catch(const std::runtime_error&){
+        throw exception::compilation_error("不適切なbreak文です",line,col);
+    }
 }
 void _continue_::to_asm(code::generator&gen)const
 {
-    gen.write("jmp",gen.get_continue_label(*this));
+    try{
+        gen.write("jmp",gen.get_continue_label());
+    }catch(const std::runtime_error&){
+        throw exception::compilation_error("不適切なcontinue文です",line,col);
+    }
 }
 void _return_::to_asm(code::generator&gen)const
 {
@@ -524,11 +552,11 @@ void function_difinition::to_asm(code::generator&gen)const
     gen.write("sub",std::min(6ul,args.size())*8,"%rsp");
     gen.enter_scope();
     for(int i=0;i<std::min(6ul,args.size());++i){
-        gen.set_offset(*args[i]);
+        args[i]->allocate_on_stack(gen);
         gen.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address(gen));
     }
     for(int i=6;i<args.size();++i)
-        gen.set_offset(*args[i],i*8-32);
+        args[i]->allocate_on_stack(gen,i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for(auto s:stats)s->to_asm(gen);
     gen.leave_scope();

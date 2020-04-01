@@ -5,9 +5,6 @@
 #include<string>
 #include<utility>
 #include<vector>
-namespace code{
-    class generator;
-}
 namespace syntax{
     class node{
         public:
@@ -42,8 +39,10 @@ namespace syntax{
     class expression_l:public expression{
         using expression::expression;
         public:
-            virtual std::string get_address(code::generator&gen)const=0;
             virtual ~expression_l()=default;
+            virtual std::string get_address(code::generator&gen)const=0;
+            virtual void allocate_on_stack(code::generator&gen)const=0;
+            virtual void allocate_on_stack(code::generator&gen,int offset)const=0;
     };
     class numeric final:public expression{
         private:
@@ -59,6 +58,8 @@ namespace syntax{
             identifier(const std::string&name,int line,int col);
             void to_asm(code::generator&gen)const override;
             std::string get_address(code::generator&gen)const override;
+            virtual void allocate_on_stack(code::generator&gen)const override;
+            virtual void allocate_on_stack(code::generator&gen,int offset)const override;
     };
     class fcall final:public expression{
         private:
