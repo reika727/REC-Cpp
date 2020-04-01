@@ -28,15 +28,15 @@ void generator::leave_continue()
 {
     continue_labels.pop();
 }
-int generator::set_offset(const std::string&name)
+void generator::set_offset(const std::string&name)
 {
-    return set_offset(name,-(offset.back().size()+1)*8);
+    set_offset(name,-(offset.back().size()+1)*8);
 }
-int generator::set_offset(const std::string&name,int off)
+void generator::set_offset(const std::string&name,int off)
 {
     if(offset.back().count(name))
         throw std::runtime_error("double definition");
-    return offset.back()[name]=off;
+    offset.back()[name]=off;
 }
 int generator::get_offset(const std::string&name)
 {
