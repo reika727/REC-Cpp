@@ -1,17 +1,24 @@
 #pragma once
 #include"../lexicon/token_array.hpp"
 #include"../code/generator.hpp"
+#include<map>
 #include<memory>
+#include<stack>
 #include<string>
 #include<utility>
 #include<vector>
 namespace syntax{
     class node{
+        // TODO: 関数の未定義・多重定義の検出の実装
+        protected:
+            inline static std::vector<std::map<std::string,int>>offset;
         public:
             const int line,col;
             node(int line,int col);
             virtual ~node()=default;
             virtual void to_asm(code::generator&gen)const=0;
+            static void enter_scope();
+            static int leave_scope();
     };
     class expression:public node{
         using node::node;
@@ -40,18 +47,9 @@ namespace syntax{
         using expression::expression;
         public:
             virtual ~expression_l()=default;
-            virtual std::string get_address(code::generator&gen)const=0;
-            virtual void allocate_on_stack(code::generator&gen)const=0;
-            virtual void allocate_on_stack(code::generator&gen,int offset)const=0;
-    };
-    class numeric final:public expression{
-        friend std::unique_ptr<const numeric>::deleter_type;
-        private:
-            const int value;
-            ~numeric()=default;
-        public:
-            numeric(int value,int line,int col);
-            void to_asm(code::generator&gen)const override;
+            virtual std::string get_address()const=0;
+            virtual void allocate_on_stack()const=0;
+            virtual void allocate_on_stack(int offset)const=0;
     };
     class identifier final:public expression_l{
         friend std::unique_ptr<const identifier>::deleter_type;
@@ -62,9 +60,18 @@ namespace syntax{
             const std::string name;
             identifier(const std::string&name,int line,int col);
             void to_asm(code::generator&gen)const override;
-            std::string get_address(code::generator&gen)const override;
-            virtual void allocate_on_stack(code::generator&gen)const override;
-            virtual void allocate_on_stack(code::generator&gen,int offset)const override;
+            std::string get_address()const override;
+            virtual void allocate_on_stack()const override;
+            virtual void allocate_on_stack(int offset)const override;
+    };
+    class numeric final:public expression{
+        friend std::unique_ptr<const numeric>::deleter_type;
+        private:
+            const int value;
+            ~numeric()=default;
+        public:
+            numeric(int value,int line,int col);
+            void to_asm(code::generator&gen)const override;
     };
     class fcall final:public expression{
         friend std::unique_ptr<const fcall>::deleter_type;
@@ -378,8 +385,20 @@ namespace syntax{
             _if_else_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
-    class _while_ final:public statement{
+    class iteration_statement:public statement{
         using statement::statement;
+        friend class _break_;
+        friend class _continue_;
+        private:
+            inline static std::stack<std::string>break_labels,continue_labels;
+        protected:
+            static void enter_break(const std::string&label);
+            static void leave_break();
+            static void enter_continue(const std::string&label);
+            static void leave_continue();
+    };
+    class _while_ final:public iteration_statement{
+        using iteration_statement::iteration_statement;
         friend std::unique_ptr<const _while_>::deleter_type;
         private:
             std::unique_ptr<const expression>cond;
@@ -389,8 +408,8 @@ namespace syntax{
             _while_(lexicon::token_array&ta);
             void to_asm(code::generator&gen)const override;
     };
-    class _for_ final:public statement{
-        using statement::statement;
+    class _for_ final:public iteration_statement{
+        using iteration_statement::iteration_statement;
         friend std::unique_ptr<const _for_>::deleter_type;
         private:
             std::unique_ptr<const expression>init,cond,reinit;

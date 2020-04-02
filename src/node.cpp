@@ -1,7 +1,34 @@
 #include"syntax/node.hpp"
 #include"exception/compilation_error.hpp"
+#include<algorithm>
 #include<typeinfo>
 using namespace syntax;
+void node::enter_scope()
+{
+    offset.emplace_back();
+}
+int node::leave_scope()
+{
+    int ret=offset.back().size()*8;
+    offset.pop_back();
+    return ret;
+}
+void iteration_statement::enter_break(const std::string&label)
+{
+    break_labels.push(label);
+}
+void iteration_statement::leave_break()
+{
+    break_labels.pop();
+}
+void iteration_statement::enter_continue(const std::string&label)
+{
+    continue_labels.push(label);
+}
+void iteration_statement::leave_continue()
+{
+    continue_labels.pop();
+}
 std::unique_ptr<const expression>expression::get(lexicon::token_array&ta,bool for_initialization)
 {
     return for_initialization?get_order14(ta):get_order15(ta);
@@ -202,31 +229,29 @@ void numeric::to_asm(code::generator&gen)const
 }
 void identifier::to_asm(code::generator&gen)const
 {
-    gen.write("mov",get_address(gen),"%rax");
+    gen.write("mov",get_address(),"%rax");
 }
-std::string identifier::get_address(code::generator&gen)const
+std::string identifier::get_address()const
 {
-    try{
-        return std::to_string(gen.get_offset(name))+"(%rbp)";
-    }catch(const std::runtime_error&){
+    auto itr=std::find_if(
+            offset.rbegin(),offset.rend(),
+            [this](const std::map<std::string,int>&mp){
+                return mp.count(name)==1;
+            }
+        );
+    if(itr==offset.rend())
         throw exception::compilation_error("未定義の変数です: "+name,line,col);
-    }
+    return std::to_string((*itr)[name])+"(%rbp)";
 }
-void identifier::allocate_on_stack(code::generator&gen)const
+void identifier::allocate_on_stack()const
 {
-    try{
-        gen.set_offset(name);
-    }catch(const std::runtime_error&){
-        throw exception::compilation_error("多重定義されました: "+name,line,col);
-    }
+    allocate_on_stack(-(offset.back().size()+1)*8);
 }
-void identifier::allocate_on_stack(code::generator&gen,int offset)const
+void identifier::allocate_on_stack(int off)const
 {
-    try{
-        gen.set_offset(name,offset);
-    }catch(const std::runtime_error&e){
+    if(offset.back().count(name))
         throw exception::compilation_error("多重定義されました: "+name,line,col);
-    }
+    offset.back()[name]=off;
 }
 void fcall::to_asm(code::generator&gen)const
 {
@@ -261,23 +286,23 @@ void lognot::to_asm(code::generator&gen)const
 }
 void preinc::to_asm(code::generator&gen)const
 {
-    gen.write("incq",arg->get_address(gen));
+    gen.write("incq",arg->get_address());
     arg->to_asm(gen);
 }
 void predec::to_asm(code::generator&gen)const
 {
-    gen.write("decq",arg->get_address(gen));
+    gen.write("decq",arg->get_address());
     arg->to_asm(gen);
 }
 void postinc::to_asm(code::generator&gen)const
 {
     arg->to_asm(gen);
-    gen.write("incq",arg->get_address(gen));
+    gen.write("incq",arg->get_address());
 }
 void postdec::to_asm(code::generator&gen)const
 {
     arg->to_asm(gen);
-    gen.write("decq",arg->get_address(gen));
+    gen.write("decq",arg->get_address());
 }
 void bplus::to_asm(code::generator&gen)const
 {
@@ -399,23 +424,23 @@ void comma::to_asm(code::generator&gen)const
 void assign::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("mov","%rax",larg->get_address(gen));
+    gen.write("mov","%rax",larg->get_address());
 }
 void plasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("add","%rax",larg->get_address(gen));
+    gen.write("add","%rax",larg->get_address());
     larg->to_asm(gen);
 }
 void miasgn::to_asm(code::generator&gen)const
 {
     rarg->to_asm(gen);
-    gen.write("sub","%rax",larg->get_address(gen));
+    gen.write("sub","%rax",larg->get_address());
     larg->to_asm(gen);
 }
 void muasgn::to_asm(code::generator&gen)const
 {
-    std::string addr=larg->get_address(gen);
+    std::string addr=larg->get_address();
     rarg->to_asm(gen);
     gen.write("imulq",addr);
     gen.write("mov","%rax",addr);
@@ -427,7 +452,7 @@ void diasgn::to_asm(code::generator&gen)const
     larg->to_asm(gen);
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
-    gen.write("mov","%rax",larg->get_address(gen));
+    gen.write("mov","%rax",larg->get_address());
     larg->to_asm(gen);
 }
 void rmasgn::to_asm(code::generator&gen)const
@@ -437,7 +462,7 @@ void rmasgn::to_asm(code::generator&gen)const
     larg->to_asm(gen);
     gen.write("xor","%rdx","%rdx");
     gen.write("idiv","%rdi");
-    gen.write("mov","%rdx",larg->get_address(gen));
+    gen.write("mov","%rdx",larg->get_address());
     larg->to_asm(gen);
 }
 void expression_statement::to_asm(code::generator&gen)const
@@ -450,18 +475,18 @@ void null_statement::to_asm(code::generator&gen)const
 }
 void compound::to_asm(code::generator&gen)const
 {
-    gen.enter_scope();
+    enter_scope();
     for(const auto&s:stats)s->to_asm(gen);
-    gen.write("add",gen.leave_scope(),"%rsp");
+    gen.write("add",leave_scope(),"%rsp");
 }
 void var_difinition::to_asm(code::generator&gen)const
 {
     gen.write("sub",8*vars.size(),"%rsp");
     for(const auto&v:vars){
-        v.first->allocate_on_stack(gen);
+        v.first->allocate_on_stack();
         if(v.second){
             v.second->to_asm(gen);
-            gen.write("mov","%rax",v.first->get_address(gen));
+            gen.write("mov","%rax",v.first->get_address());
         }
     }
 }
@@ -469,7 +494,7 @@ void _if_else_::to_asm(code::generator&gen)const
 {
     std::string lelse=code::generator::get_unique_label(".Lieelse");
     std::string lend=code::generator::get_unique_label(".Lieend");
-    gen.enter_scope();
+    enter_scope();
     cond->to_asm(gen);
     gen.write("cmp",0,"%rax");
     gen.write("je",lelse);
@@ -478,15 +503,15 @@ void _if_else_::to_asm(code::generator&gen)const
     gen.write(lelse+':');
     if(stat_else)stat_else->to_asm(gen);
     gen.write(lend+':');
-    gen.write("add",gen.leave_scope(),"%rsp");
+    gen.write("add",leave_scope(),"%rsp");
 }
 void _while_::to_asm(code::generator&gen)const
 {
     std::string lbegin=code::generator::get_unique_label(".Lwbegin");
     std::string lend=code::generator::get_unique_label(".Lwend");
-    gen.enter_scope();
-    gen.enter_break(lend);
-    gen.enter_continue(lbegin);
+    enter_scope();
+    enter_break(lend);
+    enter_continue(lbegin);
     gen.write(lbegin+':');
     cond->to_asm(gen);
     gen.write("cmp",0,"%rax");
@@ -494,18 +519,18 @@ void _while_::to_asm(code::generator&gen)const
     stat->to_asm(gen);
     gen.write("jmp",lbegin);
     gen.write(lend+':');
-    gen.leave_continue();
-    gen.leave_break();
-    gen.write("add",gen.leave_scope(),"%rsp");
+    leave_continue();
+    leave_break();
+    gen.write("add",leave_scope(),"%rsp");
 }
 void _for_::to_asm(code::generator&gen)const
 {
     std::string lbegin=code::generator::get_unique_label(".Lfbegin");
     std::string lreini=code::generator::get_unique_label(".Lfreini");
     std::string lend=code::generator::get_unique_label(".Lfend");
-    gen.enter_scope();
-    gen.enter_break(lend);
-    gen.enter_continue(lreini);
+    enter_scope();
+    enter_break(lend);
+    enter_continue(lreini);
     if(init)init->to_asm(gen);
     gen.write(lbegin+':');
     gen.write("mov",1,"%rax");
@@ -517,25 +542,21 @@ void _for_::to_asm(code::generator&gen)const
     if(reinit)reinit->to_asm(gen);
     gen.write("jmp",lbegin);
     gen.write(lend+':');
-    gen.leave_continue();
-    gen.leave_break();
-    gen.write("add",gen.leave_scope(),"%rsp");
+    leave_continue();
+    leave_break();
+    gen.write("add",leave_scope(),"%rsp");
 }
 void _break_::to_asm(code::generator&gen)const
 {
-    try{
-        gen.write("jmp",gen.get_break_label());
-    }catch(const std::runtime_error&){
+    if(iteration_statement::break_labels.empty())
         throw exception::compilation_error("不適切なbreak文です",line,col);
-    }
+    gen.write("jmp",iteration_statement::break_labels.top());
 }
 void _continue_::to_asm(code::generator&gen)const
 {
-    try{
-        gen.write("jmp",gen.get_continue_label());
-    }catch(const std::runtime_error&){
+    if(iteration_statement::continue_labels.empty())
         throw exception::compilation_error("不適切なcontinue文です",line,col);
-    }
+    gen.write("jmp",iteration_statement::continue_labels.top());
 }
 void _return_::to_asm(code::generator&gen)const
 {
@@ -551,22 +572,22 @@ void function_difinition::to_asm(code::generator&gen)const
     gen.write("push","%rbp");
     gen.write("mov","%rsp","%rbp");
     gen.write("sub",std::min(6ul,args.size())*8,"%rsp");
-    gen.enter_scope();
+    enter_scope();
     for(int i=0;i<std::min(6ul,args.size());++i){
-        args[i]->allocate_on_stack(gen);
-        gen.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address(gen));
+        args[i]->allocate_on_stack();
+        gen.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address());
     }
     for(int i=6;i<args.size();++i)
-        args[i]->allocate_on_stack(gen,i*8-32);
+        args[i]->allocate_on_stack(i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for(const auto&s:stats)s->to_asm(gen);
-    gen.leave_scope();
+    leave_scope();
 }
 void translation_unit::to_asm(code::generator&gen)const
 {
-    gen.enter_scope();
+    enter_scope();
     for(const auto&f:funcs)f->to_asm(gen);
-    gen.leave_scope();
+    leave_scope();
 }
 node::node(int line,int col)
     :line(line),col(col){}
@@ -667,7 +688,7 @@ _if_else_::_if_else_(lexicon::token_array&ta)
     stat_else=ta.consume(lexicon::TK::ELSE)?statement::get(ta):nullptr;
 }
 _while_::_while_(lexicon::token_array&ta)
-    :statement(ta.get_line(),ta.get_column())
+    :iteration_statement(ta.get_line(),ta.get_column())
 {
     if(!ta.consume(lexicon::TK::WHILE))
         throw exception::compilation_error("whileキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
@@ -679,7 +700,7 @@ _while_::_while_(lexicon::token_array&ta)
     stat=statement::get(ta);
 }
 _for_::_for_(lexicon::token_array&ta)
-    :statement(ta.get_line(),ta.get_column())
+    :iteration_statement(ta.get_line(),ta.get_column())
 {
     if(!ta.consume(lexicon::TK::FOR))
         throw exception::compilation_error("forキーワードが見つかりませんでした",ta.get_line(),ta.get_column());
