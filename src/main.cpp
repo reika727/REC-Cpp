@@ -1,4 +1,4 @@
-#include"lexicon/token_array.hpp"
+#include"lexicon/token.hpp"
 #include"syntax/node.hpp"
 #include"code/generator.hpp"
 #include<fstream>

@@ -1,4 +1,4 @@
-#include"lexicon/token_array.hpp"
+#include"lexicon/token.hpp"
 #include"exception/compilation_error.hpp"
 #include<algorithm>
 using namespace lexicon;

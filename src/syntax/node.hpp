@@ -1,5 +1,5 @@
 #pragma once
-#include"../lexicon/token_array.hpp"
+#include"../lexicon/token.hpp"
 #include"../code/generator.hpp"
 #include<map>
 #include<memory>
