@@ -1,6 +1,6 @@
-#include"lexicon/token.hpp"
-#include"syntax/node.hpp"
-#include"code/writer.hpp"
+#include"token.hpp"
+#include"node.hpp"
+#include"writer.hpp"
 #include<fstream>
 #include<iostream>
 #include<stdexcept>

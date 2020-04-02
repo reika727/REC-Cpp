@@ -1,5 +1,5 @@
-#include"lexicon/token.hpp"
-#include"exception/compilation_error.hpp"
+#include"token.hpp"
+#include"compilation_error.hpp"
 #include<algorithm>
 using namespace lexicon;
 token::token(TK type,int line,int col)

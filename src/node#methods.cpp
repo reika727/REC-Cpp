@@ -1,5 +1,5 @@
-#include"syntax/node.hpp"
-#include"exception/compilation_error.hpp"
+#include"node.hpp"
+#include"compilation_error.hpp"
 #include<algorithm>
 using namespace syntax;
 std::string identifier::get_address()const

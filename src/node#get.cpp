@@ -1,5 +1,5 @@
-#include"syntax/node.hpp"
-#include"exception/compilation_error.hpp"
+#include"node.hpp"
+#include"compilation_error.hpp"
 using namespace syntax;
 std::unique_ptr<const expression>expression::get(lexicon::token_array&ta,bool for_initialization)
 {

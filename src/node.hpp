@@ -1,6 +1,6 @@
 #pragma once
-#include"../lexicon/token.hpp"
-#include"../code/writer.hpp"
+#include"token.hpp"
+#include"writer.hpp"
 #include<map>
 #include<memory>
 #include<stack>

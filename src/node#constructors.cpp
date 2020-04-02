@@ -1,5 +1,5 @@
-#include"syntax/node.hpp"
-#include"exception/compilation_error.hpp"
+#include"node.hpp"
+#include"compilation_error.hpp"
 using namespace syntax;
 node::node(int line,int col)
     :line(line),col(col){}
