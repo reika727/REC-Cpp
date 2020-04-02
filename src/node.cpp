@@ -223,13 +223,13 @@ std::unique_ptr<const statement>statement::get(lexicon::token_array&ta)
     else if(ta.check(lexicon::TK::SCOLON))return std::make_unique<const null_statement>(ta);
     else return std::make_unique<const expression_statement>(ta);
 }
-void numeric::to_asm(code::generator&gen)const
+void numeric::to_asm(code::writer&wr)const
 {
-    gen.write("mov",value,"%rax");
+    wr.write("mov",value,"%rax");
 }
-void identifier::to_asm(code::generator&gen)const
+void identifier::to_asm(code::writer&wr)const
 {
-    gen.write("mov",get_address(),"%rax");
+    wr.write("mov",get_address(),"%rax");
 }
 std::string identifier::get_address()const
 {
@@ -253,340 +253,340 @@ void identifier::allocate_on_stack(int off)const
         throw exception::compilation_error("多重定義されました: "+name,line,col);
     offset.back()[name]=off;
 }
-void fcall::to_asm(code::generator&gen)const
+void fcall::to_asm(code::writer&wr)const
 {
-    if(vars.size()>6)gen.write("sub",8*(vars.size()-6),"%rsp");
+    if(vars.size()>6)wr.write("sub",8*(vars.size()-6),"%rsp");
     for(int i=vars.size()-1;i>=6;--i){
-        vars[i]->to_asm(gen);
-        gen.write("mov","%rax",std::to_string(8*(i-6))+"(%rsp)");
+        vars[i]->to_asm(wr);
+        wr.write("mov","%rax",std::to_string(8*(i-6))+"(%rsp)");
     }
     for(int i=std::min(5ul,vars.size()-1);i>=0;--i){
-        vars[i]->to_asm(gen);
-        gen.write("mov","%rax",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i]);
+        vars[i]->to_asm(wr);
+        wr.write("mov","%rax",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i]);
     }
     // TODO: System V ABIに従いスタックフレームを調整する
-    gen.write("call",func->name);
-    if(vars.size()>6)gen.write("add",8*(vars.size()-6),"%rsp");
+    wr.write("call",func->name);
+    if(vars.size()>6)wr.write("add",8*(vars.size()-6),"%rsp");
 }
-void uplus::to_asm(code::generator&gen)const
+void uplus::to_asm(code::writer&wr)const
 {
-    arg->to_asm(gen);
+    arg->to_asm(wr);
 }
-void uminus::to_asm(code::generator&gen)const
+void uminus::to_asm(code::writer&wr)const
 {
-    arg->to_asm(gen);
-    gen.write("neg","%rax");
+    arg->to_asm(wr);
+    wr.write("neg","%rax");
 }
-void lognot::to_asm(code::generator&gen)const
+void lognot::to_asm(code::writer&wr)const
 {
-    arg->to_asm(gen);
-    gen.write("cmp",0,"%rax");
-    gen.write("sete","%al");
-    gen.write("movzb","%al","%rax");
+    arg->to_asm(wr);
+    wr.write("cmp",0,"%rax");
+    wr.write("sete","%al");
+    wr.write("movzb","%al","%rax");
 }
-void preinc::to_asm(code::generator&gen)const
+void preinc::to_asm(code::writer&wr)const
 {
-    gen.write("incq",arg->get_address());
-    arg->to_asm(gen);
+    wr.write("incq",arg->get_address());
+    arg->to_asm(wr);
 }
-void predec::to_asm(code::generator&gen)const
+void predec::to_asm(code::writer&wr)const
 {
-    gen.write("decq",arg->get_address());
-    arg->to_asm(gen);
+    wr.write("decq",arg->get_address());
+    arg->to_asm(wr);
 }
-void postinc::to_asm(code::generator&gen)const
+void postinc::to_asm(code::writer&wr)const
 {
-    arg->to_asm(gen);
-    gen.write("incq",arg->get_address());
+    arg->to_asm(wr);
+    wr.write("incq",arg->get_address());
 }
-void postdec::to_asm(code::generator&gen)const
+void postdec::to_asm(code::writer&wr)const
 {
-    arg->to_asm(gen);
-    gen.write("decq",arg->get_address());
+    arg->to_asm(wr);
+    wr.write("decq",arg->get_address());
 }
-void bplus::to_asm(code::generator&gen)const
+void bplus::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("add","%rdi","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("add","%rdi","%rax");
 }
-void bminus::to_asm(code::generator&gen)const
+void bminus::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("sub","%rdi","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("sub","%rdi","%rax");
 }
-void multiply::to_asm(code::generator&gen)const
+void multiply::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("imul","%rdi");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("imul","%rdi");
 }
-void divide::to_asm(code::generator&gen)const
+void divide::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("xor","%rdx","%rdx");
-    gen.write("idiv","%rdi");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("xor","%rdx","%rdx");
+    wr.write("idiv","%rdi");
 }
-void remain::to_asm(code::generator&gen)const
+void remain::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("xor","%rdx","%rdx");
-    gen.write("idiv","%rdi");
-    gen.write("mov","%rdx","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("xor","%rdx","%rdx");
+    wr.write("idiv","%rdi");
+    wr.write("mov","%rdx","%rax");
 }
-void equal::to_asm(code::generator&gen)const
+void equal::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("cmp","%rdi","%rax");
-    gen.write("sete","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("cmp","%rdi","%rax");
+    wr.write("sete","%al");
+    wr.write("movzb","%al","%rax");
 }
-void nequal::to_asm(code::generator&gen)const
+void nequal::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("cmp","%rdi","%rax");
-    gen.write("setne","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("cmp","%rdi","%rax");
+    wr.write("setne","%al");
+    wr.write("movzb","%al","%rax");
 }
-void less::to_asm(code::generator&gen)const
+void less::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("cmp","%rdi","%rax");
-    gen.write("setl","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("cmp","%rdi","%rax");
+    wr.write("setl","%al");
+    wr.write("movzb","%al","%rax");
 }
-void greater::to_asm(code::generator&gen)const
+void greater::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("cmp","%rdi","%rax");
-    gen.write("setg","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("cmp","%rdi","%rax");
+    wr.write("setg","%al");
+    wr.write("movzb","%al","%rax");
 }
-void leeq::to_asm(code::generator&gen)const
+void leeq::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("cmp","%rdi","%rax");
-    gen.write("setle","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("cmp","%rdi","%rax");
+    wr.write("setle","%al");
+    wr.write("movzb","%al","%rax");
 }
-void greq::to_asm(code::generator&gen)const
+void greq::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("cmp","%rdi","%rax");
-    gen.write("setge","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("cmp","%rdi","%rax");
+    wr.write("setge","%al");
+    wr.write("movzb","%al","%rax");
 }
-void logand::to_asm(code::generator&gen)const
+void logand::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("and","%rdi","%rax");
-    gen.write("cmp",0,"%rax");
-    gen.write("setne","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("and","%rdi","%rax");
+    wr.write("cmp",0,"%rax");
+    wr.write("setne","%al");
+    wr.write("movzb","%al","%rax");
 }
-void logor::to_asm(code::generator&gen)const
+void logor::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("or","%rdi","%rax");
-    gen.write("cmp",0,"%rax");
-    gen.write("setne","%al");
-    gen.write("movzb","%al","%rax");
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("or","%rdi","%rax");
+    wr.write("cmp",0,"%rax");
+    wr.write("setne","%al");
+    wr.write("movzb","%al","%rax");
 }
-void comma::to_asm(code::generator&gen)const
+void comma::to_asm(code::writer&wr)const
 {
-    larg->to_asm(gen);
-    rarg->to_asm(gen);
+    larg->to_asm(wr);
+    rarg->to_asm(wr);
 }
-void assign::to_asm(code::generator&gen)const
+void assign::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax",larg->get_address());
+    rarg->to_asm(wr);
+    wr.write("mov","%rax",larg->get_address());
 }
-void plasgn::to_asm(code::generator&gen)const
+void plasgn::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("add","%rax",larg->get_address());
-    larg->to_asm(gen);
+    rarg->to_asm(wr);
+    wr.write("add","%rax",larg->get_address());
+    larg->to_asm(wr);
 }
-void miasgn::to_asm(code::generator&gen)const
+void miasgn::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("sub","%rax",larg->get_address());
-    larg->to_asm(gen);
+    rarg->to_asm(wr);
+    wr.write("sub","%rax",larg->get_address());
+    larg->to_asm(wr);
 }
-void muasgn::to_asm(code::generator&gen)const
+void muasgn::to_asm(code::writer&wr)const
 {
     std::string addr=larg->get_address();
-    rarg->to_asm(gen);
-    gen.write("imulq",addr);
-    gen.write("mov","%rax",addr);
+    rarg->to_asm(wr);
+    wr.write("imulq",addr);
+    wr.write("mov","%rax",addr);
 }
-void diasgn::to_asm(code::generator&gen)const
+void diasgn::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("xor","%rdx","%rdx");
-    gen.write("idiv","%rdi");
-    gen.write("mov","%rax",larg->get_address());
-    larg->to_asm(gen);
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("xor","%rdx","%rdx");
+    wr.write("idiv","%rdi");
+    wr.write("mov","%rax",larg->get_address());
+    larg->to_asm(wr);
 }
-void rmasgn::to_asm(code::generator&gen)const
+void rmasgn::to_asm(code::writer&wr)const
 {
-    rarg->to_asm(gen);
-    gen.write("mov","%rax","%rdi");
-    larg->to_asm(gen);
-    gen.write("xor","%rdx","%rdx");
-    gen.write("idiv","%rdi");
-    gen.write("mov","%rdx",larg->get_address());
-    larg->to_asm(gen);
+    rarg->to_asm(wr);
+    wr.write("mov","%rax","%rdi");
+    larg->to_asm(wr);
+    wr.write("xor","%rdx","%rdx");
+    wr.write("idiv","%rdi");
+    wr.write("mov","%rdx",larg->get_address());
+    larg->to_asm(wr);
 }
-void expression_statement::to_asm(code::generator&gen)const
+void expression_statement::to_asm(code::writer&wr)const
 {
-    expr->to_asm(gen);
+    expr->to_asm(wr);
 }
-void null_statement::to_asm(code::generator&gen)const
+void null_statement::to_asm(code::writer&wr)const
 {
-    gen.write("nop");
+    wr.write("nop");
 }
-void compound::to_asm(code::generator&gen)const
+void compound::to_asm(code::writer&wr)const
 {
     enter_scope();
-    for(const auto&s:stats)s->to_asm(gen);
-    gen.write("add",leave_scope(),"%rsp");
+    for(const auto&s:stats)s->to_asm(wr);
+    wr.write("add",leave_scope(),"%rsp");
 }
-void var_difinition::to_asm(code::generator&gen)const
+void var_difinition::to_asm(code::writer&wr)const
 {
-    gen.write("sub",8*vars.size(),"%rsp");
+    wr.write("sub",8*vars.size(),"%rsp");
     for(const auto&v:vars){
         v.first->allocate_on_stack();
         if(v.second){
-            v.second->to_asm(gen);
-            gen.write("mov","%rax",v.first->get_address());
+            v.second->to_asm(wr);
+            wr.write("mov","%rax",v.first->get_address());
         }
     }
 }
-void _if_else_::to_asm(code::generator&gen)const
+void _if_else_::to_asm(code::writer&wr)const
 {
-    std::string lelse=code::generator::get_unique_label(".Lieelse");
-    std::string lend=code::generator::get_unique_label(".Lieend");
+    std::string lelse=code::writer::get_unique_label(".Lieelse");
+    std::string lend=code::writer::get_unique_label(".Lieend");
     enter_scope();
-    cond->to_asm(gen);
-    gen.write("cmp",0,"%rax");
-    gen.write("je",lelse);
-    stat_if->to_asm(gen);
-    gen.write("jmp",lend);
-    gen.write(lelse+':');
-    if(stat_else)stat_else->to_asm(gen);
-    gen.write(lend+':');
-    gen.write("add",leave_scope(),"%rsp");
+    cond->to_asm(wr);
+    wr.write("cmp",0,"%rax");
+    wr.write("je",lelse);
+    stat_if->to_asm(wr);
+    wr.write("jmp",lend);
+    wr.write(lelse+':');
+    if(stat_else)stat_else->to_asm(wr);
+    wr.write(lend+':');
+    wr.write("add",leave_scope(),"%rsp");
 }
-void _while_::to_asm(code::generator&gen)const
+void _while_::to_asm(code::writer&wr)const
 {
-    std::string lbegin=code::generator::get_unique_label(".Lwbegin");
-    std::string lend=code::generator::get_unique_label(".Lwend");
+    std::string lbegin=code::writer::get_unique_label(".Lwbegin");
+    std::string lend=code::writer::get_unique_label(".Lwend");
     enter_scope();
     enter_break(lend);
     enter_continue(lbegin);
-    gen.write(lbegin+':');
-    cond->to_asm(gen);
-    gen.write("cmp",0,"%rax");
-    gen.write("je",lend);
-    stat->to_asm(gen);
-    gen.write("jmp",lbegin);
-    gen.write(lend+':');
+    wr.write(lbegin+':');
+    cond->to_asm(wr);
+    wr.write("cmp",0,"%rax");
+    wr.write("je",lend);
+    stat->to_asm(wr);
+    wr.write("jmp",lbegin);
+    wr.write(lend+':');
     leave_continue();
     leave_break();
-    gen.write("add",leave_scope(),"%rsp");
+    wr.write("add",leave_scope(),"%rsp");
 }
-void _for_::to_asm(code::generator&gen)const
+void _for_::to_asm(code::writer&wr)const
 {
-    std::string lbegin=code::generator::get_unique_label(".Lfbegin");
-    std::string lreini=code::generator::get_unique_label(".Lfreini");
-    std::string lend=code::generator::get_unique_label(".Lfend");
+    std::string lbegin=code::writer::get_unique_label(".Lfbegin");
+    std::string lreini=code::writer::get_unique_label(".Lfreini");
+    std::string lend=code::writer::get_unique_label(".Lfend");
     enter_scope();
     enter_break(lend);
     enter_continue(lreini);
-    if(init)init->to_asm(gen);
-    gen.write(lbegin+':');
-    gen.write("mov",1,"%rax");
-    if(cond)cond->to_asm(gen);
-    gen.write("cmp",0,"%rax");
-    gen.write("je",lend);
-    stat->to_asm(gen);
-    gen.write(lreini+':');
-    if(reinit)reinit->to_asm(gen);
-    gen.write("jmp",lbegin);
-    gen.write(lend+':');
+    if(init)init->to_asm(wr);
+    wr.write(lbegin+':');
+    wr.write("mov",1,"%rax");
+    if(cond)cond->to_asm(wr);
+    wr.write("cmp",0,"%rax");
+    wr.write("je",lend);
+    stat->to_asm(wr);
+    wr.write(lreini+':');
+    if(reinit)reinit->to_asm(wr);
+    wr.write("jmp",lbegin);
+    wr.write(lend+':');
     leave_continue();
     leave_break();
-    gen.write("add",leave_scope(),"%rsp");
+    wr.write("add",leave_scope(),"%rsp");
 }
-void _break_::to_asm(code::generator&gen)const
+void _break_::to_asm(code::writer&wr)const
 {
     if(iteration_statement::break_labels.empty())
         throw exception::compilation_error("不適切なbreak文です",line,col);
-    gen.write("jmp",iteration_statement::break_labels.top());
+    wr.write("jmp",iteration_statement::break_labels.top());
 }
-void _continue_::to_asm(code::generator&gen)const
+void _continue_::to_asm(code::writer&wr)const
 {
     if(iteration_statement::continue_labels.empty())
         throw exception::compilation_error("不適切なcontinue文です",line,col);
-    gen.write("jmp",iteration_statement::continue_labels.top());
+    wr.write("jmp",iteration_statement::continue_labels.top());
 }
-void _return_::to_asm(code::generator&gen)const
+void _return_::to_asm(code::writer&wr)const
 {
-    value->to_asm(gen);
-    gen.write("mov","%rbp","%rsp");
-    gen.write("pop","%rbp");
-    gen.write("ret");
+    value->to_asm(wr);
+    wr.write("mov","%rbp","%rsp");
+    wr.write("pop","%rbp");
+    wr.write("ret");
 }
-void function_difinition::to_asm(code::generator&gen)const
+void function_difinition::to_asm(code::writer&wr)const
 {
-    gen.write(".globl "+name);
-    gen.write(name+':');
-    gen.write("push","%rbp");
-    gen.write("mov","%rsp","%rbp");
-    gen.write("sub",std::min(6ul,args.size())*8,"%rsp");
+    wr.write(".globl "+name);
+    wr.write(name+':');
+    wr.write("push","%rbp");
+    wr.write("mov","%rsp","%rbp");
+    wr.write("sub",std::min(6ul,args.size())*8,"%rsp");
     enter_scope();
     for(int i=0;i<std::min(6ul,args.size());++i){
         args[i]->allocate_on_stack();
-        gen.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address());
+        wr.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address());
     }
     for(int i=6;i<args.size();++i)
         args[i]->allocate_on_stack(i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
-    for(const auto&s:stats)s->to_asm(gen);
+    for(const auto&s:stats)s->to_asm(wr);
     leave_scope();
 }
-void translation_unit::to_asm(code::generator&gen)const
+void translation_unit::to_asm(code::writer&wr)const
 {
     enter_scope();
-    for(const auto&f:funcs)f->to_asm(gen);
+    for(const auto&f:funcs)f->to_asm(wr);
     leave_scope();
 }
 node::node(int line,int col)

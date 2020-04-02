@@ -2,7 +2,7 @@
 #include<sstream>
 #include<string>
 namespace code{
-    class generator final{
+    class writer final{
         private:
             std::stringstream dst;
         public:
@@ -13,7 +13,7 @@ namespace code{
             void write(const std::string&inst,int arg);
             std::string get_asm()const;
             static std::string get_unique_label(const std::string&base);
-            generator&operator=(const generator&)=delete;
-            generator&operator=(generator&&)=delete;
+            writer&operator=(const writer&)=delete;
+            writer&operator=(writer&&)=delete;
     };
 }

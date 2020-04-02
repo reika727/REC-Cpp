@@ -1,6 +1,6 @@
 #pragma once
 #include"../lexicon/token.hpp"
-#include"../code/generator.hpp"
+#include"../code/writer.hpp"
 #include<map>
 #include<memory>
 #include<stack>
@@ -16,7 +16,7 @@ namespace syntax{
             const int line,col;
             node(int line,int col);
             virtual ~node()=default;
-            virtual void to_asm(code::generator&gen)const=0;
+            virtual void to_asm(code::writer&wr)const=0;
             static void enter_scope();
             static int leave_scope();
     };
@@ -59,7 +59,7 @@ namespace syntax{
             // TODO: fcallの方の問題に対応できたらprivateにする
             const std::string name;
             identifier(const std::string&name,int line,int col);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
             std::string get_address()const override;
             virtual void allocate_on_stack()const override;
             virtual void allocate_on_stack(int offset)const override;
@@ -71,7 +71,7 @@ namespace syntax{
             ~numeric()=default;
         public:
             numeric(int value,int line,int col);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class fcall final:public expression{
         friend std::unique_ptr<const fcall>::deleter_type;
@@ -82,7 +82,7 @@ namespace syntax{
             ~fcall()=default;
         public:
             fcall(std::unique_ptr<const expression>_func,std::vector<std::unique_ptr<const expression>>&_vars,int line,int col);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class unopr:public expression{
         protected:
@@ -97,7 +97,7 @@ namespace syntax{
         private:
             ~uplus()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class uminus final:public unopr{
         using unopr::unopr;
@@ -105,7 +105,7 @@ namespace syntax{
         private:
             ~uminus()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class lognot final:public unopr{
         using unopr::unopr;
@@ -113,7 +113,7 @@ namespace syntax{
         private:
             ~lognot()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class unopr_l:public expression{
         protected:
@@ -128,7 +128,7 @@ namespace syntax{
         private:
             ~preinc()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class predec final:public unopr_l{
         using unopr_l::unopr_l;
@@ -136,7 +136,7 @@ namespace syntax{
         private:
             ~predec()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class postinc final:public unopr_l{
         using unopr_l::unopr_l;
@@ -144,7 +144,7 @@ namespace syntax{
         private:
             ~postinc()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class postdec final:public unopr_l{
         using unopr_l::unopr_l;
@@ -152,7 +152,7 @@ namespace syntax{
         private:
             ~postdec()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class biopr:public expression{
         protected:
@@ -167,7 +167,7 @@ namespace syntax{
         private:
             ~bplus()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class bminus final:public biopr{
         using biopr::biopr;
@@ -175,7 +175,7 @@ namespace syntax{
         private:
             ~bminus()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class multiply final:public biopr{
         using biopr::biopr;
@@ -183,7 +183,7 @@ namespace syntax{
         private:
             ~multiply()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class divide final:public biopr{
         using biopr::biopr;
@@ -191,7 +191,7 @@ namespace syntax{
         private:
             ~divide()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class remain final:public biopr{
         using biopr::biopr;
@@ -199,7 +199,7 @@ namespace syntax{
         private:
             ~remain()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class equal final:public biopr{
         using biopr::biopr;
@@ -207,7 +207,7 @@ namespace syntax{
         private:
             ~equal()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class nequal final:public biopr{
         using biopr::biopr;
@@ -215,7 +215,7 @@ namespace syntax{
         private:
             ~nequal()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class less final:public biopr{
         using biopr::biopr;
@@ -223,7 +223,7 @@ namespace syntax{
         private:
             ~less()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class greater final:public biopr{
         using biopr::biopr;
@@ -231,7 +231,7 @@ namespace syntax{
         private:
             ~greater()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class leeq final:public biopr{
         using biopr::biopr;
@@ -239,7 +239,7 @@ namespace syntax{
         private:
             ~leeq()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class greq final:public biopr{
         using biopr::biopr;
@@ -247,7 +247,7 @@ namespace syntax{
         private:
             ~greq()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class logand final:public biopr{
         using biopr::biopr;
@@ -255,7 +255,7 @@ namespace syntax{
         private:
             ~logand()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class logor final:public biopr{
         using biopr::biopr;
@@ -263,7 +263,7 @@ namespace syntax{
         private:
             ~logor()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class comma final:public biopr{
         using biopr::biopr;
@@ -271,7 +271,7 @@ namespace syntax{
         private:
             ~comma()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class biopr_l:public expression{
         protected:
@@ -287,7 +287,7 @@ namespace syntax{
         private:
             ~assign()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class plasgn final:public biopr_l{
         using biopr_l::biopr_l;
@@ -295,7 +295,7 @@ namespace syntax{
         private:
             ~plasgn()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class miasgn final:public biopr_l{
         using biopr_l::biopr_l;
@@ -303,7 +303,7 @@ namespace syntax{
         private:
             ~miasgn()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class muasgn final:public biopr_l{
         using biopr_l::biopr_l;
@@ -311,7 +311,7 @@ namespace syntax{
         private:
             ~muasgn()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class diasgn final:public biopr_l{
         using biopr_l::biopr_l;
@@ -319,7 +319,7 @@ namespace syntax{
         private:
             ~diasgn()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class rmasgn final:public biopr_l{
         using biopr_l::biopr_l;
@@ -327,7 +327,7 @@ namespace syntax{
         private:
             ~rmasgn()=default;
         public:
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class statement:public node{
         using node::node;
@@ -343,7 +343,7 @@ namespace syntax{
             ~expression_statement()=default;
         public:
             expression_statement(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class null_statement final:public statement{
         using statement::statement;
@@ -352,7 +352,7 @@ namespace syntax{
             ~null_statement()=default;
         public:
             null_statement(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class compound final:public statement{
         using statement::statement;
@@ -362,7 +362,7 @@ namespace syntax{
             ~compound()=default;
         public:
             compound(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class var_difinition final:public statement{
         using statement::statement;
@@ -372,7 +372,7 @@ namespace syntax{
             ~var_difinition()=default;
         public:
             var_difinition(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class _if_else_ final:public statement{
         using statement::statement;
@@ -383,7 +383,7 @@ namespace syntax{
             ~_if_else_()=default;
         public:
             _if_else_(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class iteration_statement:public statement{
         using statement::statement;
@@ -406,7 +406,7 @@ namespace syntax{
             ~_while_()=default;
         public:
             _while_(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class _for_ final:public iteration_statement{
         using iteration_statement::iteration_statement;
@@ -417,7 +417,7 @@ namespace syntax{
             ~_for_()=default;
         public:
             _for_(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class _break_ final:public statement{
         using statement::statement;
@@ -426,7 +426,7 @@ namespace syntax{
             ~_break_()=default;
         public:
             _break_(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class _continue_ final:public statement{
         using statement::statement;
@@ -435,7 +435,7 @@ namespace syntax{
             ~_continue_()=default;
         public:
             _continue_(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class _return_ final:public statement{
         using statement::statement;
@@ -445,7 +445,7 @@ namespace syntax{
             ~_return_()=default;
         public:
             _return_(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class function_difinition final:public node{
         using node::node;
@@ -457,7 +457,7 @@ namespace syntax{
             ~function_difinition()=default;
         public:
             function_difinition(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
     class translation_unit final:public node{
         using node::node;
@@ -465,6 +465,6 @@ namespace syntax{
             std::vector<std::unique_ptr<const function_difinition>>funcs;
         public:
             translation_unit(lexicon::token_array&ta);
-            void to_asm(code::generator&gen)const override;
+            void to_asm(code::writer&wr)const override;
     };
 }
