@@ -1,159 +1,160 @@
 #include"syntax/node.hpp"
 #include"exception/compilation_error.hpp"
+#include<typeinfo>
 using namespace syntax;
-std::shared_ptr<const expression>expression::get(lexicon::token_array&ta,bool for_initialization)
+std::unique_ptr<const expression>expression::get(lexicon::token_array&ta,bool for_initialization)
 {
     return for_initialization?get_order14(ta):get_order15(ta);
 }
-std::shared_ptr<const expression>expression::get_order15(lexicon::token_array&ta) // , left to right
+std::unique_ptr<const expression>expression::get_order15(lexicon::token_array&ta) // , left to right
 {
     auto ret=get_order14(ta);
     while(auto tp=ta.consume(lexicon::TK::COMMA))
-        ret=std::make_shared<const comma>(ret,get_order14(ta),tp->line,tp->col);
+        ret=std::make_unique<const comma>(std::move(ret),get_order14(ta),tp->line,tp->col);
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order14(lexicon::token_array&ta) // = += -= *= /= right to left
+std::unique_ptr<const expression>expression::get_order14(lexicon::token_array&ta) // = += -= *= /= right to left
 {
     auto ret=get_order13(ta);
     while(true){
         if(auto tp=ta.consume(lexicon::TK::EQUAL))
-            ret=std::make_shared<const assign>(ret,get_order14(ta),tp->line,tp->col);
+            ret=std::make_unique<const assign>(std::move(ret),get_order14(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::PLEQ))
-            ret=std::make_shared<const plasgn>(ret,get_order14(ta),tp->line,tp->col);
+            ret=std::make_unique<const plasgn>(std::move(ret),get_order14(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::MIEQ))
-            ret=std::make_shared<const miasgn>(ret,get_order14(ta),tp->line,tp->col);
+            ret=std::make_unique<const miasgn>(std::move(ret),get_order14(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::ASEQ))
-            ret=std::make_shared<const muasgn>(ret,get_order14(ta),tp->line,tp->col);
+            ret=std::make_unique<const muasgn>(std::move(ret),get_order14(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::SLEQ))
-            ret=std::make_shared<const diasgn>(ret,get_order14(ta),tp->line,tp->col);
+            ret=std::make_unique<const diasgn>(std::move(ret),get_order14(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::PEEQ))
-            ret=std::make_shared<const rmasgn>(ret,get_order14(ta),tp->line,tp->col);
+            ret=std::make_unique<const rmasgn>(std::move(ret),get_order14(ta),tp->line,tp->col);
         else
             break;
     }
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order13(lexicon::token_array&ta)
+std::unique_ptr<const expression>expression::get_order13(lexicon::token_array&ta)
 {
     // TODO: placeholder
     return get_order12(ta);
 }
-std::shared_ptr<const expression>expression::get_order12(lexicon::token_array&ta) // || left to right
+std::unique_ptr<const expression>expression::get_order12(lexicon::token_array&ta) // || left to right
 {
     auto ret=get_order11(ta);
     while(auto tp=ta.consume(lexicon::TK::VBVB))
-        ret=std::make_shared<const logor>(ret,get_order11(ta),tp->line,tp->col);
+        ret=std::make_unique<const logor>(std::move(ret),get_order11(ta),tp->line,tp->col);
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order11(lexicon::token_array&ta) // && left to right
+std::unique_ptr<const expression>expression::get_order11(lexicon::token_array&ta) // && left to right
 {
     auto ret=get_order10(ta);
     while(auto tp=ta.consume(lexicon::TK::APAP))
-        ret=std::make_shared<const logand>(ret,get_order10(ta),tp->line,tp->col);
+        ret=std::make_unique<const logand>(std::move(ret),get_order10(ta),tp->line,tp->col);
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order10(lexicon::token_array&ta)
+std::unique_ptr<const expression>expression::get_order10(lexicon::token_array&ta)
 {
     // TODO: placeholder
     return get_order09(ta);
 }
-std::shared_ptr<const expression>expression::get_order09(lexicon::token_array&ta)
+std::unique_ptr<const expression>expression::get_order09(lexicon::token_array&ta)
 {
     // TODO: placeholder
     return get_order08(ta);
 }
-std::shared_ptr<const expression>expression::get_order08(lexicon::token_array&ta)
+std::unique_ptr<const expression>expression::get_order08(lexicon::token_array&ta)
 {
     // TODO: placeholder
     return get_order07(ta);
 }
-std::shared_ptr<const expression>expression::get_order07(lexicon::token_array&ta) // == != left to right
+std::unique_ptr<const expression>expression::get_order07(lexicon::token_array&ta) // == != left to right
 {
     auto ret=get_order06(ta);
     while(true){
         if(auto tp=ta.consume(lexicon::TK::EQEQ))
-            ret=std::make_shared<const equal>(ret,get_order06(ta),tp->line,tp->col);
+            ret=std::make_unique<const equal>(std::move(ret),get_order06(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::EXEQ))
-            ret=std::make_shared<const nequal>(ret,get_order06(ta),tp->line,tp->col);
+            ret=std::make_unique<const nequal>(std::move(ret),get_order06(ta),tp->line,tp->col);
         else
             break;
     }
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order06(lexicon::token_array&ta) // < > <= >= left to right
+std::unique_ptr<const expression>expression::get_order06(lexicon::token_array&ta) // < > <= >= left to right
 {
     auto ret=get_order05(ta);
     while(true){
         if(auto tp=ta.consume(lexicon::TK::LESS))
-            ret=std::make_shared<const less>(ret,get_order05(ta),tp->line,tp->col);
+            ret=std::make_unique<const less>(std::move(ret),get_order05(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::GREATER))
-            ret=std::make_shared<const greater>(ret,get_order05(ta),tp->line,tp->col);
+            ret=std::make_unique<const greater>(std::move(ret),get_order05(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::LEEQ))
-            ret=std::make_shared<const leeq>(ret,get_order05(ta),tp->line,tp->col);
+            ret=std::make_unique<const leeq>(std::move(ret),get_order05(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::GREQ))
-            ret=std::make_shared<const greq>(ret,get_order05(ta),tp->line,tp->col);
+            ret=std::make_unique<const greq>(std::move(ret),get_order05(ta),tp->line,tp->col);
         else
             break;
     }
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order05(lexicon::token_array&ta)
+std::unique_ptr<const expression>expression::get_order05(lexicon::token_array&ta)
 {
     // TODO: placeholder
     return get_order04(ta);
 }
-std::shared_ptr<const expression>expression::get_order04(lexicon::token_array&ta) // + - left to right
+std::unique_ptr<const expression>expression::get_order04(lexicon::token_array&ta) // + - left to right
 {
     auto ret=get_order03(ta);
     while(true){
         if(auto tp=ta.consume(lexicon::TK::PLUS))
-            ret=std::make_shared<const bplus>(ret,get_order03(ta),tp->line,tp->col);
+            ret=std::make_unique<const bplus>(std::move(ret),get_order03(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::MINUS))
-            ret=std::make_shared<const bminus>(ret,get_order03(ta),tp->line,tp->col);
+            ret=std::make_unique<const bminus>(std::move(ret),get_order03(ta),tp->line,tp->col);
         else
             break;
     }
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order03(lexicon::token_array&ta) // * / % left to right
+std::unique_ptr<const expression>expression::get_order03(lexicon::token_array&ta) // * / % left to right
 {
     auto ret=get_order02(ta);
     while(true){
         if(auto tp=ta.consume(lexicon::TK::ASTER))
-            ret=std::make_shared<const multiply>(ret,get_order02(ta),tp->line,tp->col);
+            ret=std::make_unique<const multiply>(std::move(ret),get_order02(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::SLASH))
-            ret=std::make_shared<const divide>(ret,get_order02(ta),tp->line,tp->col);
+            ret=std::make_unique<const divide>(std::move(ret),get_order02(ta),tp->line,tp->col);
         else if(tp=ta.consume(lexicon::TK::PERCENT))
-            ret=std::make_shared<const remain>(ret,get_order02(ta),tp->line,tp->col);
+            ret=std::make_unique<const remain>(std::move(ret),get_order02(ta),tp->line,tp->col);
         else
             break;
     }
     return ret;
 }
-std::shared_ptr<const expression>expression::get_order02(lexicon::token_array&ta) // + - ++ -- ! right to left
+std::unique_ptr<const expression>expression::get_order02(lexicon::token_array&ta) // + - ++ -- ! right to left
 {
     if(auto tp=ta.consume(lexicon::TK::PLUS))
-        return std::make_shared<const uplus>(get_order02(ta),tp->line,tp->col);
+        return std::make_unique<const uplus>(get_order02(ta),tp->line,tp->col);
     else if(tp=ta.consume(lexicon::TK::MINUS))
-        return std::make_shared<const uminus>(get_order02(ta),tp->line,tp->col);
+        return std::make_unique<const uminus>(get_order02(ta),tp->line,tp->col);
     else if(tp=ta.consume(lexicon::TK::PLPL))
-        return std::make_shared<const preinc>(get_order02(ta),tp->line,tp->col);
+        return std::make_unique<const preinc>(get_order02(ta),tp->line,tp->col);
     else if(tp=ta.consume(lexicon::TK::MIMI))
-        return std::make_shared<const predec>(get_order02(ta),tp->line,tp->col);
+        return std::make_unique<const predec>(get_order02(ta),tp->line,tp->col);
     else if(tp=ta.consume(lexicon::TK::EXCLAM))
-        return std::make_shared<const lognot>(get_order02(ta),tp->line,tp->col);
+        return std::make_unique<const lognot>(get_order02(ta),tp->line,tp->col);
     else
         return get_order01(ta);
 }
-std::shared_ptr<const expression>expression::get_order01(lexicon::token_array&ta) // () left to right
+std::unique_ptr<const expression>expression::get_order01(lexicon::token_array&ta) // () left to right
 {
     auto ret=get_primary(ta);
     if(auto tp=ta.consume(lexicon::TK::PLPL)){
-        return std::make_shared<const postinc>(ret,tp->line,tp->col);
+        return std::make_unique<const postinc>(std::move(ret),tp->line,tp->col);
     }else if(tp=ta.consume(lexicon::TK::MIMI)){
-        return std::make_shared<const postdec>(ret,tp->line,tp->col);
+        return std::make_unique<const postdec>(std::move(ret),tp->line,tp->col);
     }else if(tp=ta.consume(lexicon::TK::OPARENT)){
-        auto vars=std::vector<std::shared_ptr<const expression>>();
+        auto vars=std::vector<std::unique_ptr<const expression>>();
         if(!ta.consume(lexicon::TK::CPARENT)){
             while(true){
                 vars.push_back(get_order14(ta));
@@ -163,17 +164,17 @@ std::shared_ptr<const expression>expression::get_order01(lexicon::token_array&ta
                     throw exception::compilation_error("関数呼び出し演算子のコンマに問題があります",tp->line,tp->col);
             }
         }
-        return std::make_shared<const fcall>(ret,vars,tp->line,tp->col);
+        return std::make_unique<const fcall>(std::move(ret),vars,tp->line,tp->col);
     }else{
         return ret;
     }
 }
-std::shared_ptr<const expression>expression::get_primary(lexicon::token_array&ta) // literal, identifier, enclosed expression
+std::unique_ptr<const expression>expression::get_primary(lexicon::token_array&ta) // literal, identifier, enclosed expression
 {
     if(auto nump=std::dynamic_pointer_cast<const lexicon::numeric>(ta.consume(lexicon::TK::NUMERIC))){
-        return std::make_shared<const numeric>(nump->value,nump->line,nump->col);
+        return std::make_unique<const numeric>(nump->value,nump->line,nump->col);
     }else if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT))){
-        return std::make_shared<const identifier>(idp->name,idp->line,idp->col);
+        return std::make_unique<const identifier>(idp->name,idp->line,idp->col);
     }else if(auto tp=ta.consume(lexicon::TK::OPARENT)){
         auto ret=get_order15(ta);
         if(!ta.consume(lexicon::TK::CPARENT))
@@ -182,18 +183,18 @@ std::shared_ptr<const expression>expression::get_primary(lexicon::token_array&ta
     }
     throw exception::compilation_error("構文解析ができませんでした",ta.get_line(),ta.get_column());
 }
-std::shared_ptr<const statement>statement::get(lexicon::token_array&ta)
+std::unique_ptr<const statement>statement::get(lexicon::token_array&ta)
 {
-    if(ta.check(lexicon::TK::INT))return std::make_shared<const var_difinition>(ta);
-    else if(ta.check(lexicon::TK::IF))return std::make_shared<const _if_else_>(ta);
-    else if(ta.check(lexicon::TK::WHILE))return std::make_shared<const _while_>(ta);
-    else if(ta.check(lexicon::TK::FOR))return std::make_shared<const _for_>(ta);
-    else if(ta.check(lexicon::TK::BREAK))return std::make_shared<const _break_>(ta);
-    else if(ta.check(lexicon::TK::CONTINUE))return std::make_shared<const _continue_>(ta);
-    else if(ta.check(lexicon::TK::RETURN))return std::make_shared<const _return_>(ta);
-    else if(ta.check(lexicon::TK::OBRACE))return std::make_shared<compound>(ta);
-    else if(ta.check(lexicon::TK::SCOLON))return std::make_shared<const null_statement>(ta);
-    else return std::make_shared<const expression_statement>(ta);
+    if(ta.check(lexicon::TK::INT))return std::make_unique<const var_difinition>(ta);
+    else if(ta.check(lexicon::TK::IF))return std::make_unique<const _if_else_>(ta);
+    else if(ta.check(lexicon::TK::WHILE))return std::make_unique<const _while_>(ta);
+    else if(ta.check(lexicon::TK::FOR))return std::make_unique<const _for_>(ta);
+    else if(ta.check(lexicon::TK::BREAK))return std::make_unique<const _break_>(ta);
+    else if(ta.check(lexicon::TK::CONTINUE))return std::make_unique<const _continue_>(ta);
+    else if(ta.check(lexicon::TK::RETURN))return std::make_unique<const _return_>(ta);
+    else if(ta.check(lexicon::TK::OBRACE))return std::make_unique<const compound>(ta);
+    else if(ta.check(lexicon::TK::SCOLON))return std::make_unique<const null_statement>(ta);
+    else return std::make_unique<const expression_statement>(ta);
 }
 void numeric::to_asm(code::generator&gen)const
 {
@@ -450,13 +451,13 @@ void null_statement::to_asm(code::generator&gen)const
 void compound::to_asm(code::generator&gen)const
 {
     gen.enter_scope();
-    for(auto s:stats)s->to_asm(gen);
+    for(const auto&s:stats)s->to_asm(gen);
     gen.write("add",gen.leave_scope(),"%rsp");
 }
 void var_difinition::to_asm(code::generator&gen)const
 {
     gen.write("sub",8*vars.size(),"%rsp");
-    for(auto v:vars){
+    for(const auto&v:vars){
         v.first->allocate_on_stack(gen);
         if(v.second){
             v.second->to_asm(gen);
@@ -558,13 +559,13 @@ void function_difinition::to_asm(code::generator&gen)const
     for(int i=6;i<args.size();++i)
         args[i]->allocate_on_stack(gen,i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
-    for(auto s:stats)s->to_asm(gen);
+    for(const auto&s:stats)s->to_asm(gen);
     gen.leave_scope();
 }
 void translation_unit::to_asm(code::generator&gen)const
 {
     gen.enter_scope();
-    for(auto f:funcs)f->to_asm(gen);
+    for(const auto&f:funcs)f->to_asm(gen);
     gen.leave_scope();
 }
 node::node(int line,int col)
@@ -573,27 +574,43 @@ numeric::numeric(int value,int line,int col)
     :expression(line,col),value(value){}
 identifier::identifier(const std::string&name,int line,int col)
     :expression_l(line,col),name(name){}
-fcall::fcall(const std::shared_ptr<const expression>&func,const std::vector<std::shared_ptr<const expression>>&vars,int line,int col)
-    :expression(line,col),func(std::dynamic_pointer_cast<const identifier>(func)),vars(vars)
+fcall::fcall(std::unique_ptr<const expression>_func,std::vector<std::unique_ptr<const expression>>&_vars,int line,int col)
+    :expression(line,col)
 {
-    if(!(this->func))
+    auto row=_func.release();
+    if(auto casted=dynamic_cast<const identifier*>(row)){
+        func=std::unique_ptr<const identifier>(casted);
+        std::move(_vars.begin(),_vars.end(),std::back_inserter(vars));
+    }else{
+        delete row;
         throw exception::compilation_error("未実装機能: 関数名が識別子ではありません",line,col);
+    }
 }
-unopr::unopr(const std::shared_ptr<const expression>&arg,int line,int col)
-    :expression(line,col),arg(arg){}
-unopr_l::unopr_l(const std::shared_ptr<const expression>&arg,int line,int col)
-    :expression(line,col),arg(std::dynamic_pointer_cast<const expression_l>(arg))
+unopr::unopr(std::unique_ptr<const expression>arg,int line,int col)
+    :expression(line,col),arg(std::move(arg)){}
+unopr_l::unopr_l(std::unique_ptr<const expression>_arg,int line,int col)
+    :expression(line,col)
 {
-    if(!(this->arg))
+    auto row=_arg.release();
+    if(auto casted=dynamic_cast<const identifier*>(row)){
+        arg=std::unique_ptr<const identifier>(casted);
+    }else{
+        delete row;
         throw exception::compilation_error("引数が左辺値ではありません",line,col);
+    }
 }
-biopr::biopr(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
-    :expression(line,col),larg(larg),rarg(rarg){}
-biopr_l::biopr_l(const std::shared_ptr<const expression>&larg,const std::shared_ptr<const expression>&rarg,int line,int col)
-    :expression(line,col),larg(std::dynamic_pointer_cast<const expression_l>(larg)),rarg(rarg)
+biopr::biopr(std::unique_ptr<const expression>larg,std::unique_ptr<const expression>rarg,int line,int col)
+    :expression(line,col),larg(std::move(larg)),rarg(std::move(rarg)){}
+biopr_l::biopr_l(std::unique_ptr<const expression>_larg,std::unique_ptr<const expression>rarg,int line,int col)
+    :expression(line,col),rarg(std::move(rarg))
 {
-    if(!(this->larg))
-        throw exception::compilation_error("右引数が左辺値ではありません",line,col);
+    auto row=_larg.release();
+    if(auto casted=dynamic_cast<const identifier*>(row)){
+        larg=std::unique_ptr<const identifier>(casted);
+    }else{
+        delete row;
+        throw exception::compilation_error("左引数が左辺値ではありません",line,col);
+    }
 }
 expression_statement::expression_statement(lexicon::token_array&ta)
     :statement(ta.get_line(),ta.get_column())
@@ -624,7 +641,7 @@ var_difinition::var_difinition(lexicon::token_array&ta)
         if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
             vars.push_back(
                 std::make_pair(
-                    std::make_shared<const identifier>(idp->name,idp->line,idp->col),
+                    std::make_unique<const identifier>(idp->name,idp->line,idp->col),
                     ta.consume(lexicon::TK::EQUAL)?expression::get(ta,true):nullptr
                 )
             );
@@ -723,7 +740,7 @@ function_difinition::function_difinition(lexicon::token_array&ta)
             if(!ta.consume(lexicon::TK::INT))
                 throw exception::compilation_error("引数の型が見つかりませんでした",ta.get_line(),ta.get_column());
             if(auto idp=std::dynamic_pointer_cast<const lexicon::identifier>(ta.consume(lexicon::TK::IDENT)))
-                args.push_back(std::make_shared<const identifier>(idp->name,idp->line,idp->col));
+                args.push_back(std::make_unique<const identifier>(idp->name,idp->line,idp->col));
             else
                 throw exception::compilation_error("引数名が見つかりませんでした",ta.get_line(),ta.get_column());
             if(ta.consume(lexicon::TK::COMMA))
@@ -741,5 +758,5 @@ function_difinition::function_difinition(lexicon::token_array&ta)
 translation_unit::translation_unit(lexicon::token_array&ta)
     :node(ta.get_line(),ta.get_column())
 {
-    while(!ta.is_all_read())funcs.push_back(std::make_shared<const function_difinition>(ta));
+    while(!ta.is_all_read())funcs.push_back(std::make_unique<const function_difinition>(ta));
 }
