@@ -2,19 +2,19 @@
 #include"compilation_error.hpp"
 #include<algorithm>
 using namespace lexicon;
-token::token(TK type,int line,int col)
-    :type(type),line(line),col(col){}
+token::token(int line,int col)
+    :line(line),col(col){}
 token::~token(){}
 numeric::numeric(int value,int line,int col)
-    :token(TK::NUMERIC,line,col),value(value){}
+    :token(line,col),value(value){}
 identifier::identifier(const std::string&name,int line,int col)
-    :token(TK::IDENT,line,col),name(name){}
-symbol::symbol(TK type,int line,int col)
-    :token(type,line,col){}
+    :token(line,col),name(name){}
+symbol::symbol(symbol::SYMBOL sym,int line,int col)
+    :token(line,col),sym(sym){}
 token_array::token_array(const std::string&src)
 {
     int line=1,col=1;
-    auto push_symbol=[this,&line,&col](TK sym){
+    auto push_symbol=[this,&line,&col](symbol::SYMBOL sym){
         tokens.push(std::make_shared<const symbol>(sym,line,col));
     };
     auto push_number=[this,&line,&col](int num){
@@ -74,81 +74,81 @@ token_array::token_array(const std::string&src)
             return ret;
         };
         if(check_keyword("int",' '))
-            push_symbol(TK::INT);
+            push_symbol(symbol::INT);
         else if(check_keyword("void",' ',')'))
-            push_symbol(TK::VOID);
+            push_symbol(symbol::VOID);
         else if(check_keyword("if",'(',' '))
-            push_symbol(TK::IF);
+            push_symbol(symbol::IF);
         else if(check_keyword("else",'{',';',' '))
-            push_symbol(TK::ELSE);
+            push_symbol(symbol::ELSE);
         else if(check_keyword("while",'(',' '))
-            push_symbol(TK::WHILE);
+            push_symbol(symbol::WHILE);
         else if(check_keyword("for",'(',' '))
-            push_symbol(TK::FOR);
+            push_symbol(symbol::FOR);
         else if(check_keyword("break",';',' '))
-            push_symbol(TK::BREAK);
+            push_symbol(symbol::BREAK);
         else if(check_keyword("continue",';',' '))
-            push_symbol(TK::CONTINUE);
+            push_symbol(symbol::CONTINUE);
         else if(check_keyword("return",' '))
-            push_symbol(TK::RETURN);
+            push_symbol(symbol::RETURN);
         else if(src.substr(i,2)=="/*")
             check_comment_closed();
         else if(check_keyword("&&"))
-            push_symbol(TK::APAP);
+            push_symbol(symbol::APAP);
         else if(check_keyword("||"))
-            push_symbol(TK::VBVB);
+            push_symbol(symbol::VBVB);
         else if(check_keyword("++"))
-            push_symbol(TK::PLPL);
+            push_symbol(symbol::PLPL);
         else if(check_keyword("--"))
-            push_symbol(TK::MIMI);
+            push_symbol(symbol::MIMI);
         else if(check_keyword("+="))
-            push_symbol(TK::PLEQ);
+            push_symbol(symbol::PLEQ);
         else if(check_keyword("-="))
-            push_symbol(TK::MIEQ);
+            push_symbol(symbol::MIEQ);
         else if(check_keyword("*="))
-            push_symbol(TK::ASEQ);
+            push_symbol(symbol::ASEQ);
         else if(check_keyword("/="))
-            push_symbol(TK::SLEQ);
+            push_symbol(symbol::SLEQ);
         else if(check_keyword("%="))
-            push_symbol(TK::PEEQ);
+            push_symbol(symbol::PEEQ);
         else if(check_keyword("=="))
-            push_symbol(TK::EQEQ);
+            push_symbol(symbol::EQEQ);
         else if(check_keyword("!="))
-            push_symbol(TK::EXEQ);
+            push_symbol(symbol::EXEQ);
         else if(check_keyword("<="))
-            push_symbol(TK::LEEQ);
+            push_symbol(symbol::LEEQ);
         else if(check_keyword(">="))
-            push_symbol(TK::GREQ);
+            push_symbol(symbol::GREQ);
         else if(check_keyword("+"))
-            push_symbol(TK::PLUS);
+            push_symbol(symbol::PLUS);
         else if(check_keyword("-"))
-            push_symbol(TK::MINUS);
+            push_symbol(symbol::MINUS);
         else if(check_keyword("*"))
-            push_symbol(TK::ASTER);
+            push_symbol(symbol::ASTER);
         else if(check_keyword("/"))
-            push_symbol(TK::SLASH);
+            push_symbol(symbol::SLASH);
         else if(check_keyword("%"))
-            push_symbol(TK::PERCENT);
+            push_symbol(symbol::PERCENT);
         else if(check_keyword("<"))
-            push_symbol(TK::LESS);
+            push_symbol(symbol::LESS);
         else if(check_keyword(">"))
-            push_symbol(TK::GREATER);
+            push_symbol(symbol::GREATER);
         else if(check_keyword("!"))
-            push_symbol(TK::EXCLAM);
+            push_symbol(symbol::EXCLAM);
         else if(check_keyword("="))
-            push_symbol(TK::EQUAL);
+            push_symbol(symbol::EQUAL);
         else if(check_keyword(","))
-            push_symbol(TK::COMMA);
+            push_symbol(symbol::COMMA);
         else if(check_keyword(";"))
-            push_symbol(TK::SCOLON);
+            push_symbol(symbol::SCOLON);
         else if(check_keyword("("))
-            push_symbol(TK::OPARENT);
+            push_symbol(symbol::OPARENT);
         else if(check_keyword(")"))
-            push_symbol(TK::CPARENT);
+            push_symbol(symbol::CPARENT);
         else if(check_keyword("{"))
-            push_symbol(TK::OBRACE);
+            push_symbol(symbol::OBRACE);
         else if(check_keyword("}"))
-            push_symbol(TK::CBRACE);
+            push_symbol(symbol::CBRACE);
         else if(isdigit(src[i]))
             push_number(get_numeric_literal());
         else if(isalpha(src[i])||src[i]=='_')
@@ -161,10 +161,6 @@ bool token_array::is_all_read()const noexcept
 {
     return tokens.empty();
 }
-bool token_array::check(TK type)const noexcept
-{
-    return !is_all_read()&&tokens.front()->type==type;
-}
 int token_array::get_line()const noexcept
 {
     return is_all_read()?-1:tokens.front()->line;
@@ -173,11 +169,33 @@ int token_array::get_column()const noexcept
 {
     return is_all_read()?-1:tokens.front()->col;
 }
-std::shared_ptr<const token>token_array::consume(TK type)noexcept
+bool token_array::check_symbol(symbol::SYMBOL sym)const noexcept
 {
-    decltype(tokens)::value_type ret=nullptr;
-    if(check(type)){
-        ret=tokens.front();
+    if(is_all_read())return false;
+    if(auto foo=std::dynamic_pointer_cast<const symbol>(tokens.front()))
+        return foo->sym==sym;
+    else
+        return false;
+}
+std::shared_ptr<const numeric>token_array::consume_numeric()noexcept
+{
+    if(is_all_read())return nullptr;
+    auto ret=std::dynamic_pointer_cast<const numeric>(tokens.front());
+    if(ret)tokens.pop();
+    return ret;
+}
+std::shared_ptr<const identifier>token_array::consume_identifier()noexcept
+{
+    if(is_all_read())return nullptr;
+    auto ret=std::dynamic_pointer_cast<const identifier>(tokens.front());
+    if(ret)tokens.pop();
+    return ret;
+}
+std::shared_ptr<const symbol>token_array::consume_symbol(symbol::SYMBOL sym)noexcept
+{
+    std::shared_ptr<const symbol>ret=nullptr;
+    if(check_symbol(sym)){
+        ret=std::dynamic_pointer_cast<const symbol>(tokens.front());
         tokens.pop();
     }
     return ret;
