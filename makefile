@@ -2,12 +2,11 @@ SRCDIR=src
 OBJDIR=obj
 DEPDIR=dep
 TRGDIR=bin
-BUILTIN=builtin
 TESTDIR=test
 SRCS=$(wildcard $(SRCDIR)/*.cpp)
 OBJS=$(addprefix $(OBJDIR)/,$(notdir $(SRCS:.cpp=.o)))
 DEPS=$(addprefix $(DEPDIR)/,$(notdir $(SRCS:.cpp=.d)))
-TARGET=$(TRGDIR)/rec.out
+export TARGET=$(TRGDIR)/rec
 
 .PHONY: all
 all: $(TARGET)
@@ -25,12 +24,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 
 .PHONY: test
 test: $(TARGET)
-	@mkdir -p $(TESTDIR)
-	$< test.c $(TESTDIR)/test.s
-	as $(TESTDIR)/test.s $(BUILTIN)/*.s -o $(TESTDIR)/test.o
-	ld $(TESTDIR)/test.o -o $(TESTDIR)/test.out
-	./$(TESTDIR)/test.out
+	$(MAKE) -C $(TESTDIR) $@
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR) $(DEPDIR) $(TRGDIR) $(TESTDIR)
+	rm -rf $(OBJDIR) $(DEPDIR) $(TRGDIR)
+	$(MAKE) -C $(TESTDIR) $@
