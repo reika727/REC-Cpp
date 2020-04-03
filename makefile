@@ -1,4 +1,3 @@
-CXXFLAGS=-std=c++17
 SRCDIR=src
 OBJDIR=obj
 DEPDIR=dep
@@ -22,12 +21,12 @@ $(TARGET): $(OBJS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
 	@mkdir -p $(DEPDIR)
-	$(CXX) $< -c -MMD -MP -o $@ -MF $(DEPDIR)/$(notdir $*).d $(CXXFLAGS)
+	$(CXX) $< -c -o $@ -MMD -MP -MF $(DEPDIR)/$(*F).d -std=c++17
 
 .PHONY: test
 test: $(TARGET)
 	@mkdir -p $(TESTDIR)
-	./$(TARGET) test.c $(TESTDIR)/test.s
+	$< test.c $(TESTDIR)/test.s
 	$(CXX) $(TESTDIR)/test.s $(BUILTIN)/builtin_func.s -o $(TESTDIR)/test.out
 	./$(TESTDIR)/test.out
 
