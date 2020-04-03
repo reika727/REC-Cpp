@@ -27,7 +27,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 test: $(TARGET)
 	@mkdir -p $(TESTDIR)
 	$< test.c $(TESTDIR)/test.s
-	$(CXX) $(TESTDIR)/test.s $(BUILTIN)/builtin_func.s -o $(TESTDIR)/test.out
+	as $(TESTDIR)/test.s $(BUILTIN)/*.s -o $(TESTDIR)/test.o
+	ld $(TESTDIR)/test.o -o $(TESTDIR)/test.out
 	./$(TESTDIR)/test.out
 
 .PHONY: clean

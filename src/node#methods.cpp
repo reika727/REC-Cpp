@@ -346,7 +346,6 @@ void _return_::to_asm(code::writer&wr)const
 }
 void function_difinition::to_asm(code::writer&wr)const
 {
-    wr.write(".globl "+name);
     wr.write(name+':');
     wr.write("push","%rbp");
     wr.write("mov","%rsp","%rbp");

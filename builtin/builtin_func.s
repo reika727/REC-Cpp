@@ -1,4 +1,3 @@
-.globl __builtin_put_ascii
 __builtin_put_ascii:
     push   %rbp
     mov    %rsp, %rbp
@@ -12,7 +11,6 @@ __builtin_put_ascii:
     pop    %rbp
     ret
 
-.globl __builtin_print_u64
 __builtin_print_u64:
     push   %rbp
     mov    %rsp, %rbp
@@ -46,7 +44,6 @@ BPU64_WRITE:
     pop    %rbp
     ret
 
-.globl __builtin_print_2c64
 __builtin_print_2c64:
     push   %rbp
     mov    %rsp, %rbp
