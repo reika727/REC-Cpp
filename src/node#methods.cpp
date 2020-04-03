@@ -312,10 +312,11 @@ void _for_::to_asm(code::writer&wr)const
     enter_continue(lreini);
     if(init)init->to_asm(wr);
     wr.write(lbegin+':');
-    wr.write("mov",1,"%rax");
-    if(cond)cond->to_asm(wr);
-    wr.write("cmp",0,"%rax");
-    wr.write("je",lend);
+    if(cond){
+        cond->to_asm(wr);
+        wr.write("cmp",0,"%rax");
+        wr.write("je",lend);
+    }
     stat->to_asm(wr);
     wr.write(lreini+':');
     if(reinit)reinit->to_asm(wr);
