@@ -163,17 +163,17 @@ std::unique_ptr<const expression>expression::get_order01(lexicon::token_array&ta
                     throw exception::compilation_error("関数呼び出し演算子のコンマに問題があります",tp->line,tp->col);
             }
         }
-        return std::make_unique<const fcall>(std::move(ret),vars,tp->line,tp->col);
+        return std::make_unique<const fcall>(std::move(ret),vars,tp->line,tp->col,expression::type_info::get_int()); // TODO: とりあえずintで固定
     }else{
         return ret;
     }
 }
 std::unique_ptr<const expression>expression::get_primary(lexicon::token_array&ta) // literal, identifier, enclosed expression
 {
-    if(auto nump=ta.consume_numeric()){
-        return std::make_unique<const numeric>(nump->value,nump->line,nump->col);
-    }else if(auto idp=ta.consume_identifier()){
-        return std::make_unique<const identifier>(idp->name,idp->line,idp->col);
+    if(auto idp=ta.consume_identifier()){
+        return std::make_unique<const identifier>(idp->name,idp->line,idp->col,expression::type_info::get_int()); // TODO: とりあえずintで固定
+    }else if(auto nump=ta.consume_numeric()){
+        return std::make_unique<const numeric>(nump->value,nump->line,nump->col,expression::type_info::get_int()); // TODO: とりあえずintで固定
     }else if(auto tp=ta.consume_symbol(lexicon::symbol::OPARENT)){
         auto ret=get_order15(ta);
         if(!ta.consume_symbol(lexicon::symbol::CPARENT))

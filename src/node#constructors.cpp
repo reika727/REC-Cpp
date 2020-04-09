@@ -3,12 +3,14 @@
 using namespace syntax;
 node::node(int line,int col)
     :line(line),col(col){}
-numeric::numeric(int value,int line,int col)
-    :expression(line,col),value(value){}
-identifier::identifier(const std::string&name,int line,int col)
-    :expression_l(line,col),name(name){}
-fcall::fcall(std::unique_ptr<const expression>_func,std::vector<std::unique_ptr<const expression>>&_vars,int line,int col)
-    :expression(line,col)
+expression::expression(int line,int col,type_info type)
+    :node(line,col),type(type){}
+identifier::identifier(const std::string&name,int line,int col,type_info type)
+    :expression_l(line,col,type),name(name){}
+numeric::numeric(int value,int line,int col,type_info type)
+    :expression(line,col,type),value(value){}
+fcall::fcall(std::unique_ptr<const expression>_func,std::vector<std::unique_ptr<const expression>>&_vars,int line,int col,type_info type)
+    :expression(line,col,type)
 {
     auto row=_func.release();
     if(auto casted=dynamic_cast<const identifier*>(row)){
@@ -20,9 +22,9 @@ fcall::fcall(std::unique_ptr<const expression>_func,std::vector<std::unique_ptr<
     }
 }
 unopr::unopr(std::unique_ptr<const expression>arg,int line,int col)
-    :expression(line,col),arg(std::move(arg)){}
+    :expression(line,col,determine_type(arg->type)),arg(std::move(arg)){}
 unopr_l::unopr_l(std::unique_ptr<const expression>_arg,int line,int col)
-    :expression(line,col)
+    :expression(line,col,determine_type(arg->type))
 {
     auto row=_arg.release();
     if(auto casted=dynamic_cast<const expression_l*>(row)){
@@ -33,9 +35,9 @@ unopr_l::unopr_l(std::unique_ptr<const expression>_arg,int line,int col)
     }
 }
 biopr::biopr(std::unique_ptr<const expression>larg,std::unique_ptr<const expression>rarg,int line,int col)
-    :expression(line,col),larg(std::move(larg)),rarg(std::move(rarg)){}
+    :expression(line,col,determine_type(larg->type,rarg->type)),larg(std::move(larg)),rarg(std::move(rarg)){}
 biopr_l::biopr_l(std::unique_ptr<const expression>_larg,std::unique_ptr<const expression>rarg,int line,int col)
-    :expression(line,col),rarg(std::move(rarg))
+    :expression(line,col,determine_type(larg->type,rarg->type)),rarg(std::move(rarg))
 {
     auto row=_larg.release();
     if(auto casted=dynamic_cast<const expression_l*>(row)){
@@ -74,7 +76,7 @@ var_difinition::var_difinition(lexicon::token_array&ta)
         if(auto idp=ta.consume_identifier())
             vars.push_back(
                 std::make_pair(
-                    std::make_unique<const identifier>(idp->name,idp->line,idp->col),
+                    std::make_unique<const identifier>(idp->name,idp->line,idp->col,expression::type_info::get_int()), // TODO: とりあえずintで固定
                     ta.consume_symbol(lexicon::symbol::EQUAL)?expression::get(ta,true):nullptr
                 )
             );
@@ -173,7 +175,7 @@ function_difinition::function_difinition(lexicon::token_array&ta)
             if(!ta.consume_symbol(lexicon::symbol::INT))
                 throw exception::compilation_error("引数の型が見つかりませんでした",ta.get_line(),ta.get_column());
             if(auto idp=ta.consume_identifier())
-                args.push_back(std::make_unique<const identifier>(idp->name,idp->line,idp->col));
+                args.push_back(std::make_unique<const identifier>(idp->name,idp->line,idp->col,expression::type_info::get_int())); // TODO: とりあえずintで固定
             else
                 throw exception::compilation_error("引数名が見つかりませんでした",ta.get_line(),ta.get_column());
             if(ta.consume_symbol(lexicon::symbol::COMMA))

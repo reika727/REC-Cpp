@@ -394,3 +394,19 @@ void iteration_statement::leave_continue()
 {
     continue_labels.pop();
 }
+expression::type_info unopr::determine_type(type_info arg_type)
+{
+    return type_info::get_int(); // TODO: とりあえずint
+}
+expression::type_info unopr_l::determine_type(type_info arg_type)
+{
+    return type_info::get_int(); // TODO: とりあえずint
+}
+expression::type_info biopr::determine_type(type_info larg_type,type_info rarg_type)
+{
+    return type_info::get_int(); // TODO: とりあえずint
+}
+expression::type_info biopr_l::determine_type(type_info larg_type,type_info rarg_type)
+{
+    return type_info::get_int(); // TODO: とりあえずint
+}

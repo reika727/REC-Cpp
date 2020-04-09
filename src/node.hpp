@@ -21,7 +21,6 @@ namespace syntax{
             static int leave_scope();
     };
     class expression:public node{
-        using node::node;
         private:
             static std::unique_ptr<const expression>get_order15(lexicon::token_array&ta);
             static std::unique_ptr<const expression>get_order14(lexicon::token_array&ta);
@@ -40,6 +39,18 @@ namespace syntax{
             static std::unique_ptr<const expression>get_order01(lexicon::token_array&ta);
             static std::unique_ptr<const expression>get_primary(lexicon::token_array&ta);
         public:
+            const class type_info final{
+                private:
+                    enum class _kind{
+                        INT
+                    };
+                    type_info(_kind kind,int bytes):kind(kind),bytes(bytes){}
+                public:
+                    const _kind kind;
+                    const int bytes;
+                    static type_info get_int(){return{_kind::INT,8};} // TODO: とりあえず8bytes
+            }type;
+            expression(int line,int col,type_info type);
             virtual ~expression()=default;
             static std::unique_ptr<const expression>get(lexicon::token_array&ta,bool for_initialization=false);
     };
@@ -58,7 +69,7 @@ namespace syntax{
         public:
             // TODO: fcallの方の問題に対応できたらprivateにする
             const std::string name;
-            identifier(const std::string&name,int line,int col);
+            identifier(const std::string&name,int line,int col,type_info type);
             void to_asm(code::writer&wr)const override;
             std::string get_address()const override;
             virtual void allocate_on_stack()const override;
@@ -70,7 +81,7 @@ namespace syntax{
             const int value;
             ~numeric()=default;
         public:
-            numeric(int value,int line,int col);
+            numeric(int value,int line,int col,expression::type_info type);
             void to_asm(code::writer&wr)const override;
     };
     class fcall final:public expression{
@@ -81,12 +92,14 @@ namespace syntax{
             std::vector<std::unique_ptr<const expression>>vars;
             ~fcall()=default;
         public:
-            fcall(std::unique_ptr<const expression>_func,std::vector<std::unique_ptr<const expression>>&_vars,int line,int col);
+            fcall(std::unique_ptr<const expression>_func,std::vector<std::unique_ptr<const expression>>&_vars,int line,int col,type_info type);
             void to_asm(code::writer&wr)const override;
     };
+    // TODO: determine_typeのために演算子をもっと細かく分類する
     class unopr:public expression{
         protected:
             const std::unique_ptr<const expression>arg;
+            virtual type_info determine_type(type_info arg_type);
         public:
             unopr(std::unique_ptr<const expression>arg,int line,int col);
             virtual ~unopr()=default;
@@ -118,6 +131,7 @@ namespace syntax{
     class unopr_l:public expression{
         protected:
             std::unique_ptr<const expression_l>arg;
+            virtual type_info determine_type(type_info arg_type);
         public:
             unopr_l(std::unique_ptr<const expression>_arg,int line,int col);
             virtual ~unopr_l()=default;
@@ -157,6 +171,7 @@ namespace syntax{
     class biopr:public expression{
         protected:
             const std::unique_ptr<const expression>larg,rarg;
+            virtual type_info determine_type(type_info larg_type,type_info rarg_type);
         public:
             biopr(std::unique_ptr<const expression>larg,std::unique_ptr<const expression>rarg,int line,int col);
             virtual ~biopr()=default;
@@ -277,6 +292,7 @@ namespace syntax{
         protected:
             std::unique_ptr<const expression_l>larg;
             const std::unique_ptr<const expression>rarg;
+            virtual type_info determine_type(type_info larg_type,type_info rarg_type);
         public:
             biopr_l(std::unique_ptr<const expression>_larg,std::unique_ptr<const expression>rarg,int line,int col);
             virtual ~biopr_l()=default;
