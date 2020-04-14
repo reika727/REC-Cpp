@@ -4,20 +4,25 @@
 using namespace lexicon;
 token::token(int line,int col)
     :line(line),col(col){}
-token::~token(){}
 numeric::numeric(int value,int line,int col)
     :token(line,col),value(value){}
 identifier::identifier(const std::string&name,int line,int col)
     :token(line,col),name(name){}
+symbol::symbol(symbol::SYMBOL sym,int line,int col)
+    :token(line,col),sym(sym){}
+symbol&symbol::operator=(const symbol&)
+{
+    return*this;
+}
 token_array::token_array(const std::string&src)
     :src(src),pos(0),line(1),col(1){}
-std::optional<std::pair<symbol::SYMBOL,int>>symbol::match(const std::string&str,int pos)
+std::optional<std::pair<symbol::SYMBOL,int>>token_array::match()
 {
-    auto check_keyword=[str,pos](const std::string&token,auto...follow)->size_t{
-        if(str.substr(pos,token.length())!=token)return 0;
+    auto check_keyword=[this](const std::string&token,auto...follow)->size_t{
+        if(src.substr(pos,token.length())!=token)return 0;
         if(sizeof...(follow)!=0){
-            if(pos+token.length()>=str.length())return 0;
-            if(((follow!=str[pos+token.length()])&&...))return 0;
+            if(pos+token.length()>=src.length())return 0;
+            if(((follow!=src[pos+token.length()])&&...))return 0;
         }
         return token.length();
     };
@@ -98,10 +103,6 @@ std::optional<std::pair<symbol::SYMBOL,int>>symbol::match(const std::string&str,
     else
         return std::nullopt;
 }
-symbol&symbol::operator=(const symbol&)
-{
-    return*this;
-}
 void token_array::skip_space_or_comment()
 {
     while(pos<src.length()){
@@ -171,15 +172,15 @@ bool token_array::check_symbol(symbol::SYMBOL sym)
 {
     skip_space_or_comment();
     if(is_all_read())return false;
-    auto m=symbol::match(src,pos);
+    auto m=match();
     return m.has_value()&&m.value().first==sym;
 }
 std::optional<symbol>token_array::consume_symbol(symbol::SYMBOL sym)
 {
     skip_space_or_comment();
     if(is_all_read())return std::nullopt;
-    if(auto m=symbol::match(src,pos);m.has_value()&&m.value().first==sym){
-        auto ret=symbol(line,col);
+    if(auto m=match();m.has_value()&&m.value().first==sym){
+        auto ret=symbol(sym,line,col);
         pos+=m.value().second;
         col+=m.value().second;
         return ret;

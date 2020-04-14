@@ -7,7 +7,6 @@ namespace lexicon{
         public:
             const int line,col;
             token(int line,int col);
-            virtual ~token()=0;
     };
     class numeric final:public token{
         public:
@@ -20,9 +19,8 @@ namespace lexicon{
             identifier(const std::string&name,int line,int col);
     };
     class symbol final:public token{
-        using token::token;
         public:
-            enum SYMBOL{
+            const enum SYMBOL{
                 PLUS,     // +
                 MINUS,    // -
                 ASTER,    // *
@@ -60,8 +58,8 @@ namespace lexicon{
                 BREAK,    // break
                 CONTINUE, // continue
                 RETURN,   // return
-            };
-            static std::optional<std::pair<SYMBOL,int>>match(const std::string&str,int pos);
+            }sym;
+            symbol(SYMBOL sym,int line,int col);
             symbol&operator=(const symbol&);
     };
     class token_array final{
@@ -70,6 +68,7 @@ namespace lexicon{
             int pos;
             int line,col;
             void skip_space_or_comment();
+            std::optional<std::pair<symbol::SYMBOL,int>>match();
         public:
             token_array(const std::string&src);
             int get_line()const noexcept;
