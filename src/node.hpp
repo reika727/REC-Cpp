@@ -1,5 +1,5 @@
 #pragma once
-#include"token_array.hpp"
+#include"lexer.hpp"
 #include"writer.hpp"
 #include<map>
 #include<memory>
@@ -22,22 +22,22 @@ namespace syntax{
     };
     class expression:public node{
         private:
-            static std::unique_ptr<const expression>get_order15(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order14(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order13(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order12(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order11(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order10(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order09(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order08(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order07(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order06(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order05(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order04(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order03(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order02(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_order01(lexicon::token_array&ta);
-            static std::unique_ptr<const expression>get_primary(lexicon::token_array&ta);
+            static std::unique_ptr<const expression>get_order15(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order14(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order13(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order12(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order11(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order10(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order09(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order08(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order07(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order06(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order05(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order04(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order03(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order02(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_order01(lexicon::lexer&lx);
+            static std::unique_ptr<const expression>get_primary(lexicon::lexer&lx);
         public:
             const class type_info final{
                 private:
@@ -52,7 +52,7 @@ namespace syntax{
             }type;
             expression(int line,int col,type_info type);
             virtual ~expression()=default;
-            static std::unique_ptr<const expression>get(lexicon::token_array&ta,bool for_initialization=false);
+            static std::unique_ptr<const expression>get(lexicon::lexer&lx,bool for_initialization=false);
     };
     class expression_l:public expression{
         using expression::expression;
@@ -349,7 +349,7 @@ namespace syntax{
         using node::node;
         public:
             virtual ~statement()=default;
-            static std::unique_ptr<const statement>get(lexicon::token_array&ta);
+            static std::unique_ptr<const statement>get(lexicon::lexer&lx);
     };
     class expression_statement final:public statement{
         using statement::statement;
@@ -358,7 +358,7 @@ namespace syntax{
             std::unique_ptr<const expression>expr;
             ~expression_statement()=default;
         public:
-            expression_statement(lexicon::token_array&ta);
+            expression_statement(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class null_statement final:public statement{
@@ -367,7 +367,7 @@ namespace syntax{
         private:
             ~null_statement()=default;
         public:
-            null_statement(lexicon::token_array&ta);
+            null_statement(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class compound final:public statement{
@@ -377,7 +377,7 @@ namespace syntax{
             std::vector<std::unique_ptr<const statement>>stats;
             ~compound()=default;
         public:
-            compound(lexicon::token_array&ta);
+            compound(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class var_difinition final:public statement{
@@ -387,7 +387,7 @@ namespace syntax{
             std::vector<std::pair<std::unique_ptr<const identifier>,std::unique_ptr<const expression>>>vars;
             ~var_difinition()=default;
         public:
-            var_difinition(lexicon::token_array&ta);
+            var_difinition(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class _if_else_ final:public statement{
@@ -398,7 +398,7 @@ namespace syntax{
             std::unique_ptr<const statement>stat_if,stat_else;
             ~_if_else_()=default;
         public:
-            _if_else_(lexicon::token_array&ta);
+            _if_else_(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class iteration_statement:public statement{
@@ -421,7 +421,7 @@ namespace syntax{
             std::unique_ptr<const statement>stat;
             ~_while_()=default;
         public:
-            _while_(lexicon::token_array&ta);
+            _while_(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class _for_ final:public iteration_statement{
@@ -432,7 +432,7 @@ namespace syntax{
             std::unique_ptr<const statement>stat;
             ~_for_()=default;
         public:
-            _for_(lexicon::token_array&ta);
+            _for_(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class _break_ final:public statement{
@@ -441,7 +441,7 @@ namespace syntax{
         private:
             ~_break_()=default;
         public:
-            _break_(lexicon::token_array&ta);
+            _break_(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class _continue_ final:public statement{
@@ -450,7 +450,7 @@ namespace syntax{
         private:
             ~_continue_()=default;
         public:
-            _continue_(lexicon::token_array&ta);
+            _continue_(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class _return_ final:public statement{
@@ -460,7 +460,7 @@ namespace syntax{
             std::unique_ptr<const expression>value;
             ~_return_()=default;
         public:
-            _return_(lexicon::token_array&ta);
+            _return_(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class function_difinition final:public node{
@@ -472,7 +472,7 @@ namespace syntax{
             std::vector<std::unique_ptr<const statement>>stats;
             ~function_difinition()=default;
         public:
-            function_difinition(lexicon::token_array&ta);
+            function_difinition(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
     class translation_unit final:public node{
@@ -480,7 +480,7 @@ namespace syntax{
         private:
             std::vector<std::unique_ptr<const function_difinition>>funcs;
         public:
-            translation_unit(lexicon::token_array&ta);
+            translation_unit(lexicon::lexer&lx);
             void to_asm(code::writer&wr)const override;
     };
 }
