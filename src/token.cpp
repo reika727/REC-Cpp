@@ -9,8 +9,6 @@ numeric::numeric(int value,int line,int col)
     :token(line,col),value(value){}
 identifier::identifier(const std::string&name,int line,int col)
     :token(line,col),name(name){}
-symbol::symbol(symbol::SYMBOL sym,int line,int col)
-    :token(line,col),sym(sym){}
 token_array::token_array(const std::string&src)
     :src(src),pos(0),line(1),col(1){}
 std::optional<std::pair<symbol::SYMBOL,int>>symbol::match(const std::string&str,int pos)
@@ -100,6 +98,10 @@ std::optional<std::pair<symbol::SYMBOL,int>>symbol::match(const std::string&str,
     else
         return std::nullopt;
 }
+symbol&symbol::operator=(const symbol&)
+{
+    return*this;
+}
 void token_array::skip_space_or_comment()
 {
     while(pos<src.length()){
@@ -144,24 +146,26 @@ bool token_array::is_all_read()
     skip_space_or_comment();
     return pos>=src.length();
 }
-std::shared_ptr<const numeric>token_array::consume_numeric()
+std::optional<numeric>token_array::consume_numeric()
 {
     skip_space_or_comment();
-    if(is_all_read()||!std::isdigit(src[pos]))return nullptr;
+    if(is_all_read()||!std::isdigit(src[pos]))return std::nullopt;
     size_t sz;
     int num=std::stoi(src.substr(pos),&sz);
+    auto ret=std::make_optional<numeric>(num,line,col);
     pos+=sz;
     col+=sz;
-    return std::make_shared<const numeric>(num,line,col);
+    return ret;
 }
-std::shared_ptr<const identifier>token_array::consume_identifier()
+std::optional<identifier>token_array::consume_identifier()
 {
     skip_space_or_comment();
-    if(is_all_read()||!std::isalpha(src[pos])&&src[pos]!='_')return nullptr;
+    if(is_all_read()||!std::isalpha(src[pos])&&src[pos]!='_')return std::nullopt;
     auto name=std::string(src.begin()+pos,std::find_if_not(src.begin()+pos,src.end(),[](char c){return std::isalpha(c)||std::isdigit(c)||c=='_';}));
+    auto ret=std::make_optional<identifier>(name,line,col);
     pos+=name.length();
     col+=name.length();
-    return std::make_shared<const identifier>(name,line,col);
+    return ret;
 }
 bool token_array::check_symbol(symbol::SYMBOL sym)
 {
@@ -170,15 +174,16 @@ bool token_array::check_symbol(symbol::SYMBOL sym)
     auto m=symbol::match(src,pos);
     return m.has_value()&&m.value().first==sym;
 }
-std::shared_ptr<const symbol>token_array::consume_symbol(symbol::SYMBOL sym)
+std::optional<symbol>token_array::consume_symbol(symbol::SYMBOL sym)
 {
     skip_space_or_comment();
-    if(is_all_read())return nullptr;
+    if(is_all_read())return std::nullopt;
     if(auto m=symbol::match(src,pos);m.has_value()&&m.value().first==sym){
+        auto ret=symbol(line,col);
         pos+=m.value().second;
         col+=m.value().second;
-        return std::make_shared<const symbol>(m.value().first,line,col);
+        return ret;
     }else{
-        return nullptr;
+        return std::nullopt;
     }
 }
