@@ -1,7 +1,8 @@
 #pragma once
 #include<memory>
+#include<optional>
 #include<string>
-#include<queue>
+#include<utility>
 namespace lexicon{
     class token{
         public:
@@ -61,19 +62,23 @@ namespace lexicon{
                 RETURN,   // return
             }sym;
             symbol(SYMBOL sym,int line,int col);
+            static std::optional<std::pair<SYMBOL,int>>match(const std::string&str,int pos);
     };
     class token_array final{
         private:
-            std::queue<std::shared_ptr<const token>>tokens;
+            std::string src;
+            int pos;
+            int line,col;
+            void skip_space_or_comment();
         public:
             token_array(const std::string&src);
-            bool is_all_read()const noexcept;
             int get_line()const noexcept;
             int get_column()const noexcept;
-            bool check_symbol(symbol::SYMBOL sym)const noexcept;
-            std::shared_ptr<const numeric>consume_numeric()noexcept;
-            std::shared_ptr<const identifier>consume_identifier()noexcept;
-            std::shared_ptr<const symbol>consume_symbol(symbol::SYMBOL sym)noexcept;
+            bool is_all_read();
+            std::shared_ptr<const numeric>consume_numeric();
+            std::shared_ptr<const identifier>consume_identifier();
+            bool check_symbol(symbol::SYMBOL sym);
+            std::shared_ptr<const symbol>consume_symbol(symbol::SYMBOL sym);
             token_array&operator=(const token_array&)=delete;
             token_array&operator=(token_array&&)=delete;
     };
