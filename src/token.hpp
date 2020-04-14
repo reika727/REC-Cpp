@@ -1,5 +1,7 @@
 #pragma once
+#include<optional>
 #include<string>
+#include<utility>
 namespace lexicon{
     class token{
         public:
@@ -58,6 +60,7 @@ namespace lexicon{
                 RETURN,   // return
             }sym;
             symbol(SYMBOL sym,int line,int col);
+            static std::optional<std::pair<symbol::SYMBOL,int>>match(const std::string&str,int pos);
             symbol&operator=(const symbol&);
     };
 }

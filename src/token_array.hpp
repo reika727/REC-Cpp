@@ -1,7 +1,6 @@
 #pragma once
 #include"token.hpp"
 #include<optional>
-#include<utility>
 namespace lexicon{
     class token_array final{
         private:
@@ -9,7 +8,6 @@ namespace lexicon{
             int pos;
             int line,col;
             void skip_space_or_comment();
-            std::optional<std::pair<symbol::SYMBOL,int>>match();
         public:
             token_array(const std::string&src);
             int get_line()const noexcept;

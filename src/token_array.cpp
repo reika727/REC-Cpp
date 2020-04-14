@@ -4,93 +4,6 @@
 using namespace lexicon;
 token_array::token_array(const std::string&src)
     :src(src),pos(0),line(1),col(1){}
-std::optional<std::pair<symbol::SYMBOL,int>>token_array::match()
-{
-    auto check_keyword=[this](const std::string&token,auto...follow)->size_t{
-        if(src.substr(pos,token.length())!=token)return 0;
-        if(sizeof...(follow)!=0){
-            if(pos+token.length()>=src.length())return 0;
-            if(((follow!=src[pos+token.length()])&&...))return 0;
-        }
-        return token.length();
-    };
-    if(auto foo=check_keyword("int",' '))
-        return{{symbol::INT,foo}};
-    else if(foo=check_keyword("void",' ',')'))
-        return{{symbol::VOID,foo}};
-    else if(foo=check_keyword("if",'(',' '))
-        return{{symbol::IF,foo}};
-    else if(foo=check_keyword("else",'{',';',' '))
-        return{{symbol::ELSE,foo}};
-    else if(foo=check_keyword("while",'(',' '))
-        return{{symbol::WHILE,foo}};
-    else if(foo=check_keyword("for",'(',' '))
-        return{{symbol::FOR,foo}};
-    else if(foo=check_keyword("break",';',' '))
-        return{{symbol::BREAK,foo}};
-    else if(foo=check_keyword("continue",';',' '))
-        return{{symbol::CONTINUE,foo}};
-    else if(foo=check_keyword("return",' '))
-        return{{symbol::RETURN,foo}};
-    else if(foo=check_keyword("&&"))
-        return{{symbol::APAP,foo}};
-    else if(foo=check_keyword("||"))
-        return{{symbol::VBVB,foo}};
-    else if(foo=check_keyword("++"))
-        return{{symbol::PLPL,foo}};
-    else if(foo=check_keyword("--"))
-        return{{symbol::MIMI,foo}};
-    else if(foo=check_keyword("+="))
-        return{{symbol::PLEQ,foo}};
-    else if(foo=check_keyword("-="))
-        return{{symbol::MIEQ,foo}};
-    else if(foo=check_keyword("*="))
-        return{{symbol::ASEQ,foo}};
-    else if(foo=check_keyword("/="))
-        return{{symbol::SLEQ,foo}};
-    else if(foo=check_keyword("%="))
-        return{{symbol::PEEQ,foo}};
-    else if(foo=check_keyword("=="))
-        return{{symbol::EQEQ,foo}};
-    else if(foo=check_keyword("!="))
-        return{{symbol::EXEQ,foo}};
-    else if(foo=check_keyword("<="))
-        return{{symbol::LEEQ,foo}};
-    else if(foo=check_keyword(">="))
-        return{{symbol::GREQ,foo}};
-    else if(foo=check_keyword("+"))
-        return{{symbol::PLUS,foo}};
-    else if(foo=check_keyword("-"))
-        return{{symbol::MINUS,foo}};
-    else if(foo=check_keyword("*"))
-        return{{symbol::ASTER,foo}};
-    else if(foo=check_keyword("/"))
-        return{{symbol::SLASH,foo}};
-    else if(foo=check_keyword("%"))
-        return{{symbol::PERCENT,foo}};
-    else if(foo=check_keyword("<"))
-        return{{symbol::LESS,foo}};
-    else if(foo=check_keyword(">"))
-        return{{symbol::GREATER,foo}};
-    else if(foo=check_keyword("!"))
-        return{{symbol::EXCLAM,foo}};
-    else if(foo=check_keyword("="))
-        return{{symbol::EQUAL,foo}};
-    else if(foo=check_keyword(","))
-        return{{symbol::COMMA,foo}};
-    else if(foo=check_keyword(";"))
-        return{{symbol::SCOLON,foo}};
-    else if(foo=check_keyword("("))
-        return{{symbol::OPARENT,foo}};
-    else if(foo=check_keyword(")"))
-        return{{symbol::CPARENT,foo}};
-    else if(foo=check_keyword("{"))
-        return{{symbol::OBRACE,foo}};
-    else if(foo=check_keyword("}"))
-        return{{symbol::CBRACE,foo}};
-    else
-        return std::nullopt;
-}
 void token_array::skip_space_or_comment()
 {
     while(pos<src.length()){
@@ -160,15 +73,15 @@ bool token_array::check_symbol(symbol::SYMBOL sym)
 {
     skip_space_or_comment();
     if(is_all_read())return false;
-    auto m=match();
+    auto m=symbol::match(src,pos);
     return m.has_value()&&m.value().first==sym;
 }
 std::optional<symbol>token_array::consume_symbol(symbol::SYMBOL sym)
 {
     skip_space_or_comment();
     if(is_all_read())return std::nullopt;
-    if(auto m=match();m.has_value()&&m.value().first==sym){
-        auto ret=symbol(sym,line,col);
+    if(auto m=symbol::match(src,pos);m.has_value()&&m.value().first==sym){
+        auto ret=std::make_optional<symbol>(sym,line,col);
         pos+=m.value().second;
         col+=m.value().second;
         return ret;
@@ -176,4 +89,3 @@ std::optional<symbol>token_array::consume_symbol(symbol::SYMBOL sym)
         return std::nullopt;
     }
 }
-
