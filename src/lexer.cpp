@@ -69,23 +69,27 @@ std::optional<identifier>lexer::consume_identifier()
     col+=name.length();
     return ret;
 }
+std::optional<symbol>lexer::consume_symbol()
+{
+    skip_space_or_comment();
+    if(is_all_read())return std::nullopt;
+    if(auto m=symbol::match(src,pos)){
+        auto ret=std::make_optional<symbol>(m->first,line,col);
+        pos+=m->second;
+        col+=m->second;
+        return ret;
+    }else{
+        return std::nullopt;
+    }
+}
 bool lexer::check_symbol(symbol::SYMBOL sym)
 {
     skip_space_or_comment();
     if(is_all_read())return false;
     auto m=symbol::match(src,pos);
-    return m.has_value()&&m.value().first==sym;
+    return m.has_value()&&m->first==sym;
 }
-std::optional<symbol>lexer::consume_symbol(symbol::SYMBOL sym)
+std::optional<symbol>lexer::consume_symbol_if(symbol::SYMBOL sym)
 {
-    skip_space_or_comment();
-    if(is_all_read())return std::nullopt;
-    if(auto m=symbol::match(src,pos);m.has_value()&&m.value().first==sym){
-        auto ret=std::make_optional<symbol>(sym,line,col);
-        pos+=m.value().second;
-        col+=m.value().second;
-        return ret;
-    }else{
-        return std::nullopt;
-    }
+    return check_symbol(sym)?consume_symbol():std::nullopt;
 }

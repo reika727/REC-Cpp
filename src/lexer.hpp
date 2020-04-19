@@ -15,8 +15,9 @@ namespace lexicon{
             bool is_all_read();
             std::optional<numeric>consume_numeric();
             std::optional<identifier>consume_identifier();
+            std::optional<symbol>consume_symbol();
             bool check_symbol(symbol::SYMBOL sym);
-            std::optional<symbol>consume_symbol(symbol::SYMBOL sym);
+            std::optional<symbol>consume_symbol_if(symbol::SYMBOL sym);
             lexer&operator=(const lexer&)=delete;
             lexer&operator=(lexer&&)=delete;
     };
