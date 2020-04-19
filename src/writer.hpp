@@ -13,7 +13,5 @@ namespace code{
             void write(const std::string&inst,int arg);
             std::string get_asm()const;
             static std::string get_unique_label(const std::string&base);
-            writer&operator=(const writer&)=delete;
-            writer&operator=(writer&&)=delete;
     };
 }
