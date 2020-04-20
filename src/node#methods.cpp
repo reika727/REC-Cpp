@@ -261,11 +261,11 @@ void compound::to_asm(code::writer&wr)const
 void var_difinition::to_asm(code::writer&wr)const
 {
     wr.write("sub",8*vars.size(),"%rsp");
-    for(const auto&v:vars){
-        v.first->allocate_on_stack();
-        if(v.second){
-            v.second->to_asm(wr);
-            wr.write("mov","%rax",v.first->get_address());
+    for(const auto&[id,expr]:vars){
+        id->allocate_on_stack();
+        if(expr){
+            expr->to_asm(wr);
+            wr.write("mov","%rax",id->get_address());
         }
     }
 }
