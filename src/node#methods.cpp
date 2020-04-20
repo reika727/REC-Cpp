@@ -352,11 +352,11 @@ void function_difinition::to_asm(code::writer&wr)const
     wr.write("mov","%rsp","%rbp");
     wr.write("sub",std::min(6ul,args.size())*8,"%rsp");
     enter_scope();
-    for(int i=0;i<std::min(6ul,args.size());++i){
+    for(std::size_t i=0;i<std::min(6ul,args.size());++i){
         args[i]->allocate_on_stack();
         wr.write("mov",std::vector{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"}[i],args[i]->get_address());
     }
-    for(int i=6;i<args.size();++i)
+    for(std::size_t i=6;i<args.size();++i)
         args[i]->allocate_on_stack(i*8-32);
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for(const auto&s:stats)s->to_asm(wr);
@@ -394,19 +394,20 @@ void iteration_statement::leave_continue()
 {
     continue_labels.pop();
 }
-expression::type_info unopr::determine_type(type_info arg_type)
+// TODO: いずれはちゃんと実装してmaybe_unusedも取る
+expression::type_info unopr::determine_type([[maybe_unused]]type_info arg_type)
 {
     return type_info::get_int(); // TODO: とりあえずint
 }
-expression::type_info unopr_l::determine_type(type_info arg_type)
+expression::type_info unopr_l::determine_type([[maybe_unused]]type_info arg_type)
 {
     return type_info::get_int(); // TODO: とりあえずint
 }
-expression::type_info biopr::determine_type(type_info larg_type,type_info rarg_type)
+expression::type_info biopr::determine_type([[maybe_unused]]type_info larg_type,[[maybe_unused]]type_info rarg_type)
 {
     return type_info::get_int(); // TODO: とりあえずint
 }
-expression::type_info biopr_l::determine_type(type_info larg_type,type_info rarg_type)
+expression::type_info biopr_l::determine_type([[maybe_unused]]type_info larg_type,[[maybe_unused]]type_info rarg_type)
 {
     return type_info::get_int(); // TODO: とりあえずint
 }

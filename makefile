@@ -20,7 +20,7 @@ $(TARGET): $(OBJS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
 	@mkdir -p $(DEPDIR)
-	$(CXX) $< -c -o $@ -MMD -MP -MF $(DEPDIR)/$(*F).d -std=c++17
+	$(CXX) $< -c -o $@ -MMD -MP -MF $(DEPDIR)/$(*F).d -Wall -Wextra -std=c++17
 
 .PHONY: test
 test: $(TARGET)

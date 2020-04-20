@@ -62,7 +62,7 @@ std::optional<numeric>lexer::consume_numeric()
 std::optional<identifier>lexer::consume_identifier()
 {
     skip_space_or_comment();
-    if(is_all_read()||!std::isalpha(src[pos])&&src[pos]!='_')return std::nullopt;
+    if(is_all_read()||(!std::isalpha(src[pos])&&src[pos]!='_'))return std::nullopt;
     auto name=std::string(src.begin()+pos,std::find_if_not(src.begin()+pos,src.end(),[](char c){return std::isalpha(c)||std::isdigit(c)||c=='_';}));
     auto ret=identifier(name,line,col);
     pos+=name.length();
