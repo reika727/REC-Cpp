@@ -82,14 +82,14 @@ std::optional<symbol>lexer::consume_symbol()
         return std::nullopt;
     }
 }
-bool lexer::check_symbol(symbol::SYMBOL sym)
+bool lexer::check_symbol(symbol::symid id)
 {
     skip_space_or_comment();
     if(is_all_read())return false;
     auto m=symbol::match(src,pos);
-    return m.has_value()&&m->first==sym;
+    return m.has_value()&&m->first==id;
 }
-std::optional<symbol>lexer::consume_symbol_if(symbol::SYMBOL sym)
+std::optional<symbol>lexer::consume_symbol_if(symbol::symid id)
 {
-    return check_symbol(sym)?consume_symbol():std::nullopt;
+    return check_symbol(id)?consume_symbol():std::nullopt;
 }

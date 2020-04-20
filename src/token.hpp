@@ -20,7 +20,7 @@ namespace lexicon{
     };
     class symbol final:public token{
         public:
-            const enum SYMBOL{
+            const enum class symid{
                 PLUS,     // +
                 MINUS,    // -
                 ASTER,    // *
@@ -58,9 +58,9 @@ namespace lexicon{
                 BREAK,    // break
                 CONTINUE, // continue
                 RETURN,   // return
-            }sym;
-            symbol(SYMBOL sym,int line,int col);
-            static std::optional<std::pair<symbol::SYMBOL,int>>match(const std::string&str,int pos);
+            }id;
+            symbol(symid id,int line,int col);
+            static std::optional<std::pair<symid,int>>match(const std::string&str,int pos);
             symbol&operator=(const symbol&);
     };
 }
