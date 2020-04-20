@@ -73,10 +73,10 @@ var_difinition::var_difinition(lexicon::lexer&lx)
     if(!lx.consume_symbol_if(lexicon::symbol::symid::INT))
         throw exception::compilation_error("型指定子が見つかりませんでした",lx.get_line(),lx.get_column());
     while(true){
-        if(auto idp=lx.consume_identifier())
+        if(auto id=lx.consume_identifier())
             vars.push_back(
                 std::make_pair(
-                    std::make_unique<const identifier>(idp->name,idp->line,idp->col,expression::type_info::get_int()), // TODO: とりあえずintで固定
+                    std::make_unique<const identifier>(id->name,id->line,id->col,expression::type_info::get_int()), // TODO: とりあえずintで固定
                     lx.consume_symbol_if(lexicon::symbol::symid::EQUAL)?expression::get(lx,true):nullptr
                 )
             );
@@ -161,8 +161,8 @@ function_difinition::function_difinition(lexicon::lexer&lx)
 {
     if(!lx.consume_symbol_if(lexicon::symbol::symid::INT))
         throw exception::compilation_error("関数の型が見つかりませんでした",lx.get_line(),lx.get_column());
-    if(auto fidp=lx.consume_identifier())
-        name=fidp->name;
+    if(auto id=lx.consume_identifier())
+        name=id->name;
     else
         throw exception::compilation_error("関数名が見つかりませんでした",lx.get_line(),lx.get_column());
     if(!lx.consume_symbol_if(lexicon::symbol::symid::OPARENT))
@@ -174,8 +174,8 @@ function_difinition::function_difinition(lexicon::lexer&lx)
         while(true){
             if(!lx.consume_symbol_if(lexicon::symbol::symid::INT))
                 throw exception::compilation_error("引数の型が見つかりませんでした",lx.get_line(),lx.get_column());
-            if(auto idp=lx.consume_identifier())
-                args.push_back(std::make_unique<const identifier>(idp->name,idp->line,idp->col,expression::type_info::get_int())); // TODO: とりあえずintで固定
+            if(auto id=lx.consume_identifier())
+                args.push_back(std::make_unique<const identifier>(id->name,id->line,id->col,expression::type_info::get_int())); // TODO: とりあえずintで固定
             else
                 throw exception::compilation_error("引数名が見つかりませんでした",lx.get_line(),lx.get_column());
             if(lx.consume_symbol_if(lexicon::symbol::symid::COMMA))
