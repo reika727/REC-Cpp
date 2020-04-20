@@ -14,7 +14,7 @@ symbol&symbol::operator=(const symbol&)
 }
 std::optional<std::pair<symbol::symid,int>>symbol::match(const std::string&str,int pos)
 {
-    auto check_keyword=[str,pos](const std::string&token,auto...follow)->size_t{
+    auto check_keyword=[str,pos](const std::string&token,auto...follow)->std::size_t{
         if(str.substr(pos,token.length())!=token)return 0;
         if(sizeof...(follow)!=0){
             if(pos+token.length()>=str.length())return 0;

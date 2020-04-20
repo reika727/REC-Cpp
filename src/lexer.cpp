@@ -52,7 +52,7 @@ std::optional<numeric>lexer::consume_numeric()
 {
     skip_space_or_comment();
     if(is_all_read()||!std::isdigit(src[pos]))return std::nullopt;
-    size_t sz;
+    std::size_t sz;
     int num=std::stoi(src.substr(pos),&sz);
     auto ret=numeric(num,line,col);
     pos+=sz;
