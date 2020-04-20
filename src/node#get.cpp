@@ -18,15 +18,15 @@ std::unique_ptr<const expression>expression::get_order14(lexicon::lexer&lx) // =
     while(true){
         if(auto sym=lx.consume_symbol_if(lexicon::symbol::symid::EQUAL))
             ret=std::make_unique<const assign>(std::move(ret),get_order14(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::PLEQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::PLEQ)))
             ret=std::make_unique<const plasgn>(std::move(ret),get_order14(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::MIEQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::MIEQ)))
             ret=std::make_unique<const miasgn>(std::move(ret),get_order14(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::ASEQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::ASEQ)))
             ret=std::make_unique<const muasgn>(std::move(ret),get_order14(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::SLEQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::SLEQ)))
             ret=std::make_unique<const diasgn>(std::move(ret),get_order14(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::PEEQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::PEEQ)))
             ret=std::make_unique<const rmasgn>(std::move(ret),get_order14(lx),sym->line,sym->col);
         else
             break;
@@ -73,7 +73,7 @@ std::unique_ptr<const expression>expression::get_order07(lexicon::lexer&lx) // =
     while(true){
         if(auto sym=lx.consume_symbol_if(lexicon::symbol::symid::EQEQ))
             ret=std::make_unique<const equal>(std::move(ret),get_order06(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::EXEQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::EXEQ)))
             ret=std::make_unique<const nequal>(std::move(ret),get_order06(lx),sym->line,sym->col);
         else
             break;
@@ -86,11 +86,11 @@ std::unique_ptr<const expression>expression::get_order06(lexicon::lexer&lx) // <
     while(true){
         if(auto sym=lx.consume_symbol_if(lexicon::symbol::symid::LESS))
             ret=std::make_unique<const less>(std::move(ret),get_order05(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::GREATER))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::GREATER)))
             ret=std::make_unique<const greater>(std::move(ret),get_order05(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::LEEQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::LEEQ)))
             ret=std::make_unique<const leeq>(std::move(ret),get_order05(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::GREQ))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::GREQ)))
             ret=std::make_unique<const greq>(std::move(ret),get_order05(lx),sym->line,sym->col);
         else
             break;
@@ -108,7 +108,7 @@ std::unique_ptr<const expression>expression::get_order04(lexicon::lexer&lx) // +
     while(true){
         if(auto sym=lx.consume_symbol_if(lexicon::symbol::symid::PLUS))
             ret=std::make_unique<const bplus>(std::move(ret),get_order03(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::MINUS))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::MINUS)))
             ret=std::make_unique<const bminus>(std::move(ret),get_order03(lx),sym->line,sym->col);
         else
             break;
@@ -121,9 +121,9 @@ std::unique_ptr<const expression>expression::get_order03(lexicon::lexer&lx) // *
     while(true){
         if(auto sym=lx.consume_symbol_if(lexicon::symbol::symid::ASTER))
             ret=std::make_unique<const multiply>(std::move(ret),get_order02(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::SLASH))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::SLASH)))
             ret=std::make_unique<const divide>(std::move(ret),get_order02(lx),sym->line,sym->col);
-        else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::PERCENT))
+        else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::PERCENT)))
             ret=std::make_unique<const remain>(std::move(ret),get_order02(lx),sym->line,sym->col);
         else
             break;
@@ -134,13 +134,13 @@ std::unique_ptr<const expression>expression::get_order02(lexicon::lexer&lx) // +
 {
     if(auto sym=lx.consume_symbol_if(lexicon::symbol::symid::PLUS))
         return std::make_unique<const uplus>(get_order02(lx),sym->line,sym->col);
-    else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::MINUS))
+    else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::MINUS)))
         return std::make_unique<const uminus>(get_order02(lx),sym->line,sym->col);
-    else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::PLPL))
+    else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::PLPL)))
         return std::make_unique<const preinc>(get_order02(lx),sym->line,sym->col);
-    else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::MIMI))
+    else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::MIMI)))
         return std::make_unique<const predec>(get_order02(lx),sym->line,sym->col);
-    else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::EXCLAM))
+    else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::EXCLAM)))
         return std::make_unique<const lognot>(get_order02(lx),sym->line,sym->col);
     else
         return get_order01(lx);
@@ -150,9 +150,9 @@ std::unique_ptr<const expression>expression::get_order01(lexicon::lexer&lx) // (
     auto ret=get_primary(lx);
     if(auto sym=lx.consume_symbol_if(lexicon::symbol::symid::PLPL)){
         return std::make_unique<const postinc>(std::move(ret),sym->line,sym->col);
-    }else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::MIMI)){
+    }else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::MIMI))){
         return std::make_unique<const postdec>(std::move(ret),sym->line,sym->col);
-    }else if(sym=lx.consume_symbol_if(lexicon::symbol::symid::OPARENT)){
+    }else if((sym=lx.consume_symbol_if(lexicon::symbol::symid::OPARENT))){
         auto vars=std::vector<std::unique_ptr<const expression>>();
         if(!lx.consume_symbol_if(lexicon::symbol::symid::CPARENT)){
             while(true){
