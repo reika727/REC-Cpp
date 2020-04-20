@@ -54,7 +54,7 @@ std::optional<numeric>lexer::consume_numeric()
     if(is_all_read()||!std::isdigit(src[pos]))return std::nullopt;
     size_t sz;
     int num=std::stoi(src.substr(pos),&sz);
-    auto ret=std::make_optional<numeric>(num,line,col);
+    auto ret=numeric(num,line,col);
     pos+=sz;
     col+=sz;
     return ret;
@@ -64,7 +64,7 @@ std::optional<identifier>lexer::consume_identifier()
     skip_space_or_comment();
     if(is_all_read()||!std::isalpha(src[pos])&&src[pos]!='_')return std::nullopt;
     auto name=std::string(src.begin()+pos,std::find_if_not(src.begin()+pos,src.end(),[](char c){return std::isalpha(c)||std::isdigit(c)||c=='_';}));
-    auto ret=std::make_optional<identifier>(name,line,col);
+    auto ret=identifier(name,line,col);
     pos+=name.length();
     col+=name.length();
     return ret;
@@ -74,7 +74,7 @@ std::optional<symbol>lexer::consume_symbol()
     skip_space_or_comment();
     if(is_all_read())return std::nullopt;
     if(auto m=symbol::match(src,pos)){
-        auto ret=std::make_optional<symbol>(m->first,line,col);
+        auto ret=symbol(m->first,line,col);
         pos+=m->second;
         col+=m->second;
         return ret;
