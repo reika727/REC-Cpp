@@ -91,37 +91,42 @@ void postdec::to_asm(code::writer &wr) const
 void bplus::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("add", "%rdi", "%rax");
 }
 void bminus::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("sub", "%rdi", "%rax");
 }
 void multiply::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("imul", "%rdi");
 }
 void divide::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("xor", "%rdx", "%rdx");
     wr.write("idiv", "%rdi");
 }
 void remain::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("xor", "%rdx", "%rdx");
     wr.write("idiv", "%rdi");
     wr.write("mov", "%rdx", "%rax");
@@ -129,8 +134,9 @@ void remain::to_asm(code::writer &wr) const
 void equal::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("cmp", "%rdi", "%rax");
     wr.write("sete", "%al");
     wr.write("movzb", "%al", "%rax");
@@ -138,8 +144,9 @@ void equal::to_asm(code::writer &wr) const
 void nequal::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("cmp", "%rdi", "%rax");
     wr.write("setne", "%al");
     wr.write("movzb", "%al", "%rax");
@@ -147,8 +154,9 @@ void nequal::to_asm(code::writer &wr) const
 void less::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("cmp", "%rdi", "%rax");
     wr.write("setl", "%al");
     wr.write("movzb", "%al", "%rax");
@@ -156,8 +164,9 @@ void less::to_asm(code::writer &wr) const
 void greater::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("cmp", "%rdi", "%rax");
     wr.write("setg", "%al");
     wr.write("movzb", "%al", "%rax");
@@ -165,8 +174,9 @@ void greater::to_asm(code::writer &wr) const
 void leeq::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("cmp", "%rdi", "%rax");
     wr.write("setle", "%al");
     wr.write("movzb", "%al", "%rax");
@@ -174,8 +184,9 @@ void leeq::to_asm(code::writer &wr) const
 void greq::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("cmp", "%rdi", "%rax");
     wr.write("setge", "%al");
     wr.write("movzb", "%al", "%rax");
@@ -183,8 +194,9 @@ void greq::to_asm(code::writer &wr) const
 void logand::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("and", "%rdi", "%rax");
     wr.write("cmp", 0, "%rax");
     wr.write("setne", "%al");
@@ -193,8 +205,9 @@ void logand::to_asm(code::writer &wr) const
 void logor::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("or", "%rdi", "%rax");
     wr.write("cmp", 0, "%rax");
     wr.write("setne", "%al");
@@ -232,22 +245,23 @@ void muasgn::to_asm(code::writer &wr) const
 void diasgn::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("xor", "%rdx", "%rdx");
     wr.write("idiv", "%rdi");
     wr.write("mov", "%rax", larg->get_address());
-    larg->to_asm(wr);
 }
 void rmasgn::to_asm(code::writer &wr) const
 {
     rarg->to_asm(wr);
-    wr.write("mov", "%rax", "%rdi");
+    wr.write("push", "%rax");
     larg->to_asm(wr);
+    wr.write("pop", "%rdi");
     wr.write("xor", "%rdx", "%rdx");
     wr.write("idiv", "%rdi");
     wr.write("mov", "%rdx", larg->get_address());
-    larg->to_asm(wr);
+    wr.write("mov", "%rdx", "%rax");
 }
 void expression_statement::to_asm(code::writer &wr) const
 {
