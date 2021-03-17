@@ -92,10 +92,9 @@ var_difinition::var_difinition(lexicon::lexer &lx)
     }
     while (true) {
         if (auto id = lx.consume_identifier()) {
-            vars.push_back(
-                std::make_pair(
-                    std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int()), // TODO: とりあえずintで固定
-                    lx.consume_symbol_if(lexicon::symbol::symid::EQUAL) ? expression::get(lx, true) : nullptr));
+            auto ident = std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int());// TODO: とりあえずintで固定
+            auto expr = lx.consume_symbol_if(lexicon::symbol::symid::EQUAL) ? expression::get(lx, true) : nullptr;
+            vars.emplace_back(std::move(ident), std::move(expr));
         } else {
             throw exception::compilation_error("変数名が見つかりませんでした", lx.get_line(), lx.get_column());
         }

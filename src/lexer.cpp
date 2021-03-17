@@ -3,7 +3,7 @@
 #include <algorithm>
 using namespace lexicon;
 lexer::lexer(const std::string &src)
-    : src(src), pos(0), line(1), col(1)
+    : src(src)
 {
 }
 void lexer::skip_space_or_comment()
@@ -66,11 +66,16 @@ std::optional<numeric> lexer::consume_numeric()
 }
 std::optional<identifier> lexer::consume_identifier()
 {
+    auto get_identifier_name_from_string = [](const std::string &str, std::string::size_type pos) {
+        auto begin = str.begin() + pos;
+        auto end = std::find_if_not(begin, str.end(), [](char c) { return std::isalpha(c) || std::isdigit(c) || c == '_'; });
+        return std::string(begin, end);
+    };
     skip_space_or_comment();
     if (is_all_read() || (!std::isalpha(src[pos]) && src[pos] != '_')) {
         return std::nullopt;
     }
-    auto name = std::string(src.begin() + pos, std::find_if_not(src.begin() + pos, src.end(), [](char c) { return std::isalpha(c) || std::isdigit(c) || c == '_'; }));
+    auto name = get_identifier_name_from_string(src, pos);
     auto ret = identifier(name, line, col);
     pos += name.length();
     col += name.length();

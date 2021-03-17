@@ -5,8 +5,8 @@ namespace lexicon {
     class lexer final {
     private:
         std::string src;
-        std::string::size_type pos;
-        int line, col;
+        std::string::size_type pos = 0;
+        int line = 1, col = 1;
         void skip_space_or_comment();
 
     public:
