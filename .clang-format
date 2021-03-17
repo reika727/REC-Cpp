@@ -1,0 +1,15 @@
+---
+Language:        Cpp
+# BasedOnStyle:  LLVM
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+BraceWrapping:
+  AfterFunction: true
+BreakBeforeBraces: Custom
+ColumnLimit: 0
+FixNamespaceComments: false
+IndentCaseLabels: true
+IndentWidth: 4
+NamespaceIndentation: All
