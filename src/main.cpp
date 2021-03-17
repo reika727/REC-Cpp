@@ -8,10 +8,11 @@
 int main(int argc, char **argv)
 {
     try {
-        if (argc == 1)
+        if (argc == 1) {
             throw std::runtime_error("引数が不足しています");
-        else if (argc > 3)
+        } else if (argc > 3) {
             throw std::runtime_error("引数が多すぎます");
+        }
         std::ifstream ifs(argv[1]);
         lexicon::lexer lx(std::string((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>()));
         code::writer wr;

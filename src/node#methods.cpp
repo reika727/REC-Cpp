@@ -9,8 +9,9 @@ std::string identifier::get_address() const
         [this](const std::map<std::string, int> &mp) {
             return mp.count(name) == 1;
         });
-    if (itr == offset.rend())
+    if (itr == offset.rend()) {
         throw exception::compilation_error("未定義の変数です: " + name, line, col);
+    }
     return std::to_string((*itr)[name]) + "(%rbp)";
 }
 void identifier::allocate_on_stack() const
@@ -19,8 +20,9 @@ void identifier::allocate_on_stack() const
 }
 void identifier::allocate_on_stack(int off) const
 {
-    if (offset.back().count(name))
+    if (offset.back().count(name)) {
         throw exception::compilation_error("多重定義されました: " + name, line, col);
+    }
     offset.back()[name] = off;
 }
 void numeric::to_asm(code::writer &wr) const
@@ -33,7 +35,9 @@ void identifier::to_asm(code::writer &wr) const
 }
 void fcall::to_asm(code::writer &wr) const
 {
-    if (vars.size() > 6) wr.write("sub", 8 * (vars.size() - 6), "%rsp");
+    if (vars.size() > 6) {
+        wr.write("sub", 8 * (vars.size() - 6), "%rsp");
+    }
     for (int i = vars.size() - 1; i >= 6; --i) {
         vars[i]->to_asm(wr);
         wr.write("mov", "%rax", std::to_string(8 * (i - 6)) + "(%rsp)");
@@ -44,7 +48,9 @@ void fcall::to_asm(code::writer &wr) const
     }
     // TODO: System V ABIに従いスタックフレームを調整する
     wr.write("call", func->name);
-    if (vars.size() > 6) wr.write("add", 8 * (vars.size() - 6), "%rsp");
+    if (vars.size() > 6) {
+        wr.write("add", 8 * (vars.size() - 6), "%rsp");
+    }
 }
 void uplus::to_asm(code::writer &wr) const
 {
@@ -254,7 +260,9 @@ void null_statement::to_asm(code::writer &wr) const
 void compound::to_asm(code::writer &wr) const
 {
     enter_scope();
-    for (const auto &s : stats) s->to_asm(wr);
+    for (const auto &s : stats) {
+        s->to_asm(wr);
+    }
     wr.write("add", leave_scope(), "%rsp");
 }
 void var_difinition::to_asm(code::writer &wr) const
@@ -279,7 +287,9 @@ void _if_else_::to_asm(code::writer &wr) const
     stat_if->to_asm(wr);
     wr.write("jmp", lend);
     wr.write(lelse + ':');
-    if (stat_else) stat_else->to_asm(wr);
+    if (stat_else) {
+        stat_else->to_asm(wr);
+    }
     wr.write(lend + ':');
     wr.write("add", leave_scope(), "%rsp");
 }
@@ -309,7 +319,9 @@ void _for_::to_asm(code::writer &wr) const
     enter_scope();
     enter_break(lend);
     enter_continue(lreini);
-    if (init) init->to_asm(wr);
+    if (init) {
+        init->to_asm(wr);
+    }
     wr.write(lbegin + ':');
     if (cond) {
         cond->to_asm(wr);
@@ -318,7 +330,9 @@ void _for_::to_asm(code::writer &wr) const
     }
     stat->to_asm(wr);
     wr.write(lreini + ':');
-    if (reinit) reinit->to_asm(wr);
+    if (reinit) {
+        reinit->to_asm(wr);
+    }
     wr.write("jmp", lbegin);
     wr.write(lend + ':');
     leave_continue();
@@ -327,14 +341,16 @@ void _for_::to_asm(code::writer &wr) const
 }
 void _break_::to_asm(code::writer &wr) const
 {
-    if (iteration_statement::break_labels.empty())
+    if (iteration_statement::break_labels.empty()) {
         throw exception::compilation_error("不適切なbreak文です", line, col);
+    }
     wr.write("jmp", iteration_statement::break_labels.top());
 }
 void _continue_::to_asm(code::writer &wr) const
 {
-    if (iteration_statement::continue_labels.empty())
+    if (iteration_statement::continue_labels.empty()) {
         throw exception::compilation_error("不適切なcontinue文です", line, col);
+    }
     wr.write("jmp", iteration_statement::continue_labels.top());
 }
 void _return_::to_asm(code::writer &wr) const
@@ -355,16 +371,21 @@ void function_difinition::to_asm(code::writer &wr) const
         args[i]->allocate_on_stack();
         wr.write("mov", std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i], args[i]->get_address());
     }
-    for (std::size_t i = 6; i < args.size(); ++i)
+    for (std::size_t i = 6; i < args.size(); ++i) {
         args[i]->allocate_on_stack(i * 8 - 32);
+    }
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
-    for (const auto &s : stats) s->to_asm(wr);
+    for (const auto &s : stats) {
+        s->to_asm(wr);
+    }
     leave_scope();
 }
 void translation_unit::to_asm(code::writer &wr) const
 {
     enter_scope();
-    for (const auto &f : funcs) f->to_asm(wr);
+    for (const auto &f : funcs) {
+        f->to_asm(wr);
+    }
     leave_scope();
 }
 void node::enter_scope()

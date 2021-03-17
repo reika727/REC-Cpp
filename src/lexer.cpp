@@ -20,8 +20,9 @@ void lexer::skip_space_or_comment()
             pos += 2;
             int l = line, c = col;
             while (true) {
-                if (pos >= src.length())
+                if (pos >= src.length()) {
                     throw exception::compilation_error("コメントが閉じられていません", l, c);
+                }
                 if (src[pos] == '\n') {
                     ++pos;
                     ++line;
@@ -53,7 +54,9 @@ bool lexer::is_all_read()
 std::optional<numeric> lexer::consume_numeric()
 {
     skip_space_or_comment();
-    if (is_all_read() || !std::isdigit(src[pos])) return std::nullopt;
+    if (is_all_read() || !std::isdigit(src[pos])) {
+        return std::nullopt;
+    }
     std::size_t sz;
     int num = std::stoi(src.substr(pos), &sz);
     auto ret = numeric(num, line, col);
@@ -64,7 +67,9 @@ std::optional<numeric> lexer::consume_numeric()
 std::optional<identifier> lexer::consume_identifier()
 {
     skip_space_or_comment();
-    if (is_all_read() || (!std::isalpha(src[pos]) && src[pos] != '_')) return std::nullopt;
+    if (is_all_read() || (!std::isalpha(src[pos]) && src[pos] != '_')) {
+        return std::nullopt;
+    }
     auto name = std::string(src.begin() + pos, std::find_if_not(src.begin() + pos, src.end(), [](char c) { return std::isalpha(c) || std::isdigit(c) || c == '_'; }));
     auto ret = identifier(name, line, col);
     pos += name.length();
@@ -74,7 +79,9 @@ std::optional<identifier> lexer::consume_identifier()
 std::optional<symbol> lexer::consume_symbol()
 {
     skip_space_or_comment();
-    if (is_all_read()) return std::nullopt;
+    if (is_all_read()) {
+        return std::nullopt;
+    }
     if (auto m = symbol::match(src, pos)) {
         auto ret = symbol(m->first, line, col);
         pos += m->second;
@@ -87,7 +94,9 @@ std::optional<symbol> lexer::consume_symbol()
 bool lexer::check_symbol(symbol::symid id)
 {
     skip_space_or_comment();
-    if (is_all_read()) return false;
+    if (is_all_read()) {
+        return false;
+    }
     auto m = symbol::match(src, pos);
     return m.has_value() && m->first == id;
 }
