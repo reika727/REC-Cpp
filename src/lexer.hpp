@@ -7,7 +7,9 @@ namespace lexicon {
         std::string src;
         std::string::size_type pos = 0;
         int line = 1, col = 1;
-        void skip_space_or_comment();
+        bool skip_spaces();
+        bool skip_comments();
+        void skip_spaces_and_comments();
 
     public:
         lexer(const std::string &src);

@@ -6,36 +6,52 @@ lexer::lexer(const std::string &src)
     : src(src)
 {
 }
-void lexer::skip_space_or_comment()
+bool lexer::skip_spaces()
 {
-    while (pos < src.length()) {
-        if (std::isspace(src[pos])) {
-            if (src[pos] == '\n') {
-                ++line;
-                col = 0;
-            }
-            ++pos;
-            ++col;
-        } else if (src.substr(pos, 2) == "/*") {
-            pos += 2;
-            int l = line, c = col;
-            while (true) {
-                if (pos >= src.length()) {
-                    throw exception::compilation_error("コメントが閉じられていません", l, c);
-                }
-                if (src[pos] == '\n') {
-                    ++pos;
-                    ++line;
-                    col = 1;
-                } else if (src.substr(pos, 2) == "*/") {
-                    pos += 2;
-                    col += 2;
-                    break;
-                }
-            }
+    bool is_skipped = false;
+    while (pos < src.length() && std::isspace(src[pos])) {
+        is_skipped = true;
+        if (src[pos++] == '\n') {
+            ++line;
+            col = 1;
         } else {
-            break;
+            ++col;
         }
+    }
+    return is_skipped;
+}
+bool lexer::skip_comments()
+{
+    auto seek_to_comment_close = [this] {
+        const int line_original = line, col_original = col;
+        while (pos < src.length()) {
+            if (src[pos] == '\n') {
+                ++pos;
+                ++line;
+                col = 1;
+            } else if (src.substr(pos, 2) == "*/") {
+                pos += 2;
+                col += 2;
+                return;
+            } else {
+                ++pos;
+                ++col;
+            }
+        }
+        throw exception::compilation_error("コメントが閉じられていません", line_original, col_original);
+    };
+    bool is_skipped = false;
+    while (pos < src.length() && src.substr(pos, 2) == "/*") {
+        is_skipped = true;
+        pos += 2;
+        seek_to_comment_close();
+    }
+    return is_skipped;
+}
+void lexer::skip_spaces_and_comments()
+{
+    while (skip_spaces() || skip_comments()) {
+        // PASS
     }
 }
 int lexer::get_line() const noexcept
@@ -48,12 +64,12 @@ int lexer::get_column() const noexcept
 }
 bool lexer::is_all_read()
 {
-    skip_space_or_comment();
+    skip_spaces_and_comments();
     return pos >= src.length();
 }
 std::optional<numeric> lexer::consume_numeric()
 {
-    skip_space_or_comment();
+    skip_spaces_and_comments();
     if (is_all_read() || !std::isdigit(src[pos])) {
         return std::nullopt;
     }
@@ -67,11 +83,16 @@ std::optional<numeric> lexer::consume_numeric()
 std::optional<identifier> lexer::consume_identifier()
 {
     auto get_identifier_name_from_string = [](const std::string &str, std::string::size_type pos) {
-        auto begin = str.begin() + pos;
-        auto end = std::find_if_not(begin, str.end(), [](char c) { return std::isalpha(c) || std::isdigit(c) || c == '_'; });
-        return std::string(begin, end);
+        std::string identifire_name;
+        for (auto c : str.substr(pos)) {
+            if (!std::isalpha(c) && !std::isdigit(c) && c != '_') {
+                break;
+            }
+            identifire_name += c;
+        }
+        return identifire_name;
     };
-    skip_space_or_comment();
+    skip_spaces_and_comments();
     if (is_all_read() || (!std::isalpha(src[pos]) && src[pos] != '_')) {
         return std::nullopt;
     }
@@ -83,7 +104,7 @@ std::optional<identifier> lexer::consume_identifier()
 }
 std::optional<symbol> lexer::consume_symbol()
 {
-    skip_space_or_comment();
+    skip_spaces_and_comments();
     if (is_all_read()) {
         return std::nullopt;
     }
@@ -98,7 +119,7 @@ std::optional<symbol> lexer::consume_symbol()
 }
 bool lexer::check_symbol(symbol::symid id)
 {
-    skip_space_or_comment();
+    skip_spaces_and_comments();
     if (is_all_read()) {
         return false;
     }
