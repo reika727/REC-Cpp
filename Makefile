@@ -1,12 +1,14 @@
-SRCDIR=src
-OBJDIR=obj
-DEPDIR=dep
-TRGDIR=bin
-TESTDIR=test
-SRCS=$(wildcard $(SRCDIR)/*.cpp)
-OBJS=$(addprefix $(OBJDIR)/,$(notdir $(SRCS:.cpp=.o)))
-DEPS=$(addprefix $(DEPDIR)/,$(notdir $(SRCS:.cpp=.d)))
-export TARGET=$(TRGDIR)/rec
+SRCDIR  := src
+OBJDIR  := obj
+DEPDIR  := dep
+TRGDIR  := bin
+TESTDIR := test
+SRCS    := $(wildcard $(SRCDIR)/*.cpp)
+OBJS    := $(addprefix $(OBJDIR)/, $(notdir $(SRCS:.cpp=.o)))
+DEPS    := $(addprefix $(DEPDIR)/, $(notdir $(SRCS:.cpp=.d)))
+TARGET  := $(TRGDIR)/rec
+
+export TARGET
 
 .PHONY: all
 all: $(TARGET)
