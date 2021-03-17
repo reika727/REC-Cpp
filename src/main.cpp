@@ -1,3 +1,4 @@
+#include "common.hpp"
 #include "lexer.hpp"
 #include "node.hpp"
 #include "writer.hpp"
@@ -8,16 +9,19 @@
 int main(int argc, char *argv[])
 {
     try {
-        if (argc == 1) {
-            throw std::runtime_error("引数が不足しています");
-        } else if (argc > 3) {
-            throw std::runtime_error("引数が多すぎます");
+        const char *const default_name = "tmp.s";
+        if (argc != 2 && argc != 3) {
+            throw std::runtime_error(format("usage: rec INPUT [OUTPUT=%s]", default_name));
         }
         std::ifstream ifs(argv[1]);
-        lexicon::lexer lx(std::string((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>()));
+        if (!ifs) {
+            throw std::runtime_error(format("file %s does not exist", argv[1]));
+        }
+        std::string source{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
+        lexicon::lexer lx(source);
         code::writer wr;
         syntax::translation_unit(lx).to_asm(wr);
-        std::ofstream(argc == 2 ? "tmp.s" : argv[2]) << wr.get_asm();
+        std::ofstream(argc == 2 ? default_name : argv[2]) << wr.get_asm();
     } catch (const std::exception &e) {
         std::cerr << "\033[1;31m" << e.what() << "\033[m" << std::endl;
         return EXIT_FAILURE;
