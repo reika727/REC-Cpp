@@ -23,12 +23,15 @@ symbol &symbol::operator=(const symbol &)
 }
 std::optional<symbol::symid> symbol::lexeme_to_id(const std::string &lexeme)
 {
-    auto itr = std::find(lexeme_table.begin(), lexeme_table.end(), lexeme);
-    if (itr != lexeme_table.end()) {
+    if (auto itr = std::find(lexeme_table.begin(), lexeme_table.end(), lexeme); itr != lexeme_table.end()) {
         return static_cast<symbol::symid>(itr - lexeme_table.begin());
     } else {
         return std::nullopt;
     }
+}
+std::string symbol::id_to_lexeme(symid id)
+{
+    return lexeme_table.at(static_cast<decltype(lexeme_table)::size_type>(id));
 }
 std::string symbol::longest_forward_match(const std::string &src)
 {

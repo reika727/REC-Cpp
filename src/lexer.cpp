@@ -55,18 +55,6 @@ void lexer::skip_spaces_and_comments()
         // PASS
     }
 }
-std::optional<symbol> lexer::get_matching_symbol(std::size_t *sz)
-{
-    skip_spaces_and_comments();
-    auto lfm = symbol::longest_forward_match(src.substr(pos));
-    if (auto id = symbol::lexeme_to_id(lfm)) {
-        if (sz) {
-            *sz = lfm.length();
-        }
-        return symbol(id.value(), line, col);
-    }
-    return std::nullopt;
-}
 int lexer::get_line() const noexcept
 {
     return line;
@@ -108,20 +96,16 @@ std::optional<identifier> lexer::consume_identifier()
 }
 bool lexer::check_symbol(symbol::symid id)
 {
-    if (auto ms = get_matching_symbol()) {
-        return ms->id == id;
-    } else {
-        return false;
-    }
+    skip_spaces_and_comments();
+    return id == symbol::lexeme_to_id(symbol::longest_forward_match(src.substr(pos)));
 }
 std::optional<symbol> lexer::consume_symbol_if(symbol::symid id)
 {
-    std::size_t sz;
-    auto ms = get_matching_symbol(&sz);
-    if (ms && ms->id == id) {
-        pos += sz;
-        col += sz;
-        return ms;
+    if (check_symbol(id)) {
+        std::string lexeme = symbol::id_to_lexeme(id);
+        pos += lexeme.length();
+        col += lexeme.length();
+        return symbol(id, line, col);
     }
     return std::nullopt;
 }

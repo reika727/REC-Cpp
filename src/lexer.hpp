@@ -10,7 +10,6 @@ namespace lexicon {
         bool skip_spaces();
         bool skip_comments();
         void skip_spaces_and_comments();
-        std::optional<symbol> get_matching_symbol(std::size_t *sz = nullptr);
 
     public:
         lexer(const std::string &src);
