@@ -10,8 +10,6 @@ namespace lexicon {
         bool skip_spaces();
         bool skip_comments();
         void skip_spaces_and_comments();
-        std::optional<numeric> get_matching_numeric(std::size_t *sz = nullptr);
-        std::optional<identifier> get_matching_identifier(std::size_t *sz = nullptr);
         std::optional<symbol> get_matching_symbol(std::size_t *sz = nullptr);
 
     public:

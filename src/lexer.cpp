@@ -55,34 +55,6 @@ void lexer::skip_spaces_and_comments()
         // PASS
     }
 }
-std::optional<numeric> lexer::get_matching_numeric(std::size_t *sz)
-{
-    skip_spaces_and_comments();
-    std::smatch m;
-    auto unread = src.substr(pos);
-    if (std::regex_search(unread, m, std::regex(R"(^\d+)"))) {
-        if (sz) {
-            *sz = m.length();
-        }
-        return numeric(std::stoi(m.str()), line, col);
-    }
-    return std::nullopt;
-}
-std::optional<identifier> lexer::get_matching_identifier(std::size_t *sz)
-{
-    skip_spaces_and_comments();
-    std::smatch m;
-    auto unread = src.substr(pos);
-    if (std::regex_search(unread, m, std::regex(R"(^[_A-z]+\w*)"))) {
-        if (!symbol::lexeme_to_id(m.str())) {
-            if (sz) {
-                *sz = m.length();
-            }
-            return identifier(m.str(), line, col);
-        }
-    }
-    return std::nullopt;
-}
 std::optional<symbol> lexer::get_matching_symbol(std::size_t *sz)
 {
     skip_spaces_and_comments();
@@ -110,23 +82,29 @@ bool lexer::is_all_read()
 }
 std::optional<numeric> lexer::consume_numeric()
 {
-    std::size_t sz;
-    auto ms = get_matching_numeric(&sz);
-    if (ms) {
-        pos += sz;
-        col += sz;
+    skip_spaces_and_comments();
+    std::smatch m;
+    auto unread = src.substr(pos);
+    if (std::regex_search(unread, m, std::regex(R"(^\d+)"))) {
+        pos += m.length();
+        col += m.length();
+        return numeric(std::stoi(m.str()), line, col);
     }
-    return ms;
+    return std::nullopt;
 }
 std::optional<identifier> lexer::consume_identifier()
 {
-    std::size_t sz;
-    auto ms = get_matching_identifier(&sz);
-    if (ms) {
-        pos += sz;
-        col += sz;
+    skip_spaces_and_comments();
+    std::smatch m;
+    auto unread = src.substr(pos);
+    if (std::regex_search(unread, m, std::regex(R"(^[_A-z]+\w*)"))) {
+        if (!symbol::lexeme_to_id(m.str())) {
+            pos += m.length();
+            col += m.length();
+            return identifier(m.str(), line, col);
+        }
     }
-    return ms;
+    return std::nullopt;
 }
 bool lexer::check_symbol(symbol::symid id)
 {
