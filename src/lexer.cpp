@@ -1,6 +1,7 @@
 #include "lexer.hpp"
 #include "compilation_error.hpp"
 #include <algorithm>
+#include <regex>
 using namespace lexicon;
 lexer::lexer(const std::string &src)
     : src(src)
@@ -54,6 +55,46 @@ void lexer::skip_spaces_and_comments()
         // PASS
     }
 }
+std::optional<numeric> lexer::get_matching_numeric(std::size_t *sz)
+{
+    skip_spaces_and_comments();
+    std::smatch m;
+    auto unread = src.substr(pos);
+    if (std::regex_search(unread, m, std::regex(R"(^\d+)"))) {
+        if (sz) {
+            *sz = m.length();
+        }
+        return numeric(std::stoi(m.str()), line, col);
+    }
+    return std::nullopt;
+}
+std::optional<identifier> lexer::get_matching_identifier(std::size_t *sz)
+{
+    skip_spaces_and_comments();
+    std::smatch m;
+    auto unread = src.substr(pos);
+    if (std::regex_search(unread, m, std::regex(R"(^[_A-z]+\w*)"))) {
+        if (!symbol::lexeme_to_id(m.str())) {
+            if (sz) {
+                *sz = m.length();
+            }
+            return identifier(m.str(), line, col);
+        }
+    }
+    return std::nullopt;
+}
+std::optional<symbol> lexer::get_matching_symbol(std::size_t *sz)
+{
+    skip_spaces_and_comments();
+    auto lfm = symbol::longest_forward_match(src.substr(pos));
+    if (auto id = symbol::lexeme_to_id(lfm)) {
+        if (sz) {
+            *sz = lfm.length();
+        }
+        return symbol(id.value(), line, col);
+    }
+    return std::nullopt;
+}
 int lexer::get_line() const noexcept
 {
     return line;
@@ -69,64 +110,40 @@ bool lexer::is_all_read()
 }
 std::optional<numeric> lexer::consume_numeric()
 {
-    skip_spaces_and_comments();
-    if (is_all_read() || !std::isdigit(src[pos])) {
-        return std::nullopt;
-    }
     std::size_t sz;
-    int num = std::stoi(src.substr(pos), &sz);
-    auto ret = numeric(num, line, col);
-    pos += sz;
-    col += sz;
-    return ret;
+    auto ms = get_matching_numeric(&sz);
+    if (ms) {
+        pos += sz;
+        col += sz;
+    }
+    return ms;
 }
 std::optional<identifier> lexer::consume_identifier()
 {
-    auto get_identifier_name_from_string = [](const std::string &str, std::string::size_type pos) {
-        std::string identifire_name;
-        for (auto c : str.substr(pos)) {
-            if (!std::isalpha(c) && !std::isdigit(c) && c != '_') {
-                break;
-            }
-            identifire_name += c;
-        }
-        return identifire_name;
-    };
-    skip_spaces_and_comments();
-    if (is_all_read() || (!std::isalpha(src[pos]) && src[pos] != '_')) {
-        return std::nullopt;
+    std::size_t sz;
+    auto ms = get_matching_identifier(&sz);
+    if (ms) {
+        pos += sz;
+        col += sz;
     }
-    auto name = get_identifier_name_from_string(src, pos);
-    auto ret = identifier(name, line, col);
-    pos += name.length();
-    col += name.length();
-    return ret;
-}
-std::optional<symbol> lexer::consume_symbol()
-{
-    skip_spaces_and_comments();
-    if (is_all_read()) {
-        return std::nullopt;
-    }
-    if (auto m = symbol::match(src, pos)) {
-        auto ret = symbol(m->first, line, col);
-        pos += m->second;
-        col += m->second;
-        return ret;
-    } else {
-        return std::nullopt;
-    }
+    return ms;
 }
 bool lexer::check_symbol(symbol::symid id)
 {
-    skip_spaces_and_comments();
-    if (is_all_read()) {
+    if (auto ms = get_matching_symbol()) {
+        return ms->id == id;
+    } else {
         return false;
     }
-    auto m = symbol::match(src, pos);
-    return m.has_value() && m->first == id;
 }
 std::optional<symbol> lexer::consume_symbol_if(symbol::symid id)
 {
-    return check_symbol(id) ? consume_symbol() : std::nullopt;
+    std::size_t sz;
+    auto ms = get_matching_symbol(&sz);
+    if (ms && ms->id == id) {
+        pos += sz;
+        col += sz;
+        return ms;
+    }
+    return std::nullopt;
 }

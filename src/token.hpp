@@ -1,7 +1,7 @@
 #pragma once
 #include <optional>
 #include <string>
-#include <utility>
+#include <vector>
 namespace lexicon {
     class token {
     public:
@@ -19,6 +19,47 @@ namespace lexicon {
         identifier(const std::string &name, int line, int col);
     };
     class symbol final : public token {
+    private:
+        inline static std::vector<std::string> lexeme_table{
+            "+",
+            "-",
+            "*",
+            "/",
+            "%",
+            "<",
+            ">",
+            "!",
+            "=",
+            ",",
+            ";",
+            "(",
+            ")",
+            "{",
+            "}",
+            "&&",
+            "||",
+            "++",
+            "--",
+            "+=",
+            "-=",
+            "*=",
+            "/=",
+            "%=",
+            "==",
+            "!=",
+            "<=",
+            ">=",
+            "int",
+            "void",
+            "if",
+            "else",
+            "while",
+            "for",
+            "break",
+            "continue",
+            "return",
+        };
+
     public:
         const enum class symid {
             PLUS,     // +
@@ -59,8 +100,10 @@ namespace lexicon {
             CONTINUE, // continue
             RETURN,   // return
         } id;
+        static std::optional<symid> lexeme_to_id(const std::string &lexeme);
+        static std::string longest_forward_match(const std::string &src);
         symbol(symid id, int line, int col);
-        static std::optional<std::pair<symid, int>> match(const std::string &str, int pos);
+        // TODO どうにかして失くしたい
         symbol &operator=(const symbol &);
     };
 }

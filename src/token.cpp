@@ -1,4 +1,5 @@
 #include "token.hpp"
+#include <algorithm>
 using namespace lexicon;
 token::token(int line, int col)
     : line(line), col(col)
@@ -20,97 +21,24 @@ symbol &symbol::operator=(const symbol &)
 {
     return *this;
 }
-std::optional<std::pair<symbol::symid, int>> symbol::match(const std::string &str, int pos)
+std::optional<symbol::symid> symbol::lexeme_to_id(const std::string &lexeme)
 {
-    auto check_keyword = [str, pos](const std::string &token, auto... follow) -> std::size_t {
-        if (str.substr(pos, token.length()) != token) {
-            return 0;
-        }
-        if (sizeof...(follow) != 0) {
-            if (pos + token.length() >= str.length()) {
-                return 0;
-            }
-            if (((follow != str[pos + token.length()]) && ...)) {
-                return 0;
-            }
-        }
-        return token.length();
-    };
-    if (auto foo = check_keyword("int", ' ')) {
-        return {{symbol::symid::INT, foo}};
-    } else if ((foo = check_keyword("void", ' ', ')'))) {
-        return {{symbol::symid::VOID, foo}};
-    } else if ((foo = check_keyword("if", '(', ' '))) {
-        return {{symbol::symid::IF, foo}};
-    } else if ((foo = check_keyword("else", '{', ';', ' '))) {
-        return {{symbol::symid::ELSE, foo}};
-    } else if ((foo = check_keyword("while", '(', ' '))) {
-        return {{symbol::symid::WHILE, foo}};
-    } else if ((foo = check_keyword("for", '(', ' '))) {
-        return {{symbol::symid::FOR, foo}};
-    } else if ((foo = check_keyword("break", ';', ' '))) {
-        return {{symbol::symid::BREAK, foo}};
-    } else if ((foo = check_keyword("continue", ';', ' '))) {
-        return {{symbol::symid::CONTINUE, foo}};
-    } else if ((foo = check_keyword("return", ' '))) {
-        return {{symbol::symid::RETURN, foo}};
-    } else if ((foo = check_keyword("&&"))) {
-        return {{symbol::symid::APAP, foo}};
-    } else if ((foo = check_keyword("||"))) {
-        return {{symbol::symid::VBVB, foo}};
-    } else if ((foo = check_keyword("++"))) {
-        return {{symbol::symid::PLPL, foo}};
-    } else if ((foo = check_keyword("--"))) {
-        return {{symbol::symid::MIMI, foo}};
-    } else if ((foo = check_keyword("+="))) {
-        return {{symbol::symid::PLEQ, foo}};
-    } else if ((foo = check_keyword("-="))) {
-        return {{symbol::symid::MIEQ, foo}};
-    } else if ((foo = check_keyword("*="))) {
-        return {{symbol::symid::ASEQ, foo}};
-    } else if ((foo = check_keyword("/="))) {
-        return {{symbol::symid::SLEQ, foo}};
-    } else if ((foo = check_keyword("%="))) {
-        return {{symbol::symid::PEEQ, foo}};
-    } else if ((foo = check_keyword("=="))) {
-        return {{symbol::symid::EQEQ, foo}};
-    } else if ((foo = check_keyword("!="))) {
-        return {{symbol::symid::EXEQ, foo}};
-    } else if ((foo = check_keyword("<="))) {
-        return {{symbol::symid::LEEQ, foo}};
-    } else if ((foo = check_keyword(">="))) {
-        return {{symbol::symid::GREQ, foo}};
-    } else if ((foo = check_keyword("+"))) {
-        return {{symbol::symid::PLUS, foo}};
-    } else if ((foo = check_keyword("-"))) {
-        return {{symbol::symid::MINUS, foo}};
-    } else if ((foo = check_keyword("*"))) {
-        return {{symbol::symid::ASTER, foo}};
-    } else if ((foo = check_keyword("/"))) {
-        return {{symbol::symid::SLASH, foo}};
-    } else if ((foo = check_keyword("%"))) {
-        return {{symbol::symid::PERCENT, foo}};
-    } else if ((foo = check_keyword("<"))) {
-        return {{symbol::symid::LESS, foo}};
-    } else if ((foo = check_keyword(">"))) {
-        return {{symbol::symid::GREATER, foo}};
-    } else if ((foo = check_keyword("!"))) {
-        return {{symbol::symid::EXCLAM, foo}};
-    } else if ((foo = check_keyword("="))) {
-        return {{symbol::symid::EQUAL, foo}};
-    } else if ((foo = check_keyword(","))) {
-        return {{symbol::symid::COMMA, foo}};
-    } else if ((foo = check_keyword(";"))) {
-        return {{symbol::symid::SCOLON, foo}};
-    } else if ((foo = check_keyword("("))) {
-        return {{symbol::symid::OPARENT, foo}};
-    } else if ((foo = check_keyword(")"))) {
-        return {{symbol::symid::CPARENT, foo}};
-    } else if ((foo = check_keyword("{"))) {
-        return {{symbol::symid::OBRACE, foo}};
-    } else if ((foo = check_keyword("}"))) {
-        return {{symbol::symid::CBRACE, foo}};
+    auto itr = std::find(lexeme_table.begin(), lexeme_table.end(), lexeme);
+    if (itr != lexeme_table.end()) {
+        return static_cast<symbol::symid>(itr - lexeme_table.begin());
     } else {
         return std::nullopt;
     }
+}
+std::string symbol::longest_forward_match(const std::string &src)
+{
+    std::string result = "";
+    for (auto lexeme : lexeme_table) {
+        if (src.substr(0, lexeme.length()) == lexeme) {
+            if (lexeme.length() > result.length()) {
+                result = lexeme;
+            }
+        }
+    }
+    return result;
 }

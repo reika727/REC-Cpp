@@ -10,6 +10,9 @@ namespace lexicon {
         bool skip_spaces();
         bool skip_comments();
         void skip_spaces_and_comments();
+        std::optional<numeric> get_matching_numeric(std::size_t *sz = nullptr);
+        std::optional<identifier> get_matching_identifier(std::size_t *sz = nullptr);
+        std::optional<symbol> get_matching_symbol(std::size_t *sz = nullptr);
 
     public:
         lexer(const std::string &src);
@@ -18,7 +21,6 @@ namespace lexicon {
         bool is_all_read();
         std::optional<numeric> consume_numeric();
         std::optional<identifier> consume_identifier();
-        std::optional<symbol> consume_symbol();
         bool check_symbol(symbol::symid id);
         std::optional<symbol> consume_symbol_if(symbol::symid id);
     };
