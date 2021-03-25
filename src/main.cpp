@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
         }
         std::string source{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
         lexicon::lexer lx(source);
+        auto syntax_tree = syntax::translation_unit(lx);
         code::writer wr;
-        syntax::translation_unit(lx).to_asm(wr);
+        syntax_tree.to_asm(wr);
         std::ofstream(argc == 2 ? default_name : argv[2]) << wr.get_asm();
     } catch (const std::exception &e) {
         std::cerr << "\033[1;31m" << e.what() << "\033[m" << std::endl;
