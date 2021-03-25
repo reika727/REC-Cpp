@@ -34,7 +34,7 @@ unopr::unopr(std::unique_ptr<const expression> arg, int line, int col)
 {
 }
 unopr_l::unopr_l(std::unique_ptr<const expression> _arg, int line, int col)
-    : expression(line, col, determine_type(arg->type))
+    : expression(line, col, determine_type(_arg->type))
 {
     auto row = _arg.release();
     if (auto casted = dynamic_cast<const expression_l *>(row)) {
@@ -48,8 +48,8 @@ biopr::biopr(std::unique_ptr<const expression> larg, std::unique_ptr<const expre
     : expression(line, col, determine_type(larg->type, rarg->type)), larg(std::move(larg)), rarg(std::move(rarg))
 {
 }
-biopr_l::biopr_l(std::unique_ptr<const expression> _larg, std::unique_ptr<const expression> rarg, int line, int col)
-    : expression(line, col, determine_type(larg->type, rarg->type)), rarg(std::move(rarg))
+biopr_l::biopr_l(std::unique_ptr<const expression> _larg, std::unique_ptr<const expression> _rarg, int line, int col)
+    : expression(line, col, determine_type(_larg->type, _rarg->type)), rarg(std::move(_rarg))
 {
     auto row = _larg.release();
     if (auto casted = dynamic_cast<const expression_l *>(row)) {

@@ -40,6 +40,12 @@ int fibonacci(int n)
 }
 int main(void)
 {
+    int i=0;
+    for(i=0;i<10;++i){
+        __builtin_print_2c64(i);
+        __builtin_put_ascii(32);
+    }
+    __builtin_put_ascii(10);
     func(1,534,5,-1,4,46,-23,64,-6543,34,-465,6345,-234);
     __builtin_print_2c64(1+2*3+4*5-6+7);
     __builtin_put_ascii(10);

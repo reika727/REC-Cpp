@@ -356,7 +356,7 @@ namespace syntax {
         virtual type_info determine_type(type_info larg_type, type_info rarg_type);
 
     public:
-        biopr_l(std::unique_ptr<const expression> _larg, std::unique_ptr<const expression> rarg, int line, int col);
+        biopr_l(std::unique_ptr<const expression> _larg, std::unique_ptr<const expression> _rarg, int line, int col);
         virtual ~biopr_l() = default;
     };
     class assign final : public biopr_l {
