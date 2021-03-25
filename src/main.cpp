@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
     try {
-        const char *const default_name = "tmp.s";
+        constexpr char default_name[] = "tmp.s";
         if (argc != 2 && argc != 3) {
             throw std::runtime_error(format("usage: rec INPUT [OUTPUT=%s]", default_name));
         }
