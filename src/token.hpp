@@ -102,7 +102,7 @@ namespace lexicon {
         } id;
         static std::optional<symid> lexeme_to_id(const std::string &lexeme);
         static std::string id_to_lexeme(symid id);
-        static std::string longest_forward_match(const std::string &src);
+        static std::optional<symid> longest_forward_match(const std::string &src);
         symbol(symid id, int line, int col);
         // TODO どうにかして失くしたい
         symbol &operator=(const symbol &);

@@ -33,7 +33,7 @@ std::string symbol::id_to_lexeme(symid id)
 {
     return lexeme_table.at(static_cast<decltype(lexeme_table)::size_type>(id));
 }
-std::string symbol::longest_forward_match(const std::string &src)
+std::optional<symbol::symid> symbol::longest_forward_match(const std::string &src)
 {
     std::string result = "";
     for (auto lexeme : lexeme_table) {
@@ -43,5 +43,5 @@ std::string symbol::longest_forward_match(const std::string &src)
             }
         }
     }
-    return result;
+    return lexeme_to_id(result);
 }

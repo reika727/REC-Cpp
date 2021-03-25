@@ -97,7 +97,7 @@ std::optional<identifier> lexer::consume_identifier()
 bool lexer::check_symbol(symbol::symid id)
 {
     skip_spaces_and_comments();
-    return id == symbol::lexeme_to_id(symbol::longest_forward_match(src.substr(pos)));
+    return id == symbol::longest_forward_match(src.substr(pos));
 }
 std::optional<symbol> lexer::consume_symbol_if(symbol::symid id)
 {
