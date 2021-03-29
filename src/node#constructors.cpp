@@ -23,7 +23,7 @@ fcall::fcall(std::unique_ptr<const expression> _func, std::vector<std::unique_pt
     auto row = _func.release();
     if (auto casted = dynamic_cast<const identifier *>(row)) {
         func = std::unique_ptr<const identifier>(casted);
-        std::move(_vars.begin(), _vars.end(), std::back_inserter(vars));
+        std::ranges::move(_vars, std::back_inserter(vars));
     } else {
         delete row;
         throw exception::compilation_error("未実装機能: 関数名が識別子ではありません", line, col);

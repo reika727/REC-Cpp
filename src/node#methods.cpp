@@ -4,15 +4,12 @@
 using namespace syntax;
 std::string identifier::get_address() const
 {
-    auto itr = std::find_if(
-        offset.rbegin(), offset.rend(),
-        [this](const std::map<std::string, int> &mp) {
-            return mp.count(name) == 1;
-        });
-    if (itr == offset.rend()) {
-        throw exception::compilation_error("未定義の変数です: " + name, line, col);
+    for (auto &o : offset | std::views::reverse) {
+        if (o.contains(name)) {
+            return std::to_string(o[name]) + "(%rbp)";
+        }
     }
-    return std::to_string((*itr)[name]) + "(%rbp)";
+    throw exception::compilation_error("未定義の変数です: " + name, line, col);
 }
 void identifier::allocate_on_stack() const
 {

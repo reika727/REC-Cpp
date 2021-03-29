@@ -23,7 +23,7 @@ symbol &symbol::operator=(const symbol &)
 }
 std::optional<symbol::symid> symbol::lexeme_to_id(const std::string &lexeme)
 {
-    if (auto itr = std::find(lexeme_table.begin(), lexeme_table.end(), lexeme); itr != lexeme_table.end()) {
+    if (auto itr = std::ranges::find(lexeme_table, lexeme); itr != lexeme_table.end()) {
         return static_cast<symbol::symid>(itr - lexeme_table.begin());
     } else {
         return std::nullopt;
@@ -35,13 +35,12 @@ std::string symbol::id_to_lexeme(symid id)
 }
 std::optional<symbol::symid> symbol::longest_forward_match(const std::string &src)
 {
-    std::string result = "";
-    for (auto lexeme : lexeme_table) {
-        if (src.substr(0, lexeme.length()) == lexeme) {
-            if (lexeme.length() > result.length()) {
-                result = lexeme;
-            }
-        }
+    auto src_contains = [src](const std::string &lexeme) {
+        return src.starts_with(lexeme);
+    };
+    if (auto range = lexeme_table | std::views::filter(src_contains)) {
+        return lexeme_to_id(*std::ranges::max_element(range, {}, &std::string::length));
+    } else {
+        return std::nullopt;
     }
-    return lexeme_to_id(result);
 }
