@@ -26,23 +26,21 @@ bool lexer::skip_comments()
     auto seek_to_comment_close = [this] {
         const int line_original = line, col_original = col;
         while (pos < src.length()) {
-            if (src[pos] == '\n') {
-                ++pos;
-                ++line;
-                col = 1;
-            } else if (src.substr(pos, 2) == "*/") {
+            if (src.substr(pos).starts_with("*/")) {
                 pos += 2;
                 col += 2;
                 return;
+            } else if (src[pos++] == '\n') {
+                ++line;
+                col = 1;
             } else {
-                ++pos;
                 ++col;
             }
         }
         throw exception::compilation_error("コメントが閉じられていません", line_original, col_original);
     };
     bool is_skipped = false;
-    while (pos < src.length() && src.substr(pos, 2) == "/*") {
+    while (pos < src.length() && src.substr(pos).starts_with("/*")) {
         is_skipped = true;
         pos += 2;
         seek_to_comment_close();
