@@ -35,11 +35,13 @@ void fcall::to_asm(code::writer &wr) const
     if (vars.size() > 6) {
         wr.write("sub", 8 * (vars.size() - 6), "%rsp");
     }
-    for (int i = vars.size() - 1; i >= 6; --i) {
+    // TODO: g++でstd::ssizeが使えるようになり次第書き換える
+    for (int i = static_cast<int>(vars.size()) - 1; i >= 6; --i) {
         vars[i]->to_asm(wr);
         wr.write("mov", "%rax", std::to_string(8 * (i - 6)) + "(%rsp)");
     }
-    for (int i = std::min(5ul, vars.size() - 1); i >= 0; --i) {
+    // TODO: 上に同じ
+    for (int i = std::min(5, static_cast<int>(vars.size()) - 1); i >= 0; --i) {
         vars[i]->to_asm(wr);
         wr.write("mov", "%rax", std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i]);
     }
