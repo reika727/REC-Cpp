@@ -8,6 +8,36 @@ C言語をアセンブリ言語に翻訳します。未完成です。とりあ�
 1. 意味解析。右辺値への代入など意味的な不正を検出する。
 1. コード生成。アセンブリを出力する。
 
+## 現在の文法
+<pre>
+  <code>
+    translation unit        = { function definition } ;
+    function definition     = type specifier, identifier, argument list, compound ;
+    argument list           = "(", ( "void" | argument declarelations ), ")" ;
+    argument declarelations = type specifier, identifier, { ",", type specifier, identifier } ;
+    statement               = expression statement | null statement | compound | control statement ;
+    expression statement    = expression, ";" ;
+    null statement          = ";" ;
+    compound                = "{", { variable definition }, { statement }, "}" ;
+    control statement       = selection statement | iteration statement | jump statement ;
+    selection statement     = if else ;
+    iteration statement     = while | for ;
+    jump statement          = break | continue | return ;
+    if else                 = "if", "(", expression, ")", statement, [ "else", statement ] ;
+    while                   = "while", "(", expression, ")", statement ;
+    for                     = "for", "(", [ expression ], ";", [ expression ], ";", [ expression ], ")", statement ;
+    break                   = "break", ";" ;
+    continue                = "continue", ";" ;
+    return                  = "return", [ expression ], ";" ;
+    variable definition     = type specifier, identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }, ";" ;
+    expression              = (そのうち書く) ;
+    identifier              = ( "_" | alphabet )+, { "_" | alphabet | digit } ;
+    alphabet                = "A" | (中略) | "z" ;
+    digit                   = "0" | (中略) | "9" ;
+    type specifier          = "int" ;
+  </code>
+</pre>
+
 ## Example
 <details>
   <summary>長いので折り畳み</summary>
