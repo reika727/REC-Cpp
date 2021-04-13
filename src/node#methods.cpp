@@ -1,3 +1,4 @@
+#include "common.hpp"
 #include "compilation_error.hpp"
 #include "node.hpp"
 #include <algorithm>
@@ -35,13 +36,13 @@ void fcall::to_asm(code::writer &wr) const
     if (vars.size() > 6) {
         wr.write("sub", 8 * (vars.size() - 6), "%rsp");
     }
-    for (int i = std::ssize(vars) - 1; i >= 6; --i) {
+    for (int i = std::ssize(vars) - 1; i >= 0; --i) {
+        auto argument_storage = [i] {
+            return i < 6 ? std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i]
+                         : format("%d(%%rsp)", 8 * (i - 6));
+        };
         vars[i]->to_asm(wr);
-        wr.write("mov", "%rax", std::to_string(8 * (i - 6)) + "(%rsp)");
-    }
-    for (int i = std::min(std::ptrdiff_t(5), std::ssize(vars) - 1); i >= 0; --i) {
-        vars[i]->to_asm(wr);
-        wr.write("mov", "%rax", std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i]);
+        wr.write("mov", "%rax", argument_storage());
     }
     // TODO: System V ABIに従いスタックフレームを調整する
     wr.write("call", func->name);
