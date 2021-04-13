@@ -379,12 +379,15 @@ void function_difinition::to_asm(code::writer &wr) const
     wr.write("mov", "%rsp", "%rbp");
     wr.write("sub", std::min(6ul, args.size()) * 8, "%rsp");
     enter_scope();
-    for (std::size_t i = 0; i < std::min(6ul, args.size()); ++i) {
-        args[i]->allocate_on_stack();
-        wr.write("mov", std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i], args[i]->get_address());
-    }
-    for (std::size_t i = 6; i < args.size(); ++i) {
-        args[i]->allocate_on_stack(i * 8 - 32);
+    for (std::size_t i = 0; i < args.size(); ++i) {
+        // 6つめまでの引数はレジスタに入っているのでスタック上に新しく確保した領域にそれをコピー、
+        // 7つめ以降の引数はすでにスタックに積まれているのでそのオフセットを記録
+        if (i < 6) {
+            args[i]->allocate_on_stack();
+            wr.write("mov", std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i], args[i]->get_address());
+        } else {
+            args[i]->allocate_on_stack(i * 8 - 32);
+        }
     }
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
     for (const auto &s : stats) {
