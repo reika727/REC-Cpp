@@ -277,7 +277,7 @@ void compound::to_asm(code::writer &wr) const
     }
     wr.write("add", leave_scope(), "%rsp");
 }
-void var_difinition::to_asm(code::writer &wr) const
+void var_definition::to_asm(code::writer &wr) const
 {
     wr.write("sub", 8 * vars.size(), "%rsp");
     for (const auto &[id, expr] : vars) {
@@ -372,7 +372,7 @@ void _return_::to_asm(code::writer &wr) const
     wr.write("pop", "%rbp");
     wr.write("ret");
 }
-void function_difinition::to_asm(code::writer &wr) const
+void function_definition::to_asm(code::writer &wr) const
 {
     wr.write(name + ':');
     wr.write("push", "%rbp");
@@ -428,7 +428,7 @@ void iteration_statement::leave_continue()
 {
     continue_labels.pop();
 }
-void function_difinition::set_argument_list(lexicon::lexer &lx)
+void function_definition::set_argument_list(lexicon::lexer &lx)
 {
     if (!lx.consume_symbol_if(lexicon::symbol::symid::OPARENT)) {
         throw exception::compilation_error("引数リストが見つかりませんでした", lx.get_line(), lx.get_column());

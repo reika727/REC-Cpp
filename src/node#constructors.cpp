@@ -84,7 +84,7 @@ compound::compound(lexicon::lexer &lx)
         stats.push_back(statement::get(lx));
     }
 }
-var_difinition::var_difinition(lexicon::lexer &lx)
+var_definition::var_definition(lexicon::lexer &lx)
     : statement(lx.get_line(), lx.get_column())
 {
     if (!lx.consume_symbol_if(lexicon::symbol::symid::INT)) {
@@ -190,7 +190,7 @@ _return_::_return_(lexicon::lexer &lx)
         throw exception::compilation_error("不正なreturn文です", lx.get_line(), lx.get_column());
     }
 }
-function_difinition::function_difinition(lexicon::lexer &lx)
+function_definition::function_definition(lexicon::lexer &lx)
     : node(lx.get_line(), lx.get_column())
 {
     if (!lx.consume_type_specifier()) {
@@ -208,6 +208,6 @@ translation_unit::translation_unit(lexicon::lexer &lx)
     : node(lx.get_line(), lx.get_column())
 {
     while (!lx.is_all_read()) {
-        funcs.push_back(std::make_unique<const function_difinition>(lx));
+        funcs.push_back(std::make_unique<const function_definition>(lx));
     }
 }

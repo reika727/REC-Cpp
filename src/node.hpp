@@ -461,16 +461,16 @@ namespace syntax {
         compound(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
-    class var_difinition final : public statement {
+    class var_definition final : public statement {
         using statement::statement;
-        friend std::unique_ptr<const var_difinition>::deleter_type;
+        friend std::unique_ptr<const var_definition>::deleter_type;
 
     private:
         std::vector<std::pair<std::unique_ptr<const identifier>, std::unique_ptr<const expression>>> vars;
-        ~var_difinition() = default;
+        ~var_definition() = default;
 
     public:
-        var_difinition(lexicon::lexer &lx);
+        var_definition(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
     class _if_else_ final : public statement {
@@ -565,19 +565,19 @@ namespace syntax {
     * argument list = "(", ( "void" | argument declaretions ), ")" ;
     * argument declaretion = type specifier, identifier, { ",", type specifier, identifier } ;
     */
-    class function_difinition final : public node {
+    class function_definition final : public node {
         using node::node;
-        friend std::unique_ptr<const function_difinition>::deleter_type;
+        friend std::unique_ptr<const function_definition>::deleter_type;
 
     private:
         std::string name;
         std::vector<std::unique_ptr<const identifier>> args;
         std::unique_ptr<const compound> comp;
         void set_argument_list(lexicon::lexer &lx);
-        ~function_difinition() = default;
+        ~function_definition() = default;
 
     public:
-        function_difinition(lexicon::lexer &lx);
+        function_definition(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
     /**
@@ -587,7 +587,7 @@ namespace syntax {
         using node::node;
 
     private:
-        std::vector<std::unique_ptr<const function_difinition>> funcs;
+        std::vector<std::unique_ptr<const function_definition>> funcs;
 
     public:
         translation_unit(lexicon::lexer &lx);
