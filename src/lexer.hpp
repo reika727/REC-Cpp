@@ -20,5 +20,6 @@ namespace lexicon {
         std::optional<identifier> consume_identifier();
         bool check_symbol(symbol::symid id);
         std::optional<symbol> consume_symbol_if(symbol::symid id);
+        std::optional<symbol> consume_type_specifier();
     };
 }

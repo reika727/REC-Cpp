@@ -193,7 +193,7 @@ _return_::_return_(lexicon::lexer &lx)
 function_difinition::function_difinition(lexicon::lexer &lx)
     : node(lx.get_line(), lx.get_column())
 {
-    if (!lx.consume_symbol_if(lexicon::symbol::symid::INT)) {
+    if (!lx.consume_type_specifier()) {
         throw exception::compilation_error("関数の型が見つかりませんでした", lx.get_line(), lx.get_column());
     }
     if (auto id = lx.consume_identifier()) {
@@ -201,38 +201,8 @@ function_difinition::function_difinition(lexicon::lexer &lx)
     } else {
         throw exception::compilation_error("関数名が見つかりませんでした", lx.get_line(), lx.get_column());
     }
-    if (!lx.consume_symbol_if(lexicon::symbol::symid::OPARENT)) {
-        throw exception::compilation_error("引数リストが見つかりませんでした", lx.get_line(), lx.get_column());
-    }
-    if (lx.consume_symbol_if(lexicon::symbol::symid::VOID)) {
-        if (!lx.consume_symbol_if(lexicon::symbol::symid::CPARENT)) {
-            throw exception::compilation_error("不正な引数リストです", lx.get_line(), lx.get_column());
-        }
-    } else {
-        while (true) {
-            if (!lx.consume_symbol_if(lexicon::symbol::symid::INT)) {
-                throw exception::compilation_error("引数の型が見つかりませんでした", lx.get_line(), lx.get_column());
-            }
-            if (auto id = lx.consume_identifier()) {
-                args.push_back(std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int())); // TODO: とりあえずintで固定
-            } else {
-                throw exception::compilation_error("引数名が見つかりませんでした", lx.get_line(), lx.get_column());
-            }
-            if (lx.consume_symbol_if(lexicon::symbol::symid::COMMA)) {
-                continue;
-            } else if (lx.consume_symbol_if(lexicon::symbol::symid::CPARENT)) {
-                break;
-            } else {
-                throw exception::compilation_error("不正な区切り文字です", lx.get_line(), lx.get_column());
-            }
-        }
-    }
-    if (!lx.consume_symbol_if(lexicon::symbol::symid::OBRACE)) {
-        throw exception::compilation_error("関数の開始ブラケットが見つかりません", lx.get_line(), lx.get_column());
-    }
-    while (!lx.consume_symbol_if(lexicon::symbol::symid::CBRACE)) {
-        stats.push_back(statement::get(lx));
-    }
+    set_argument_list(lx);
+    comp = std::make_unique<const compound>(lx);
 }
 translation_unit::translation_unit(lexicon::lexer &lx)
     : node(lx.get_line(), lx.get_column())

@@ -560,6 +560,11 @@ namespace syntax {
         _return_(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
+    /**
+    * function definition = type specifier, identifier, argument list, compound ;
+    * argument list = "(", ( "void" | argument declaretions ), ")" ;
+    * argument declaretion = type specifier, identifier, { ",", type specifier, identifier } ;
+    */
     class function_difinition final : public node {
         using node::node;
         friend std::unique_ptr<const function_difinition>::deleter_type;
@@ -567,13 +572,17 @@ namespace syntax {
     private:
         std::string name;
         std::vector<std::unique_ptr<const identifier>> args;
-        std::vector<std::unique_ptr<const statement>> stats;
+        std::unique_ptr<const compound> comp;
+        void set_argument_list(lexicon::lexer &lx);
         ~function_difinition() = default;
 
     public:
         function_difinition(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
+    /**
+    * translation unit = { function definition } ;
+    */
     class translation_unit final : public node {
         using node::node;
 

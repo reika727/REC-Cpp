@@ -378,6 +378,7 @@ void function_difinition::to_asm(code::writer &wr) const
     wr.write("push", "%rbp");
     wr.write("mov", "%rsp", "%rbp");
     wr.write("sub", std::min(6ul, args.size()) * 8, "%rsp");
+    // TODO: 現在の実装では関数に入る際に2回スコープをくぐっている。要検証。
     enter_scope();
     for (std::size_t i = 0; i < args.size(); ++i) {
         // 6つめまでの引数はレジスタに入っているのでスタック上に新しく確保した領域にそれをコピー、
@@ -390,9 +391,7 @@ void function_difinition::to_asm(code::writer &wr) const
         }
     }
     // TODO: com内で必ずreturnすることを前提にしている問題を解決する
-    for (const auto &s : stats) {
-        s->to_asm(wr);
-    }
+    comp->to_asm(wr);
     leave_scope();
 }
 void translation_unit::to_asm(code::writer &wr) const
@@ -428,6 +427,35 @@ void iteration_statement::enter_continue(const std::string &label)
 void iteration_statement::leave_continue()
 {
     continue_labels.pop();
+}
+void function_difinition::set_argument_list(lexicon::lexer &lx)
+{
+    if (!lx.consume_symbol_if(lexicon::symbol::symid::OPARENT)) {
+        throw exception::compilation_error("引数リストが見つかりませんでした", lx.get_line(), lx.get_column());
+    }
+    if (lx.consume_symbol_if(lexicon::symbol::symid::VOID)) {
+        if (!lx.consume_symbol_if(lexicon::symbol::symid::CPARENT)) {
+            throw exception::compilation_error("不正な引数リストです", lx.get_line(), lx.get_column());
+        }
+    } else {
+        while (true) {
+            if (!lx.consume_type_specifier()) {
+                throw exception::compilation_error("引数の型が見つかりませんでした", lx.get_line(), lx.get_column());
+            }
+            if (auto id = lx.consume_identifier()) {
+                args.push_back(std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int())); // TODO: とりあえずintで固定
+            } else {
+                throw exception::compilation_error("引数名が見つかりませんでした", lx.get_line(), lx.get_column());
+            }
+            if (lx.consume_symbol_if(lexicon::symbol::symid::COMMA)) {
+                continue;
+            } else if (lx.consume_symbol_if(lexicon::symbol::symid::CPARENT)) {
+                break;
+            } else {
+                throw exception::compilation_error("不正な区切り文字です", lx.get_line(), lx.get_column());
+            }
+        }
+    }
 }
 // TODO: いずれはちゃんと実装してmaybe_unusedも取る
 expression::type_info unopr::determine_type([[maybe_unused]] type_info arg_type)

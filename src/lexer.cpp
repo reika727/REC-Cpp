@@ -107,3 +107,7 @@ std::optional<symbol> lexer::consume_symbol_if(symbol::symid id)
     }
     return std::nullopt;
 }
+std::optional<symbol> lexer::consume_type_specifier()
+{
+    return consume_symbol_if(symbol::symid::INT);
+}
