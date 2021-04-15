@@ -9,7 +9,7 @@
 #include <vector>
 namespace syntax {
     class node {
-        // TODO: 関数の未定義・多重定義の検出の実装
+        /// @todo 関数の未定義・多重定義の検出の実装
     protected:
         inline static std::vector<std::map<std::string, int>> offset;
 
@@ -57,7 +57,7 @@ namespace syntax {
             static type_info get_int()
             {
                 return {_kind::INT, 8};
-            } // TODO: とりあえず8bytes
+            } /// @todo とりあえず8bytes
         } type;
         expression(int line, int col, type_info type);
         virtual ~expression() = default;
@@ -79,7 +79,7 @@ namespace syntax {
         ~identifier() = default;
 
     public:
-        // TODO: fcallの方の問題に対応できたらprivateにする
+        /// @todo fcallの方の問題に対応できたらprivateにする
         const std::string name;
         identifier(const std::string &name, int line, int col, type_info type);
         void to_asm(code::writer &wr) const override;
@@ -102,7 +102,7 @@ namespace syntax {
         friend std::unique_ptr<const fcall>::deleter_type;
 
     private:
-        // TODO: 関数部分が識別子でなくてもよいようにする
+        /// @todo 関数部分が識別子でなくてもよいようにする
         std::unique_ptr<const identifier> func;
         std::vector<std::unique_ptr<const expression>> vars;
         ~fcall() = default;
@@ -111,7 +111,7 @@ namespace syntax {
         fcall(std::unique_ptr<const expression> _func, std::vector<std::unique_ptr<const expression>> &_vars, int line, int col, type_info type);
         void to_asm(code::writer &wr) const override;
     };
-    // TODO: determine_typeのために演算子をもっと細かく分類する
+    /// @todo determine_typeのために演算子をもっと細かく分類する
     class unopr : public expression {
     protected:
         const std::unique_ptr<const expression> arg;

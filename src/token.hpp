@@ -104,7 +104,7 @@ namespace lexicon {
         static std::string id_to_lexeme(symid id);
         static std::optional<symid> longest_forward_match(const std::string &src);
         symbol(symid id, int line, int col);
-        // TODO どうにかして失くしたい
+        /// @todo これ必要か?
         symbol &operator=(const symbol &);
     };
 }

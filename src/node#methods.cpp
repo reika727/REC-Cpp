@@ -44,7 +44,7 @@ void fcall::to_asm(code::writer &wr) const
         vars[i]->to_asm(wr);
         wr.write("mov", "%rax", argument_storage());
     }
-    // TODO: System V ABIに従いスタックフレームを調整する
+    /// @todo System V ABIに従いスタックフレームを調整する
     wr.write("call", func->name);
     if (vars.size() > 6) {
         wr.write("add", 8 * (vars.size() - 6), "%rsp");
@@ -378,7 +378,7 @@ void function_definition::to_asm(code::writer &wr) const
     wr.write("push", "%rbp");
     wr.write("mov", "%rsp", "%rbp");
     wr.write("sub", std::min(6ul, args.size()) * 8, "%rsp");
-    // TODO: 現在の実装では関数に入る際に2回スコープをくぐっている。要検証。
+    /// @todo 現在の実装では関数に入る際に2回スコープをくぐっている。要検証。
     enter_scope();
     for (std::size_t i = 0; i < args.size(); ++i) {
         // 6つめまでの引数はレジスタに入っているのでスタック上に新しく確保した領域にそれをコピー、
@@ -390,7 +390,7 @@ void function_definition::to_asm(code::writer &wr) const
             args[i]->allocate_on_stack(i * 8 - 32);
         }
     }
-    // TODO: com内で必ずreturnすることを前提にしている問題を解決する
+    /// @todo com内で必ずreturnすることを前提にしている問題を解決する
     comp->to_asm(wr);
     leave_scope();
 }
@@ -443,7 +443,7 @@ void function_definition::set_argument_list(lexicon::lexer &lx)
                 throw exception::compilation_error("引数の型が見つかりませんでした", lx.get_line(), lx.get_column());
             }
             if (auto id = lx.consume_identifier()) {
-                args.push_back(std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int())); // TODO: とりあえずintで固定
+                args.push_back(std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int())); /// @todo とりあえずintで固定
             } else {
                 throw exception::compilation_error("引数名が見つかりませんでした", lx.get_line(), lx.get_column());
             }
@@ -457,20 +457,20 @@ void function_definition::set_argument_list(lexicon::lexer &lx)
         }
     }
 }
-// TODO: いずれはちゃんと実装してmaybe_unusedも取る
+/// @todo いずれはちゃんと実装してmaybe_unusedも取る
 expression::type_info unopr::determine_type([[maybe_unused]] type_info arg_type)
 {
-    return type_info::get_int(); // TODO: とりあえずint
+    return type_info::get_int(); /// @todo とりあえずint
 }
 expression::type_info unopr_l::determine_type([[maybe_unused]] type_info arg_type)
 {
-    return type_info::get_int(); // TODO: とりあえずint
+    return type_info::get_int(); /// @todo とりあえずint
 }
 expression::type_info biopr::determine_type([[maybe_unused]] type_info larg_type, [[maybe_unused]] type_info rarg_type)
 {
-    return type_info::get_int(); // TODO: とりあえずint
+    return type_info::get_int(); /// @todo とりあえずint
 }
 expression::type_info biopr_l::determine_type([[maybe_unused]] type_info larg_type, [[maybe_unused]] type_info rarg_type)
 {
-    return type_info::get_int(); // TODO: とりあえずint
+    return type_info::get_int(); /// @todo とりあえずint
 }

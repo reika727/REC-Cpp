@@ -37,7 +37,7 @@ std::unique_ptr<const expression> expression::get_order14(lexicon::lexer &lx) //
 }
 std::unique_ptr<const expression> expression::get_order13(lexicon::lexer &lx)
 {
-    // TODO: placeholder
+    /// @todo placeholder
     return get_order12(lx);
 }
 std::unique_ptr<const expression> expression::get_order12(lexicon::lexer &lx) // || left to right
@@ -58,17 +58,17 @@ std::unique_ptr<const expression> expression::get_order11(lexicon::lexer &lx) //
 }
 std::unique_ptr<const expression> expression::get_order10(lexicon::lexer &lx)
 {
-    // TODO: placeholder
+    /// @todo placeholder
     return get_order09(lx);
 }
 std::unique_ptr<const expression> expression::get_order09(lexicon::lexer &lx)
 {
-    // TODO: placeholder
+    /// @todo placeholder
     return get_order08(lx);
 }
 std::unique_ptr<const expression> expression::get_order08(lexicon::lexer &lx)
 {
-    // TODO: placeholder
+    /// @todo placeholder
     return get_order07(lx);
 }
 std::unique_ptr<const expression> expression::get_order07(lexicon::lexer &lx) // == != left to right
@@ -105,7 +105,7 @@ std::unique_ptr<const expression> expression::get_order06(lexicon::lexer &lx) //
 }
 std::unique_ptr<const expression> expression::get_order05(lexicon::lexer &lx)
 {
-    // TODO: placeholder
+    /// @todo placeholder
     return get_order04(lx);
 }
 std::unique_ptr<const expression> expression::get_order04(lexicon::lexer &lx) // + - left to right
@@ -173,7 +173,7 @@ std::unique_ptr<const expression> expression::get_order01(lexicon::lexer &lx) //
                 }
             }
         }
-        return std::make_unique<const fcall>(std::move(ret), vars, sym->line, sym->col, expression::type_info::get_int()); // TODO: とりあえずintで固定
+        return std::make_unique<const fcall>(std::move(ret), vars, sym->line, sym->col, expression::type_info::get_int()); /// @todo とりあえずintで固定
     } else {
         return ret;
     }
@@ -181,9 +181,9 @@ std::unique_ptr<const expression> expression::get_order01(lexicon::lexer &lx) //
 std::unique_ptr<const expression> expression::get_primary(lexicon::lexer &lx) // literal, identifier, enclosed expression
 {
     if (auto id = lx.consume_identifier()) {
-        return std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int()); // TODO: とりあえずintで固定
+        return std::make_unique<const identifier>(id->name, id->line, id->col, expression::type_info::get_int()); /// @todo とりあえずintで固定
     } else if (auto num = lx.consume_numeric()) {
-        return std::make_unique<const numeric>(num->value, num->line, num->col, expression::type_info::get_int()); // TODO: とりあえずintで固定
+        return std::make_unique<const numeric>(num->value, num->line, num->col, expression::type_info::get_int()); /// @todo とりあえずintで固定
     } else if (auto sym = lx.consume_symbol_if(lexicon::symbol::symid::OPARENT)) {
         auto ret = get_order15(lx);
         if (!lx.consume_symbol_if(lexicon::symbol::symid::CPARENT)) {

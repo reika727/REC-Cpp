@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <string>
 
-// g++でstd::formatが使えるようになるまではこれ使う
+/// @todo g++でstd::formatが使えるようになるまではこれ使う
 template <typename... Args>
 std::string format(const std::string &fmt, Args... args)
 {
