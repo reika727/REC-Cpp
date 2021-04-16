@@ -419,11 +419,19 @@ namespace syntax {
     public:
         void to_asm(code::writer &wr) const override;
     };
+    /**
+    * variable definition =
+    * type specifier, identifier, [ "=", expression ],
+    * { ",", identifier, [ "=", expression ] },
+    * ";"
+    * ;
+    */
     class var_definition final : public node {
         using node::node;
         friend std::unique_ptr<const var_definition>::deleter_type;
 
     private:
+        /// @todo pairではなくオリジナルの構造体を使う
         std::vector<std::pair<std::unique_ptr<const identifier>, std::unique_ptr<const expression>>> vars;
         ~var_definition() = default;
 
@@ -431,6 +439,9 @@ namespace syntax {
         var_definition(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
+    /**
+    * statement = expression statement | null statement | compound | control statement ;
+    */
     class statement : public node {
         using node::node;
 
