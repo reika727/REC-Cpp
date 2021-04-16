@@ -15,6 +15,7 @@ namespace syntax {
 
     public:
         const int line, col;
+        inline static const std::vector sysv64_regs{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
         node(int line, int col);
         virtual ~node() = default;
         virtual void to_asm(code::writer &wr) const = 0;

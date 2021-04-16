@@ -17,8 +17,7 @@ void fcall::to_asm(code::writer &wr) const
     }
     for (int i = std::ssize(vars) - 1; i >= 0; --i) {
         auto argument_storage = [i] {
-            return i < 6 ? std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i]
-                         : format("%d(%%rsp)", 8 * (i - 6));
+            return i < 6 ? sysv64_regs[i] : format("%d(%%rsp)", 8 * (i - 6));
         };
         vars[i]->to_asm(wr);
         wr.write("mov", "%rax", argument_storage());
@@ -367,7 +366,7 @@ void function_definition::to_asm(code::writer &wr) const
         // 7つめ以降の引数はすでにスタックに積まれているのでそのオフセットを記録
         if (i < 6) {
             args[i]->allocate_on_stack();
-            wr.write("mov", std::vector{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}[i], args[i]->get_address());
+            wr.write("mov", sysv64_regs[i], args[i]->get_address());
         } else {
             args[i]->allocate_on_stack(i * 8 - 32);
         }
