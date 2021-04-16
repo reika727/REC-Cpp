@@ -251,6 +251,9 @@ void null_statement::to_asm(code::writer &wr) const
 void compound::to_asm(code::writer &wr) const
 {
     enter_scope();
+    for (const auto &v : vd) {
+        v->to_asm(wr);
+    }
     for (const auto &s : stats) {
         s->to_asm(wr);
     }

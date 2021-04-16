@@ -80,12 +80,15 @@ compound::compound(lexicon::lexer &lx)
     if (!lx.consume_symbol_if(lexicon::symbol::symid::OBRACE)) {
         throw exception::compilation_error("複文の開始ブラケットが見つかりませんでした", lx.get_line(), lx.get_column());
     }
+    while (lx.check_symbol(lexicon::symbol::symid::INT)) {
+        vd.push_back(std::make_unique<const var_definition>(lx));
+    }
     while (!lx.consume_symbol_if(lexicon::symbol::symid::CBRACE)) {
         stats.push_back(statement::get(lx));
     }
 }
 var_definition::var_definition(lexicon::lexer &lx)
-    : statement(lx.get_line(), lx.get_column())
+    : node(lx.get_line(), lx.get_column())
 {
     if (!lx.consume_symbol_if(lexicon::symbol::symid::INT)) {
         throw exception::compilation_error("型指定子が見つかりませんでした", lx.get_line(), lx.get_column());

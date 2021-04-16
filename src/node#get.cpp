@@ -195,9 +195,7 @@ std::unique_ptr<const expression> expression::get_primary(lexicon::lexer &lx) //
 }
 std::unique_ptr<const statement> statement::get(lexicon::lexer &lx)
 {
-    if (lx.check_symbol(lexicon::symbol::symid::INT)) {
-        return std::make_unique<const var_definition>(lx);
-    } else if (lx.check_symbol(lexicon::symbol::symid::IF)) {
+    if (lx.check_symbol(lexicon::symbol::symid::IF)) {
         return std::make_unique<const _if_else_>(lx);
     } else if (lx.check_symbol(lexicon::symbol::symid::WHILE)) {
         return std::make_unique<const _while_>(lx);

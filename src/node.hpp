@@ -419,6 +419,18 @@ namespace syntax {
     public:
         void to_asm(code::writer &wr) const override;
     };
+    class var_definition final : public node {
+        using node::node;
+        friend std::unique_ptr<const var_definition>::deleter_type;
+
+    private:
+        std::vector<std::pair<std::unique_ptr<const identifier>, std::unique_ptr<const expression>>> vars;
+        ~var_definition() = default;
+
+    public:
+        var_definition(lexicon::lexer &lx);
+        void to_asm(code::writer &wr) const override;
+    };
     class statement : public node {
         using node::node;
 
@@ -449,28 +461,20 @@ namespace syntax {
         null_statement(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
+    /**
+    * compound = "{", { variable definition }, { statement }, "}" ;
+    */
     class compound final : public statement {
         using statement::statement;
         friend std::unique_ptr<const compound>::deleter_type;
 
     private:
+        std::vector<std::unique_ptr<const var_definition>> vd;
         std::vector<std::unique_ptr<const statement>> stats;
         ~compound() = default;
 
     public:
         compound(lexicon::lexer &lx);
-        void to_asm(code::writer &wr) const override;
-    };
-    class var_definition final : public statement {
-        using statement::statement;
-        friend std::unique_ptr<const var_definition>::deleter_type;
-
-    private:
-        std::vector<std::pair<std::unique_ptr<const identifier>, std::unique_ptr<const expression>>> vars;
-        ~var_definition() = default;
-
-    public:
-        var_definition(lexicon::lexer &lx);
         void to_asm(code::writer &wr) const override;
     };
     class _if_else_ final : public statement {
