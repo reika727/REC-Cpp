@@ -1,5 +1,6 @@
 #include "token.hpp"
 #include <algorithm>
+#include <ranges>
 using namespace lexicon;
 token::token(int line, int col)
     : line(line), col(col)

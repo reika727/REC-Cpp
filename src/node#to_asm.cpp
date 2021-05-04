@@ -15,7 +15,7 @@ void fcall::to_asm(code::writer &wr) const
     if (vars.size() > 6) {
         wr.write("sub", 8 * (vars.size() - 6), "%rsp");
     }
-    for (int i = std::ssize(vars) - 1; i >= 0; --i) {
+    for (auto i = std::ssize(vars) - 1; i >= 0; --i) {
         auto argument_storage = [i] {
             return i < 6 ? sysv64_regs[i] : format("%d(%%rsp)", 8 * (i - 6));
         };
@@ -361,7 +361,7 @@ void function_definition::to_asm(code::writer &wr) const
     wr.write("sub", std::min(6ul, args.size()) * 8, "%rsp");
     /// @todo 現在の実装では関数に入る際に2回スコープをくぐっている。要検証。
     enter_scope();
-    for (std::size_t i = 0; i < args.size(); ++i) {
+    for (auto i = 0uz; i < args.size(); ++i) {
         // 6つめまでの引数はレジスタに入っているのでスタック上に新しく確保した領域にそれをコピー、
         // 7つめ以降の引数はすでにスタックに積まれているのでそのオフセットを記録
         if (i < 6) {

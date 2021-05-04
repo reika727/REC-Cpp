@@ -1,5 +1,6 @@
 #include "compilation_error.hpp"
 #include "node.hpp"
+#include <ranges>
 using namespace syntax;
 std::string identifier::get_address() const
 {
